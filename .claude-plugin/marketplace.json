@@ -1,0 +1,21 @@
+{
+	"$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+	"name": "revenuecat",
+	"metadata": {
+		"description": "RevenueCat plugins for Claude Code"
+	},
+	"owner": {
+		"name": "RevenueCat",
+		"email": "support@revenuecat.com",
+		"url": "https://github.com/RevenueCat"
+	},
+	"plugins": [
+		{
+			"name": "rc",
+			"description": "Configure RevenueCat projects, products, entitlements, and offerings directly from Claude Code. Manage your in-app purchase backend without leaving your IDE.",
+			"category": "productivity",
+			"source": "./plugin",
+			"homepage": "https://www.revenuecat.com/docs/tools/mcp/overview"
+		}
+	]
+}

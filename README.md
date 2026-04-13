@@ -6,104 +6,41 @@ Configure RevenueCat projects, products, entitlements, and offerings directly fr
 
 ### Prerequisites
 
-- Claude Code version 1.0.33 or later (run `claude --version` to check)
+- Claude Code with plugin support (run `claude --version` to check)
 
-### Method 1: One-Line Install Script (Recommended)
+### Install via `/plugin`
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/RevenueCat/rc-claude-code-plugin/main/install.sh | bash
+In Claude Code, run the two slash commands below:
+
+```text
+/plugin marketplace add RevenueCat/rc-claude-code-plugin
+/plugin install rc@revenuecat
 ```
 
-This script clones the plugin to `~/.claude/plugins/rc-claude-code-plugin` and automatically adds it to your `~/.claude/settings.json`. Restart Claude Code when it completes.
+The first command registers this repository as a Claude Code plugin marketplace. The second installs the `rc` plugin from it. Restart your session and verify with `/rc:status`.
 
-> **Update an existing installation:** Run the same command again — it will `git pull` the latest changes and ensure your settings are correct.
+### Development / per-session testing
 
-### Method 2: Using `--plugin-dir` Flag (Per-Session)
+To load the plugin directly from a local checkout without installing it (useful while contributing), clone the repo and pass the `plugin/` subdirectory to `--plugin-dir`:
 
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
-   ```
-
-2. Start Claude Code with the plugin directory:
-
-   ```bash
-   claude --plugin-dir /path/to/rc-claude-code-plugin
-   ```
-
-   You can specify multiple plugins by repeating the flag:
-
-   ```bash
-   claude --plugin-dir /path/to/rc-claude-code-plugin --plugin-dir /path/to/other-plugin
-   ```
-
-### Method 3: Permanent Installation via Settings (Manual)
-
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
-   ```
-
-2. Add the plugin to your Claude Code settings file:
-
-   **User-level** (available across all projects):
-   Edit `~/.claude/settings.json`:
-
-   ```json
-   {
-     "plugins": [
-       "/absolute/path/to/rc-claude-code-plugin"
-     ]
-   }
-   ```
-
-   **Project-level** (shared with your team via git):
-   Edit `.claude/settings.json` in your project root:
-
-   ```json
-   {
-     "plugins": [
-       "/absolute/path/to/rc-claude-code-plugin"
-     ]
-   }
-   ```
-
-   **Local project-level** (personal, not shared):
-   Edit `.claude/settings.local.json` in your project root (add to `.gitignore`):
-
-   ```json
-   {
-     "plugins": [
-       "/absolute/path/to/rc-claude-code-plugin"
-     ]
-   }
-   ```
-
-3. Restart Claude Code:
-
-   ```bash
-   claude
-   ```
+```bash
+git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
+claude --plugin-dir ./rc-claude-code-plugin/plugin
+```
 
 ### Verify Installation
 
 Once installed, verify the plugin is loaded by checking for the `/rc:` commands:
 
-- `/rc:status` - View project status
-- `/rc:apikey` - Get API keys
-- `/rc:create-app` - Create a new app
-- `/rc:create-product` - Create a new product
+- `/rc:status` — View project status
+- `/rc:apikey` — Get API keys
+- `/rc:create-app` — Create a new app
+- `/rc:create-product` — Create a new product
 
 You can also use natural language to trigger agents:
 
 - "Set up RevenueCat for my app"
 - "Debug my RevenueCat configuration"
-
-### Claude Plugin Marketplace
-
-This plugin will soon be available via the official Claude Code plugin marketplace for one-click installation. Stay tuned!
 
 ## Authentication
 

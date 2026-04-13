@@ -5,6 +5,18 @@ All notable changes to the RevenueCat Claude Code Plugin will be documented in t
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1] - 2026-04-13
+
+### Fixed
+
+- **Installation**: Previously the plugin could not be loaded by Claude Code because the install script and README documented a `settings.json` schema (`{"plugins": [...]}`) that Claude Code does not read. The repository is now structured as a self-contained Claude Code plugin marketplace, so installation uses the built-in `/plugin marketplace add` + `/plugin install` flow and all skills and agents load correctly. Resolves #3.
+
+### Changed
+
+- Plugin files moved into a `plugin/` subdirectory so the repository root can host the marketplace manifest.
+- README installation section rewritten to document the `/plugin` slash command flow and the local `--plugin-dir` development path.
+- `install.sh` retired: kept in place as a deprecation notice that points users at the new flow, since `curl … | bash` links may still exist in the wild.
+
 ## [1.0.0] - 2026-02-02
 
 ### Added
