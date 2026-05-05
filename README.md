@@ -1,115 +1,75 @@
-# RevenueCat Claude Code Plugin
+# RevenueCat Plugin Marketplace
 
-Configure RevenueCat projects, products, entitlements, and offerings directly from Claude Code. Manage your in-app purchase backend without leaving your IDE.
+Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your IDE — works with **Claude Code, Cursor, OpenAI Codex CLI, and Gemini CLI**.
 
 ## Installation
 
-### Prerequisites
+### Claude Code (recommended)
 
-- Claude Code version 1.0.33 or later (run `claude --version` to check)
+```
+/plugin marketplace add RevenueCat/rc-claude-code-plugin
+/plugin install revenuecat@revenuecat
+```
 
-### Method 1: One-Line Install Script (Recommended)
+Restart Claude Code when prompted. Verify with `/rc:status`.
+
+### Cursor
+
+Settings → Plugins → Import → paste:
+
+```
+https://github.com/RevenueCat/rc-claude-code-plugin
+```
+
+Select the `revenuecat` plugin from the list.
+
+### OpenAI Codex CLI
+
+```bash
+codex plugin marketplace add RevenueCat/rc-claude-code-plugin
+codex plugin install revenuecat@revenuecat
+```
+
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/RevenueCat/rc-claude-code-plugin --path dist/gemini/revenuecat
+```
+
+### Legacy install (Claude Code, no marketplace)
+
+> **Deprecated.** Use the marketplace install above. This method will be removed in a future release.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/RevenueCat/rc-claude-code-plugin/main/install.sh | bash
 ```
 
-This script clones the plugin to `~/.claude/plugins/rc-claude-code-plugin` and automatically adds it to your `~/.claude/settings.json`. Restart Claude Code when it completes.
+This clones the plugin to `~/.claude/plugins/rc-claude-code-plugin` and adds it to `~/.claude/settings.json`. Restart Claude Code when it completes. To update, run the same command again.
 
-> **Update an existing installation:** Run the same command again — it will `git pull` the latest changes and ensure your settings are correct.
+**Per-session (without the installer):**
 
-### Method 2: Using `--plugin-dir` Flag (Per-Session)
+```bash
+git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
+claude --plugin-dir /path/to/rc-claude-code-plugin/plugins/revenuecat
+```
 
-1. Clone this repository:
+**Permanent (manual settings edit):**
 
-   ```bash
-   git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
-   ```
+Add to `~/.claude/settings.json` (user-level) or `.claude/settings.json` (project-level):
 
-2. Start Claude Code with the plugin directory:
-
-   ```bash
-   claude --plugin-dir /path/to/rc-claude-code-plugin
-   ```
-
-   You can specify multiple plugins by repeating the flag:
-
-   ```bash
-   claude --plugin-dir /path/to/rc-claude-code-plugin --plugin-dir /path/to/other-plugin
-   ```
-
-### Method 3: Permanent Installation via Settings (Manual)
-
-1. Clone this repository:
-
-   ```bash
-   git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
-   ```
-
-2. Add the plugin to your Claude Code settings file:
-
-   **User-level** (available across all projects):
-   Edit `~/.claude/settings.json`:
-
-   ```json
-   {
-     "plugins": [
-       "/absolute/path/to/rc-claude-code-plugin"
-     ]
-   }
-   ```
-
-   **Project-level** (shared with your team via git):
-   Edit `.claude/settings.json` in your project root:
-
-   ```json
-   {
-     "plugins": [
-       "/absolute/path/to/rc-claude-code-plugin"
-     ]
-   }
-   ```
-
-   **Local project-level** (personal, not shared):
-   Edit `.claude/settings.local.json` in your project root (add to `.gitignore`):
-
-   ```json
-   {
-     "plugins": [
-       "/absolute/path/to/rc-claude-code-plugin"
-     ]
-   }
-   ```
-
-3. Restart Claude Code:
-
-   ```bash
-   claude
-   ```
-
-### Verify Installation
-
-Once installed, verify the plugin is loaded by checking for the `/rc:` commands:
-
-- `/rc:status` - View project status
-- `/rc:apikey` - Get API keys
-- `/rc:create-app` - Create a new app
-- `/rc:create-product` - Create a new product
-
-You can also use natural language to trigger agents:
-
-- "Set up RevenueCat for my app"
-- "Debug my RevenueCat configuration"
-
-### Claude Plugin Marketplace
-
-This plugin will soon be available via the official Claude Code plugin marketplace for one-click installation. Stay tuned!
+```json
+{
+  "plugins": [
+    "/absolute/path/to/rc-claude-code-plugin/plugins/revenuecat"
+  ]
+}
+```
 
 ## Authentication
 
 The plugin requires authentication with your RevenueCat account via OAuth.
 
-When you first use a RevenueCat tool, you'll be prompted to authenticate via OAuth in your browser. This grants Claude Code access based on your RevenueCat account permissions and allows access to all your projects.
+When you first use a RevenueCat tool, you'll be prompted to authenticate via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
 
 ## Available Skills (Slash Commands)
 
@@ -164,7 +124,7 @@ Claude: [Creates products, entitlements, offering, packages]
         Android: goog_xxxxx
 ```
 
-### Quick Product Check
+### Quick Project Check
 
 ```
 You: /rc:status
@@ -181,26 +141,29 @@ Claude: RevenueCat Project Status
         ✅ Configuration looks healthy!
 ```
 
-### Debug an Issue
-
-```
-You: Users are purchasing but not getting premium access
-
-Claude: I'll diagnose this. Let me check your configuration...
-        
-        [Checks products, entitlements, attachments]
-        
-        Found 1 issue:
-        ⚠️ Product "annual_premium" is not attached to any entitlement
-        
-        Would you like me to fix this?
-```
-
 ## MCP Tools Reference
 
-This plugin uses the RevenueCat MCP server which provides tools for common configuration actions.
+This plugin uses the RevenueCat MCP server for common configuration actions.
 
-See the [full MCP tools reference](https://www.revenuecat.com/docs/tools/mcp/tools-reference) for complete details on all available tools.
+See the [full MCP tools reference](https://www.revenuecat.com/docs/tools/mcp/tools-reference) for details on all available tools.
+
+## Repository Layout
+
+```
+rc-claude-code-plugin/
+├── .claude-plugin/marketplace.json    # Claude Code marketplace registry
+├── .cursor-plugin/marketplace.json    # Cursor marketplace registry
+├── .agents/plugins/marketplace.json   # OpenAI Codex marketplace registry
+├── plugins/revenuecat/                # Plugin contents (shared across Claude, Cursor, Codex)
+│   ├── .claude-plugin/plugin.json
+│   ├── .cursor-plugin/plugin.json
+│   ├── .codex-plugin/plugin.json
+│   ├── gemini-extension.json
+│   ├── agents/
+│   └── skills/
+├── scripts/build-gemini.mjs           # Gemini export builder
+└── dist/gemini/revenuecat/            # Generated Gemini export (gitignored)
+```
 
 ## Support
 
@@ -211,4 +174,4 @@ See the [full MCP tools reference](https://www.revenuecat.com/docs/tools/mcp/too
 
 ## License
 
-MIT License - see the main repository for details.
+MIT License — see [LICENSE](LICENSE) for details.

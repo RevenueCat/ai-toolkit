@@ -1,0 +1,52 @@
+name: Validate manifests and build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate JSON manifests
+        run: |
+          for f in \
+            .claude-plugin/marketplace.json \
+            .cursor-plugin/marketplace.json \
+            .agents/plugins/marketplace.json \
+            plugins/revenuecat/.claude-plugin/plugin.json \
+            plugins/revenuecat/.cursor-plugin/plugin.json \
+            plugins/revenuecat/.codex-plugin/plugin.json \
+            plugins/revenuecat/gemini-extension.json; do
+            echo "Validating $f..."
+            node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" \
+              && echo "  OK" \
+              || { echo "  INVALID JSON: $f"; exit 1; }
+          done
+
+      - name: Validate Claude marketplace schema
+        run: |
+          npm install -g ajv-cli
+          curl -fsSL https://json.schemastore.org/claude-code-marketplace.json -o /tmp/claude-marketplace-schema.json || true
+          if [ -f /tmp/claude-marketplace-schema.json ]; then
+            ajv validate -s /tmp/claude-marketplace-schema.json -d .claude-plugin/marketplace.json && echo "Schema valid" || echo "Schema validation failed (non-blocking)"
+          else
+            echo "Could not fetch schema — skipping schema validation"
+          fi
+
+      - name: Build Gemini export
+        run: node scripts/build-gemini.mjs
+
+      - name: Verify Gemini export contents
+        run: |
+          test -f dist/gemini/revenuecat/gemini-extension.json || { echo "Missing gemini-extension.json in export"; exit 1; }
+          echo "Gemini export OK"

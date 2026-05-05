@@ -1,0 +1,34 @@
+{
+  "name": "rc",
+  "displayName": "RevenueCat",
+  "shortDescription": "Configure RevenueCat projects, products, entitlements, and offerings from your IDE.",
+  "longDescription": "Manage your RevenueCat in-app purchase backend without leaving your IDE. Create apps, products, entitlements, and offerings; debug configuration issues; and bootstrap new projects — all via natural language or slash commands.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "category": "Productivity",
+  "keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"],
+  "author": {
+    "name": "RevenueCat",
+    "url": "https://github.com/RevenueCat",
+    "email": "support@revenuecat.com"
+  },
+  "homepage": "https://www.revenuecat.com/docs/tools/mcp/overview",
+  "repository": "https://github.com/RevenueCat/rc-claude-code-plugin",
+  "capabilities": {
+    "mcpServers": {
+      "revenuecat": {
+        "type": "http",
+        "url": "https://mcp.revenuecat.ai/mcp",
+        "description": "RevenueCat API v2 MCP server for project configuration"
+      }
+    }
+  },
+  "interface": {
+    "slashCommands": [
+      { "name": "rc:status", "description": "View RevenueCat project status" },
+      { "name": "rc:apikey", "description": "Retrieve public API keys for SDK initialization" },
+      { "name": "rc:create-app", "description": "Step-by-step guide for setting up an iOS or Android app" },
+      { "name": "rc:create-product", "description": "Guided product creation wizard" }
+    ]
+  }
+}

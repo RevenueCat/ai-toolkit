@@ -4,7 +4,8 @@ set -euo pipefail
 REPO_URL="https://github.com/RevenueCat/rc-claude-code-plugin.git"
 PLUGIN_NAME="rc-claude-code-plugin"
 PLUGINS_DIR="${HOME}/.claude/plugins"
-PLUGIN_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}"
+PLUGIN_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}/plugins/revenuecat"
+CLONE_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}"
 SETTINGS_FILE="${HOME}/.claude/settings.json"
 
 GREEN='\033[0;32m'
@@ -21,6 +22,11 @@ echo ""
 echo "RevenueCat Claude Code Plugin — Installer"
 echo "=========================================="
 echo ""
+warn "DEPRECATION NOTICE: The curl-pipe-bash installer will be removed in a future release."
+warn "Prefer the marketplace install:"
+warn "  /plugin marketplace add RevenueCat/rc-claude-code-plugin"
+warn "  /plugin install revenuecat@revenuecat"
+echo ""
 
 # ── Preflight checks ──────────────────────────────────────────────────────────
 
@@ -34,19 +40,19 @@ fi
 
 mkdir -p "${PLUGINS_DIR}"
 
-if [ -d "${PLUGIN_PATH}/.git" ]; then
+if [ -d "${CLONE_PATH}/.git" ]; then
   info "Plugin already installed — updating..."
-  git -C "${PLUGIN_PATH}" pull --ff-only --quiet
-  success "Plugin updated at ${PLUGIN_PATH}"
-elif [ -e "${PLUGIN_PATH}" ]; then
+  git -C "${CLONE_PATH}" pull --ff-only --quiet
+  success "Plugin updated at ${CLONE_PATH}"
+elif [ -e "${CLONE_PATH}" ]; then
   warn "Found existing plugin path without git metadata; replacing with a fresh clone..."
-  rm -rf "${PLUGIN_PATH}"
-  git clone --depth=1 --quiet "${REPO_URL}" "${PLUGIN_PATH}"
-  success "Plugin reinstalled at ${PLUGIN_PATH}"
+  rm -rf "${CLONE_PATH}"
+  git clone --depth=1 --quiet "${REPO_URL}" "${CLONE_PATH}"
+  success "Plugin reinstalled at ${CLONE_PATH}"
 else
-  info "Cloning plugin into ${PLUGIN_PATH}..."
-  git clone --depth=1 --quiet "${REPO_URL}" "${PLUGIN_PATH}"
-  success "Plugin cloned to ${PLUGIN_PATH}"
+  info "Cloning plugin into ${CLONE_PATH}..."
+  git clone --depth=1 --quiet "${REPO_URL}" "${CLONE_PATH}"
+  success "Plugin cloned to ${CLONE_PATH}"
 fi
 
 # ── Patch ~/.claude/settings.json ─────────────────────────────────────────────
