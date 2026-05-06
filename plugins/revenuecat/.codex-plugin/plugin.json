@@ -26,6 +26,11 @@
     "termsOfServiceURL": "https://www.revenuecat.com/terms",
     "brandColor": "#F2545B",
     "logo": "./assets/logo.png",
-    "composerIcon": "./assets/logo.png"
+    "composerIcon": "./assets/logo.png",
+    "defaultPrompt": [
+      "Integrate RevenueCat in my app.",
+      "What was my revenue last month?",
+      "Set up a new offering with the manual and annual subscription."
+    ]
   }
 }
