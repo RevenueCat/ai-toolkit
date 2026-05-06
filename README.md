@@ -122,23 +122,6 @@ This plugin uses the RevenueCat MCP server for common configuration actions.
 
 See the [full MCP tools reference](https://www.revenuecat.com/docs/tools/mcp/tools-reference) for details on all available tools.
 
-## Repository Layout
-
-```
-ai-toolkit/
-├── .claude-plugin/marketplace.json    # Claude Code marketplace registry
-├── .cursor-plugin/marketplace.json    # Cursor marketplace registry
-├── .agents/plugins/marketplace.json   # OpenAI Codex marketplace registry
-├── plugins/revenuecat/                # Plugin contents (shared across Claude, Cursor, Codex)
-│   ├── .claude-plugin/plugin.json
-│   ├── .cursor-plugin/plugin.json
-│   ├── .codex-plugin/plugin.json
-│   ├── gemini-extension.json
-│   └── skills/
-├── scripts/build-gemini.mjs           # Gemini export builder
-└── dist/gemini/revenuecat/            # Generated Gemini export (gitignored)
-```
-
 ## Support
 
 - [RevenueCat Documentation](https://www.revenuecat.com/docs)
