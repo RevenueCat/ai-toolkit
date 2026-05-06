@@ -23,13 +23,7 @@ claude plugins install RevenueCat
 
 ### Cursor
 
-Settings → Plugins → Import → paste:
-
-```
-https://github.com/RevenueCat/ai-toolkit
-```
-
-Select the `revenuecat` plugin from the list.
+Coming soon. In the meantime, you can [add the RevenueCat MCP directly](https://www.revenuecat.com/docs/tools/mcp/setup#using-with-cursor).
 
 ### OpenAI Codex CLI
 
@@ -58,22 +52,15 @@ gemini extensions install https://github.com/RevenueCat/ai-toolkit --path revenu
 ```
 
 
+### Visual Studio Code
+
+Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+
 ## Authentication
 
 The plugin requires authentication with your RevenueCat account via OAuth.
 
-When you first use a RevenueCat tool, you'll be prompted to authenticate via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
-
-## Available Skills (Slash Commands)
-
-| Command | Description |
-|---------|-------------|
-| `/rc:status` | Get a quick overview of your RevenueCat project |
-| `/rc:apikey` | Retrieve public API keys for SDK initialization |
-| `/rc:create-product` | Guided product creation wizard |
-| `/rc:create-app` | Step-by-step guide for setting up an iOS or Android app |
-| `/rc:bootstrap` | Set up a complete RevenueCat project from scratch |
-| `/rc:troubleshoot` | Diagnose and resolve integration issues |
+Depending on the environment, you might get prompted to authenticate immediately, when you first use a RevenueCat tool, or manually (in Gemini: `/mcp auth revenuecat`). Authentication happens via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
 
 ## Example Workflows
 
@@ -102,7 +89,7 @@ Claude: [Creates products, entitlements, offering, packages]
 ### Quick Project Check
 
 ```
-You: /rc:status
+You: What is the status of my RevenueCat project
 
 Claude: RevenueCat Project Status
         ============================
@@ -119,8 +106,6 @@ Claude: RevenueCat Project Status
 ## MCP Tools Reference
 
 This plugin uses the RevenueCat MCP server for common configuration actions.
-
-See the [full MCP tools reference](https://www.revenuecat.com/docs/tools/mcp/tools-reference) for details on all available tools.
 
 ## Support
 

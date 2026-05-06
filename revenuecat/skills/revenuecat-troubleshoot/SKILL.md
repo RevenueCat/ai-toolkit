@@ -1,5 +1,5 @@
 ---
-name: troubleshoot
+name: revenuecat-troubleshoot
 description: Diagnose and resolve RevenueCat integration issues — checks configuration, identifies problems, and offers to fix them.
 ---
 
@@ -7,15 +7,9 @@ description: Diagnose and resolve RevenueCat integration issues — checks confi
 
 Diagnose and resolve common RevenueCat integration issues.
 
-## Usage
-
-```
-/rc:troubleshoot
-```
-
 ## Instructions
 
-**Important:** The API key may have access to multiple projects. Always call `mcp_RC_get_project` first. If multiple projects are returned, ask the user which project to troubleshoot.
+**Important:** The API key may have access to multiple projects. Always use the `list-projects` tool of the RevenueCat MCP first. If multiple projects are returned, ask the user which project to troubleshoot.
 
 ### Phase 1: Gather Context
 
@@ -30,14 +24,14 @@ Work through this checklist:
 
 #### Check 1: Project Overview
 ```
-mcp_RC_get_project → ask user to select project if multiple
-mcp_RC_list_apps (with selected project_id)
+`list-projects` → ask user to select project if multiple
+`list-apps` (with selected project_id)
 ```
 - Verify project exists and apps are present
 
 #### Check 2: Products
 ```
-mcp_RC_list_products
+list-products
 ```
 - [ ] Products exist for each store item
 - [ ] Store identifiers match App Store Connect / Play Console exactly
@@ -46,8 +40,8 @@ mcp_RC_list_products
 
 #### Check 3: Entitlements
 ```
-mcp_RC_list_entitlements
-mcp_RC_get_products_from_entitlement (for each entitlement)
+list-entitlements
+get-products-from-entitlement (for each entitlement)
 ```
 - [ ] Entitlements exist for each access level
 - [ ] Products are attached to entitlements
@@ -55,8 +49,8 @@ mcp_RC_get_products_from_entitlement (for each entitlement)
 
 #### Check 4: Offerings
 ```
-mcp_RC_list_offerings
-mcp_RC_list_packages (for each offering)
+list-offerings
+list-packages
 ```
 - [ ] At least one offering exists with `is_current: true`
 - [ ] Packages contain products
@@ -64,7 +58,7 @@ mcp_RC_list_packages (for each offering)
 
 #### Check 5: Webhooks (if server-side issues suspected)
 ```
-mcp_RC_list_webhook_integrations
+list-webhook-integrations
 ```
 - [ ] Webhook URL is correct and accessible
 - [ ] Environment matches (production vs sandbox)
