@@ -54,7 +54,7 @@ Then, in the Codex app, click on "Plugins". From the "Built by OpenAI" dropdown,
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/RevenueCat/ai-toolkit --path plugins/revenuecat
+gemini extensions install https://github.com/RevenueCat/ai-toolkit --path revenuecat
 ```
 
 

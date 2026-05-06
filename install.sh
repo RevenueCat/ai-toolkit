@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_URL="https://github.com/RevenueCat/ai-toolkit.git"
 PLUGIN_NAME="ai-toolkit"
 PLUGINS_DIR="${HOME}/.claude/plugins"
-PLUGIN_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}/plugins/revenuecat"
+PLUGIN_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}/revenuecat"
 CLONE_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}"
 SETTINGS_FILE="${HOME}/.claude/settings.json"
 

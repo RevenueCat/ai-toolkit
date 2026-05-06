@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "RevenueCat",
-      "source": "./plugins/revenuecat",
+      "source": "./revenuecat",
       "description": "Set up RevenueCat, integrate it, and access data.",
       "version": "1.0.0",
       "category": "developer-tools",

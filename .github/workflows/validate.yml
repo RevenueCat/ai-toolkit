@@ -23,10 +23,10 @@ jobs:
             .claude-plugin/marketplace.json \
             .cursor-plugin/marketplace.json \
             .agents/plugins/marketplace.json \
-            plugins/revenuecat/.claude-plugin/plugin.json \
-            plugins/revenuecat/.cursor-plugin/plugin.json \
-            plugins/revenuecat/.codex-plugin/plugin.json \
-            plugins/revenuecat/gemini-extension.json; do
+            revenuecat/.claude-plugin/plugin.json \
+            revenuecat/.cursor-plugin/plugin.json \
+            revenuecat/.codex-plugin/plugin.json \
+            revenuecat/gemini-extension.json; do
             echo "Validating $f..."
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" \
               && echo "  OK" \
@@ -42,11 +42,3 @@ jobs:
           else
             echo "Could not fetch schema — skipping schema validation"
           fi
-
-      - name: Build Gemini export
-        run: node scripts/build-gemini.mjs
-
-      - name: Verify Gemini export contents
-        run: |
-          test -f dist/gemini/revenuecat/gemini-extension.json || { echo "Missing gemini-extension.json in export"; exit 1; }
-          echo "Gemini export OK"
