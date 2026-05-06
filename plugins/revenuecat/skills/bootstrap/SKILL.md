@@ -1,66 +1,44 @@
-# Project Bootstrap Agent
+---
+name: bootstrap
+description: Set up a complete RevenueCat project from scratch — creates apps, products, entitlements, offerings, and packages in the correct order.
+---
 
-A specialized agent for setting up a complete RevenueCat project from scratch.
+# RevenueCat Project Bootstrap
 
-## Purpose
+Guide through setting up a complete RevenueCat project from scratch.
 
-Guide developers through the entire initial setup process, creating all necessary RevenueCat resources in the correct order. This agent handles the complexity of:
-- Understanding which platforms the developer needs
-- Creating apps for each platform
-- Setting up a typical subscription product catalog
-- Configuring entitlements that map to features
-- Creating offerings with packages
-- Wiring everything together
+## Usage
 
-## When to Use
+```
+/rc:bootstrap
+```
 
-Invoke this agent when:
-- Starting a brand new app with in-app purchases
-- Setting up RevenueCat for the first time
-- The user says things like "help me set up RevenueCat", "I'm new to RevenueCat", or "configure my project"
-
-## Agent Behavior
+## Instructions
 
 **Important:** The API key may have access to multiple projects. Always call `mcp_RC_get_project` first to retrieve all accessible projects. If multiple projects are returned, ask the user which project to use or if they want to create a new one.
 
 ### Phase 1: Discovery
 
-Start by understanding the developer's needs:
+Ask targeted questions to understand the developer's needs:
 
-1. **Platforms**
-   - "Which platforms are you building for?"
-   - Options: iOS, Android, Web, or multiple
-   
-2. **Business Model**
-   - "What type of monetization are you planning?"
-   - Options: Subscriptions, one-time purchases, consumables, or a mix
-   
-3. **Subscription Tiers** (if applicable)
-   - "What subscription options do you want to offer?"
-   - Common patterns: Monthly + Annual, Single tier, Freemium + Premium
-
-4. **App Details**
-   - Bundle ID (iOS): e.g., `com.company.appname`
-   - Package name (Android): e.g., `com.company.appname`
-   - App name for display
+1. **Platforms** — "Which platforms are you building for?" (iOS, Android, Web, or multiple)
+2. **Business Model** — "What type of monetization are you planning?" (subscriptions, one-time purchases, consumables, or a mix)
+3. **Subscription Tiers** (if applicable) — "What subscription options do you want to offer?" (common: Monthly + Annual, single tier, Freemium + Premium)
+4. **App Details** — Bundle ID (iOS, e.g. `com.company.appname`), package name (Android), and display name
 
 ### Phase 2: Create Resources
 
-Execute in this order (dependencies matter):
+Execute in this order — dependencies matter:
 
 ```
 1. Verify/Create Project
-   └── Call mcp_RC_get_project (returns list of accessible projects)
-   └── If multiple projects exist:
-      - Ask user which project to use, OR
-      - Create a new project with mcp_RC_create_project
-   └── If no projects exist:
-      - Create a new project with mcp_RC_create_project
-   └── Store the selected project_id for all subsequent calls
+   └── mcp_RC_get_project (returns list of accessible projects)
+   └── If multiple: ask user which to use, or offer to create a new one with mcp_RC_create_project
+   └── If none: create with mcp_RC_create_project
+   └── Store project_id for all subsequent calls
 
 2. Create Apps (for each platform)
-   └── mcp_RC_create_app (type: app_store, play_store, rc_billing)
-   └── Pass the project_id from step 1
+   └── mcp_RC_create_app (type: app_store | play_store | rc_billing)
 
 3. Create Products (for each subscription/purchase)
    └── mcp_RC_create_product
@@ -87,7 +65,7 @@ Execute in this order (dependencies matter):
 
 ### Phase 3: Summary & Next Steps
 
-Provide a complete summary:
+Provide a complete setup summary:
 
 ```
 Project Setup Complete!
@@ -179,11 +157,3 @@ If any step fails:
 2. Suggest fixes (e.g., "Bundle ID may already be in use")
 3. Offer to retry or skip that step
 4. Continue with remaining steps if possible
-
-## Conversation Starters
-
-- "Set up RevenueCat for my new app"
-- "I need to configure in-app purchases"
-- "Help me create a subscription backend"
-- "Bootstrap my RevenueCat project"
-- "I'm starting fresh, walk me through setup"

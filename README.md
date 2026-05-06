@@ -4,14 +4,22 @@ Configure RevenueCat projects, products, entitlements, and offerings directly fr
 
 ## Installation
 
-### Claude Code (recommended)
+### Claude Code CLI
+
+From within Claude Code
 
 ```
 /plugin marketplace add RevenueCat/ai-toolkit
-/plugin install revenuecat@revenuecat
+/plugin install RevenueCat
 ```
 
-Restart Claude Code when prompted. Verify with `/rc:status`.
+Or from the command line:
+
+```
+claude plugins marketplace add RevenueCat/ai-toolkit
+claude plugins install RevenueCat
+```
+
 
 ### Cursor
 
@@ -27,43 +35,28 @@ Select the `revenuecat` plugin from the list.
 
 ```bash
 codex plugin marketplace add RevenueCat/ai-toolkit
-codex plugin install revenuecat@revenuecat
 ```
+
+Start Codex, then run `/plugins`, search for `RevenueCat`, and install.
+
+
+### OpenAI Codex Desktop App
+
+First, install the marketplace by running the following command in your terminal:
+
+```
+codex plugin marketplace add RevenueCat/ai-toolkit
+```
+
+Then, in the Codex app, click on "Plugins". From the "Built by OpenAI" dropdown, select "RevenueCat". Then, click the Plus button next to the plugin.
+
 
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/RevenueCat/ai-toolkit --path dist/gemini/revenuecat
+gemini extensions install https://github.com/RevenueCat/ai-toolkit --path plugins/revenuecat
 ```
 
-### Legacy install (Claude Code, no marketplace)
-
-> **Deprecated.** Use the marketplace install above. This method will be removed in a future release.
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/RevenueCat/ai-toolkit/main/install.sh | bash
-```
-
-This clones the plugin to `~/.claude/plugins/ai-toolkit` and adds it to `~/.claude/settings.json`. Restart Claude Code when it completes. To update, run the same command again.
-
-**Per-session (without the installer):**
-
-```bash
-git clone https://github.com/RevenueCat/ai-toolkit.git
-claude --plugin-dir /path/to/ai-toolkit/plugins/revenuecat
-```
-
-**Permanent (manual settings edit):**
-
-Add to `~/.claude/settings.json` (user-level) or `.claude/settings.json` (project-level):
-
-```json
-{
-  "plugins": [
-    "/absolute/path/to/ai-toolkit/plugins/revenuecat"
-  ]
-}
-```
 
 ## Authentication
 
@@ -79,26 +72,8 @@ When you first use a RevenueCat tool, you'll be prompted to authenticate via OAu
 | `/rc:apikey` | Retrieve public API keys for SDK initialization |
 | `/rc:create-product` | Guided product creation wizard |
 | `/rc:create-app` | Step-by-step guide for setting up an iOS or Android app |
-
-## Available Agents
-
-### Project Bootstrap Agent
-
-Complete project setup from scratch. Creates apps, products, entitlements, offerings, and packages in the correct order.
-
-**Trigger phrases:**
-- "Set up RevenueCat for my new app"
-- "Help me create a subscription backend"
-- "Bootstrap my RevenueCat project"
-
-### Troubleshooting Agent
-
-Diagnose and fix common integration issues. Systematically checks your configuration for problems.
-
-**Trigger phrases:**
-- "My purchases aren't working"
-- "Debug my RevenueCat setup"
-- "Users aren't getting premium access"
+| `/rc:bootstrap` | Set up a complete RevenueCat project from scratch |
+| `/rc:troubleshoot` | Diagnose and resolve integration issues |
 
 ## Example Workflows
 
@@ -159,7 +134,6 @@ ai-toolkit/
 │   ├── .cursor-plugin/plugin.json
 │   ├── .codex-plugin/plugin.json
 │   ├── gemini-extension.json
-│   ├── agents/
 │   └── skills/
 ├── scripts/build-gemini.mjs           # Gemini export builder
 └── dist/gemini/revenuecat/            # Generated Gemini export (gitignored)
