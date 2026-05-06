@@ -16,7 +16,7 @@
     "revenuecat": {
       "type": "http",
       "url": "https://mcp.revenuecat.ai/mcp",
-      "description": "RevenueCat API v2 MCP server for project configuration"
+			"description": "RevenueCat MCP server for project configuration and data access"
     }
   }
 }

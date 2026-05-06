@@ -1,16 +1,16 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
-  "name": "revenuecat",
-  "description": "RevenueCat plugins for AI coding assistants — configure projects, products, entitlements, and offerings without leaving your IDE.",
+  "name": "RevenueCat",
+  "description": "Set up RevenueCat, integrate it, and access data.",
   "owner": {
     "name": "RevenueCat",
     "email": "support@revenuecat.com"
   },
   "plugins": [
     {
-      "name": "revenuecat",
+      "name": "RevenueCat",
       "source": "./plugins/revenuecat",
-      "description": "Configure RevenueCat projects, products, entitlements, and offerings directly from Claude Code. Manage your in-app purchase backend without leaving your IDE.",
+      "description": "Set up RevenueCat, integrate it, and access data.",
       "version": "1.0.0",
       "category": "developer-tools",
       "author": { "name": "RevenueCat" },

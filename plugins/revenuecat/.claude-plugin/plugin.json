@@ -1,21 +1,21 @@
 {
-	"name": "rc",
-	"description": "Configure RevenueCat projects, products, entitlements, and offerings directly from Claude Code. Manage your in-app purchase backend without leaving your IDE.",
+	"name": "RevenueCat",
+	"description": "Set up RevenueCat, integrate it, and access data.",
 	"version": "1.0.0",
 	"license": "MIT",
 	"keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"],	
 	"author": {
 		"name": "RevenueCat",
-		"url": "https://github.com/RevenueCat",
+		"url": "https://www.revenuecat.com",
 		"email": "support@revenuecat.com"
 	},
-	"homepage": "https://www.revenuecat.com/docs/tools/mcp/overview",
-	"repository": "https://github.com/RevenueCat/cloud-mcp-server",
+	"homepage": "https://www.revenuecat.com",
+	"repository": "https://github.com/RevenueCat/ai-toolkit",
 	"mcpServers": {
 		"revenuecat": {
 			"type": "http",
 			"url": "https://mcp.revenuecat.ai/mcp",
-			"description": "RevenueCat API v2 MCP server for project configuration"
+			"description": "RevenueCat MCP server for project configuration and data access"
 		}
 	}
 }
