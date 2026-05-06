@@ -1,7 +1,7 @@
 {
 	"name": "RevenueCat",
 	"description": "Set up RevenueCat, integrate it, and access data.",
-	"version": "1.0.0",
+	"version": "2.0.0",
 	"license": "MIT",
 	"keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"],	
 	"author": {

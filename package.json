@@ -1,6 +1,6 @@
 {
   "name": "ai-toolkit",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "RevenueCat plugin marketplace for AI coding assistants",
   "type": "module",
   "scripts": {
