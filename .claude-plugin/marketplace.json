@@ -15,7 +15,7 @@
       "category": "developer-tools",
       "author": { "name": "RevenueCat" },
       "homepage": "https://www.revenuecat.com",
-      "repository": "https://github.com/RevenueCat/rc-claude-code-plugin",
+      "repository": "https://github.com/RevenueCat/ai-toolkit",
       "license": "MIT",
       "keywords": ["revenuecat", "subscriptions", "iap", "in-app-purchases", "mobile"]
     }

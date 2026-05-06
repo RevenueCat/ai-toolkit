@@ -67,4 +67,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store-specific setup instructions (App Store Connect, Google Play Console)
 - Configuration validation and issue highlighting
 
-[1.0.0]: https://github.com/RevenueCat/rc-claude-code-plugin/releases/tag/v1.0.0
+[1.0.0]: https://github.com/RevenueCat/ai-toolkit/releases/tag/v1.0.0

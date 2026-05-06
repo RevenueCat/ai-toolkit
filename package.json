@@ -1,5 +1,5 @@
 {
-  "name": "rc-claude-code-plugin",
+  "name": "ai-toolkit",
   "version": "1.0.0",
   "description": "RevenueCat plugin marketplace for AI coding assistants",
   "type": "module",
@@ -13,6 +13,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/RevenueCat/rc-claude-code-plugin"
+    "url": "https://github.com/RevenueCat/ai-toolkit"
   }
 }

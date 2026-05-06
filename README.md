@@ -7,7 +7,7 @@ Configure RevenueCat projects, products, entitlements, and offerings directly fr
 ### Claude Code (recommended)
 
 ```
-/plugin marketplace add RevenueCat/rc-claude-code-plugin
+/plugin marketplace add RevenueCat/ai-toolkit
 /plugin install revenuecat@revenuecat
 ```
 
@@ -18,7 +18,7 @@ Restart Claude Code when prompted. Verify with `/rc:status`.
 Settings → Plugins → Import → paste:
 
 ```
-https://github.com/RevenueCat/rc-claude-code-plugin
+https://github.com/RevenueCat/ai-toolkit
 ```
 
 Select the `revenuecat` plugin from the list.
@@ -26,14 +26,14 @@ Select the `revenuecat` plugin from the list.
 ### OpenAI Codex CLI
 
 ```bash
-codex plugin marketplace add RevenueCat/rc-claude-code-plugin
+codex plugin marketplace add RevenueCat/ai-toolkit
 codex plugin install revenuecat@revenuecat
 ```
 
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/RevenueCat/rc-claude-code-plugin --path dist/gemini/revenuecat
+gemini extensions install https://github.com/RevenueCat/ai-toolkit --path dist/gemini/revenuecat
 ```
 
 ### Legacy install (Claude Code, no marketplace)
@@ -41,16 +41,16 @@ gemini extensions install https://github.com/RevenueCat/rc-claude-code-plugin --
 > **Deprecated.** Use the marketplace install above. This method will be removed in a future release.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/RevenueCat/rc-claude-code-plugin/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/RevenueCat/ai-toolkit/main/install.sh | bash
 ```
 
-This clones the plugin to `~/.claude/plugins/rc-claude-code-plugin` and adds it to `~/.claude/settings.json`. Restart Claude Code when it completes. To update, run the same command again.
+This clones the plugin to `~/.claude/plugins/ai-toolkit` and adds it to `~/.claude/settings.json`. Restart Claude Code when it completes. To update, run the same command again.
 
 **Per-session (without the installer):**
 
 ```bash
-git clone https://github.com/RevenueCat/rc-claude-code-plugin.git
-claude --plugin-dir /path/to/rc-claude-code-plugin/plugins/revenuecat
+git clone https://github.com/RevenueCat/ai-toolkit.git
+claude --plugin-dir /path/to/ai-toolkit/plugins/revenuecat
 ```
 
 **Permanent (manual settings edit):**
@@ -60,7 +60,7 @@ Add to `~/.claude/settings.json` (user-level) or `.claude/settings.json` (projec
 ```json
 {
   "plugins": [
-    "/absolute/path/to/rc-claude-code-plugin/plugins/revenuecat"
+    "/absolute/path/to/ai-toolkit/plugins/revenuecat"
   ]
 }
 ```
@@ -150,7 +150,7 @@ See the [full MCP tools reference](https://www.revenuecat.com/docs/tools/mcp/too
 ## Repository Layout
 
 ```
-rc-claude-code-plugin/
+ai-toolkit/
 ├── .claude-plugin/marketplace.json    # Claude Code marketplace registry
 ├── .cursor-plugin/marketplace.json    # Cursor marketplace registry
 ├── .agents/plugins/marketplace.json   # OpenAI Codex marketplace registry
@@ -170,7 +170,7 @@ rc-claude-code-plugin/
 - [RevenueCat Documentation](https://www.revenuecat.com/docs)
 - [MCP Server Documentation](https://www.revenuecat.com/docs/tools/mcp/overview)
 - [Community Forum](https://community.revenuecat.com/)
-- [GitHub Issues](https://github.com/RevenueCat/rc-claude-code-plugin/issues)
+- [GitHub Issues](https://github.com/RevenueCat/ai-toolkit/issues)
 
 ## License
 

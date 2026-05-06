@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="https://github.com/RevenueCat/rc-claude-code-plugin.git"
-PLUGIN_NAME="rc-claude-code-plugin"
+REPO_URL="https://github.com/RevenueCat/ai-toolkit.git"
+PLUGIN_NAME="ai-toolkit"
 PLUGINS_DIR="${HOME}/.claude/plugins"
 PLUGIN_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}/plugins/revenuecat"
 CLONE_PATH="${PLUGINS_DIR}/${PLUGIN_NAME}"
@@ -24,7 +24,7 @@ echo "=========================================="
 echo ""
 warn "DEPRECATION NOTICE: The curl-pipe-bash installer will be removed in a future release."
 warn "Prefer the marketplace install:"
-warn "  /plugin marketplace add RevenueCat/rc-claude-code-plugin"
+warn "  /plugin marketplace add RevenueCat/ai-toolkit"
 warn "  /plugin install revenuecat@revenuecat"
 echo ""
 

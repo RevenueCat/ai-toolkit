@@ -13,7 +13,7 @@
     "email": "support@revenuecat.com"
   },
   "homepage": "https://www.revenuecat.com/docs/tools/mcp/overview",
-  "repository": "https://github.com/RevenueCat/rc-claude-code-plugin",
+  "repository": "https://github.com/RevenueCat/ai-toolkit",
   "capabilities": {
     "mcpServers": {
       "revenuecat": {
