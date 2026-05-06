@@ -1,22 +1,14 @@
 {
-  "name": "rc",
-  "displayName": "RevenueCat",
-  "description": "Configure RevenueCat projects, products, entitlements, and offerings directly from Cursor. Manage your in-app purchase backend without leaving your IDE.",
+  "name": "revenuecat",
+  "description": "Configure your RevenueCat integration and access data from your RevenueCat projects.",
   "version": "1.0.0",
   "license": "MIT",
   "keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"],
   "author": {
     "name": "RevenueCat",
-    "url": "https://github.com/RevenueCat",
     "email": "support@revenuecat.com"
   },
-  "homepage": "https://www.revenuecat.com/docs/tools/mcp/overview",
+  "homepage": "https://www.revenuecat.com",
   "repository": "https://github.com/RevenueCat/ai-toolkit",
-  "mcpServers": {
-    "revenuecat": {
-      "type": "http",
-      "url": "https://mcp.revenuecat.ai/mcp",
-			"description": "RevenueCat MCP server for project configuration and data access"
-    }
-  }
+  "logo": "assets/logo.png"
 }
