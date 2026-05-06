@@ -1,4 +1,4 @@
-# RevenueCat Plugin Marketplace
+# RevenueCat AI Toolkit
 
 Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your IDE — works with **Claude Code, Cursor, OpenAI Codex CLI, and Gemini CLI**.
 
