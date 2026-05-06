@@ -1,6 +1,6 @@
 # RevenueCat AI Toolkit
 
-Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your IDE — works with **Claude Code, Cursor, OpenAI Codex CLI, and Gemini CLI**.
+Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your agent — works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
 ## Installation
 
@@ -55,6 +55,16 @@ gemini extensions install https://github.com/RevenueCat/ai-toolkit --path revenu
 ### Visual Studio Code
 
 Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+
+
+### Other (unsupported agentic coding environments)
+Use `npx skills`:
+
+```
+npx skills add RevenueCat/ai-toolkit
+```
+
+Note that this will only install the skills from this repository, not the MCP server. Configure the MCP manually in your coding environment [following our instructions](https://www.revenuecat.com/docs/tools/mcp/setup).
 
 ## Authentication
 
