@@ -1,8 +1,8 @@
 {
-  "name": "revenuecat",
+  "name": "RevenueCat",
   "plugins": [
     {
-      "name": "revenuecat",
+      "name": "RevenueCat",
       "source": { "source": "local", "path": "./plugins/revenuecat" },
       "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
       "category": "Productivity"
