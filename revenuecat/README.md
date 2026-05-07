@@ -1,6 +1,6 @@
 # RevenueCat Plugin
 
-Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your agent — works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
+Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Access data about your revenue, conversion funnel, and experiments. Manage your in-app purchase monetization without leaving your agent. Works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
 ## Authentication
 
