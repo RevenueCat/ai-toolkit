@@ -10,7 +10,7 @@ Use observer mode. Your existing StoreKit code keeps owning the purchase flow.
 
 ### Install the SDK
 
-See `revenuecat-setup/platforms/ios.md` for dependency manager specifics. You want a recent 5.x release.
+See `integrate-revenuecat/platforms/ios.md` for dependency manager specifics. You want a recent 5.x release.
 
 ### Configure in observer mode
 

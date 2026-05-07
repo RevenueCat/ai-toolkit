@@ -1,4 +1,4 @@
-# revenuecat-setup: Flutter
+# integrate-revenuecat: Flutter
 
 ## Install
 

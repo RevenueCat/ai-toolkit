@@ -10,7 +10,7 @@ Use observer mode. Your existing Play Billing code keeps owning the purchase flo
 
 ### Install the SDK
 
-See `revenuecat-setup/platforms/android.md` for dependency specifics. Target a recent 8.x or newer release.
+See `integrate-revenuecat/platforms/android.md` for dependency specifics. Target a recent 8.x or newer release.
 
 ### Configure in observer mode
 

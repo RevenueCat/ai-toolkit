@@ -1,4 +1,4 @@
-# revenuecat-debug: Kotlin Multiplatform
+# revenuecat-troubleshoot: Kotlin Multiplatform
 
 `purchases-kmp` wraps the native iOS and Android SDKs. Bugs almost always reproduce on one specific target, and the fix is the same as the native SDK fix for that target.
 

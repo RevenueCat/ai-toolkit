@@ -1,6 +1,6 @@
 # revenuecat-entitlements-gate: Kotlin Multiplatform
 
-`purchases-kmp` wraps the native iOS and Android SDKs. The commonMain API looks the same on both sides; only the initial configuration differs (see `revenuecat-setup`).
+`purchases-kmp` wraps the native iOS and Android SDKs. The commonMain API looks the same on both sides; only the initial configuration differs (see `integrate-revenuecat`).
 
 ## One shot check (coroutines, commonMain)
 

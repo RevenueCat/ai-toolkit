@@ -86,4 +86,4 @@ Your testing environment is set up once:
 3. The expected entitlement is active on `customerInfo` after the purchase completes.
 4. Restoring purchases on a fresh install of the app restores the entitlement to the same test user.
 
-If any of those four steps fails, the environment is not ready. The `revenuecat-debug` skill covers the usual root causes.
+If any of those four steps fails, the environment is not ready. The `revenuecat-troubleshoot` skill covers the usual root causes.

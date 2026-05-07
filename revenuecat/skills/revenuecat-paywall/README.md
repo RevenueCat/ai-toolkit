@@ -2,7 +2,7 @@
 
 Use this skill when the user wants to show a paywall that is built and configured in the RevenueCat dashboard, using the native RevenueCatUI components. This skill does not cover building a custom paywall from scratch. For that, use `revenuecat-purchase-flow` (when available) and `Purchases.getOfferings(…)` directly.
 
-Prerequisite: `revenuecat-setup` has already run. `Purchases.configure(…)` must succeed before a paywall can load.
+Prerequisite: `integrate-revenuecat` has already run. `Purchases.configure(…)` must succeed before a paywall can load.
 
 ## 1. Detect the platform
 

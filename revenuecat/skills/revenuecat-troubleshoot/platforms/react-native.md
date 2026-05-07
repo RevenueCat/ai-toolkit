@@ -1,6 +1,6 @@
-# revenuecat-debug: React Native
+# revenuecat-troubleshoot: React Native
 
-Work the universal checklist in `../SKILL.md` first. React Native bugs usually surface in JavaScript but are rooted in the underlying native SDK. The iOS and Android platform files in `revenuecat-debug/platforms/` apply.
+Work the universal checklist in `../README.md` first. React Native bugs usually surface in JavaScript but are rooted in the underlying native SDK. The iOS and Android platform files in `platforms/` apply.
 
 ## Turn on debug logging
 

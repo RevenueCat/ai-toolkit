@@ -1,4 +1,4 @@
-# revenuecat-setup: React Native
+# integrate-revenuecat: React Native
 
 ## Install
 

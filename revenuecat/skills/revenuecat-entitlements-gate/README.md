@@ -20,7 +20,7 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 - **`customerInfo.entitlements.active` is the source of truth.** It is a `Map<String, EntitlementInfo>` keyed by entitlement identifier. Presence in `active` means the user currently has access. Absence means they do not, regardless of past purchases.
 - **Do not gate on purchase history.** Expired subscriptions still appear in `customerInfo.entitlements.all` but drop out of `active`. Use `active` only.
 - **Fetch once, then subscribe.** The first `customerInfo` call returns a cached value quickly, and the SDK refreshes in the background. Every SDK exposes a listener or stream that fires when entitlements change (after a purchase, restore, renewal, or expiration). Subscribe to that instead of polling.
-- **The SDK must be configured first.** If `Purchases.configure(…)` has not run, the entitlement call will fail. Set up the SDK via `revenuecat-setup` before using this skill.
+- **The SDK must be configured first.** If `Purchases.configure(…)` has not run, the entitlement call will fail. Set up the SDK via `integrate-revenuecat` before using this skill.
 
 ## 3. Implementation
 

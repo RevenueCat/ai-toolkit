@@ -10,7 +10,7 @@ Use observer mode. Your existing purchase code (whether Dart based or native via
 
 ### Install
 
-Add `purchases_flutter` to `pubspec.yaml` and run `flutter pub get`. See `revenuecat-setup/platforms/flutter.md` for the setup details.
+Add `purchases_flutter` to `pubspec.yaml` and run `flutter pub get`. See `integrate-revenuecat/platforms/flutter.md` for the setup details.
 
 ### Configure in observer mode
 

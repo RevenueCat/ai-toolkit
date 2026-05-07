@@ -1,4 +1,4 @@
-# revenuecat-setup: iOS (native)
+# integrate-revenuecat: iOS (native)
 
 ## Install
 

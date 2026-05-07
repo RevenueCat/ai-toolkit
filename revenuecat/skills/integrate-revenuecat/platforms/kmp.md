@@ -1,4 +1,4 @@
-# revenuecat-setup: Kotlin Multiplatform
+# integrate-revenuecat: Kotlin Multiplatform
 
 `purchases-kmp` is a thin Kotlin Multiplatform wrapper over the native iOS and Android SDKs. Behavior matches the native SDKs; only the entry point differs.
 

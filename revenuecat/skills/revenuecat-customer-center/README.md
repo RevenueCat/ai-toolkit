@@ -2,7 +2,7 @@
 
 Use this skill when the user wants an out of the box UI that lets their customers manage active subscriptions, request refunds, cancel, restore, or contact support, without shipping custom UI. The UI is configured in the RevenueCat dashboard and rendered by the `RevenueCatUI` SDKs.
 
-Prerequisite: `revenuecat-setup` has already run. `Purchases.configure(…)` must succeed before the Customer Center can load customer data.
+Prerequisite: `integrate-revenuecat` has already run. `Purchases.configure(…)` must succeed before the Customer Center can load customer data.
 
 ## 1. Detect the platform
 

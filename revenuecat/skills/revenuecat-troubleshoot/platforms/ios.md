@@ -1,6 +1,6 @@
-# revenuecat-debug: iOS (native)
+# revenuecat-troubleshoot: iOS (native)
 
-Work the universal checklist in `../SKILL.md` first. This file covers issues that only show up on iOS.
+Work the universal checklist in `../README.md` first. This file covers issues that only show up on iOS.
 
 ## Turn on debug logging
 

@@ -1,4 +1,4 @@
-# revenuecat-setup: Android (native Kotlin/Java)
+# integrate-revenuecat: Android (native Kotlin/Java)
 
 ## Install
 

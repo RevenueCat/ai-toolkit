@@ -1,6 +1,6 @@
 # revenuecat-identify-user: connect RevenueCat to your auth system
 
-Use this skill when the user wants to call `logIn` / `logOut` on the RevenueCat SDK so that their app users line up with RevenueCat subscribers. This skill does not cover initial SDK setup (see `revenuecat-setup`), purchases (`revenuecat-purchase-flow`), or gating (`revenuecat-entitlements-gate`).
+Use this skill when the user wants to call `logIn` / `logOut` on the RevenueCat SDK so that their app users line up with RevenueCat subscribers. This skill does not cover initial SDK setup (see `integrate-revenuecat`), purchases (`revenuecat-purchase-flow`), or gating (`revenuecat-entitlements-gate`).
 
 ## 1. Detect the platform
 
