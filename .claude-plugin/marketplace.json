@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "RevenueCat",
+  "description": "Set up RevenueCat, integrate it, and access data.",
+  "owner": {
+    "name": "RevenueCat",
+    "email": "support@revenuecat.com"
+  },
+  "plugins": [
+    {
+      "name": "RevenueCat",
+      "source": "./revenuecat",
+      "description": "Set up RevenueCat, integrate it, and access data.",
+      "version": "2.0.0",
+      "category": "developer-tools",
+      "author": { "name": "RevenueCat" },
+      "homepage": "https://www.revenuecat.com",
+      "repository": "https://github.com/RevenueCat/ai-toolkit",
+      "license": "MIT",
+      "keywords": ["revenuecat", "subscriptions", "iap", "in-app-purchases", "mobile"]
+    }
+  ]
+}

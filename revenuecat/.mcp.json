@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "RevenueCat": {
+      "type": "http",
+      "url": "https://mcp.revenuecat.ai/mcp",
+      "description": "RevenueCat MCP server for project configuration and data access"
+    }
+  }
+}

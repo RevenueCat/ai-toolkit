@@ -1,9 +1,45 @@
 # Changelog
 
-All notable changes to the RevenueCat Claude Code Plugin will be documented in this file.
+All notable changes to the RevenueCat AI Toolkit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.0] - 2026-05-06
+
+### Added
+
+#### Skills
+
+- **revenuecat** — Catch-all skill for RevenueCat interactions not covered by a more specific skill; uses the MCP server and links to RevenueCat docs
+- **integrate-revenuecat** — Step-by-step guide for integrating RevenueCat into an iOS or Android app, including store credential setup, product configuration, and API key retrieval (replaces `create-app` and `apikey`)
+- **create-revenuecat-project** — Complete project bootstrap from scratch: creates apps, products, entitlements, offerings, and packages in the correct dependency order (replaces `bootstrap` agent)
+- **revenuecat-charts** — Fetch and interpret RevenueCat analytics data (MRR, subscriptions, churn, trials, and more) using `get-chart-options-schema` and `get-chart-data` MCP tools
+- **revenuecat-status** — Quick project health overview (replaces `status`)
+- **revenuecat-troubleshoot** — Diagnose and fix common integration issues (replaces `troubleshoot` agent)
+
+#### Multi-platform support
+
+- **OpenAI Codex** — Added `.codex-plugin/plugin.json` manifest and marketplace entry
+- **Cursor** — Added `.cursor-plugin/plugin.json` and marketplace entry
+- **Gemini CLI** — Plugin installable directly from the repository folder (Gemini build script removed)
+- **Visual Studio Code** — Supported via the VS Code agent plugins marketplace (beta)
+- **`npx skills`** — Fallback installation method for unsupported agentic environments (installs skills only; MCP must be configured separately)
+
+### Changed
+
+- Renamed project from "RevenueCat Claude Code Plugin" to **RevenueCat AI Toolkit** to reflect multi-platform support
+- Moved plugin source from `plugins/revenuecat/` to `revenuecat/` at the repository root
+- Converted `project-bootstrap` and `troubleshoot` agents to skills
+- Removed standalone Gemini build script; Gemini CLI now installs directly from the plugin folder
+
+### Removed
+
+- `status`, `apikey`, `create-app`, `create-product` skills (superseded by renamed/refactored skills above)
+- `project-bootstrap` and `troubleshoot` agents (converted to skills)
+- Gemini build script (`scripts/build-gemini.mjs`) and `dist/gemini/` output directory
+
+---
 
 ## [1.0.0] - 2026-02-02
 
@@ -67,4 +103,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store-specific setup instructions (App Store Connect, Google Play Console)
 - Configuration validation and issue highlighting
 
-[1.0.0]: https://github.com/RevenueCat/rc-claude-code-plugin/releases/tag/v1.0.0
+[2.0.0]: https://github.com/RevenueCat/ai-toolkit/compare/v1.0.0...v2.0.0
+[1.0.0]: https://github.com/RevenueCat/ai-toolkit/releases/tag/v1.0.0

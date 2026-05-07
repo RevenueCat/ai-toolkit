@@ -1,0 +1,13 @@
+{
+  "name": "revenuecat",
+  "version": "2.0.0",
+  "description": "Configure RevenueCat projects, products, entitlements, and offerings from Gemini CLI.",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {
+    "revenuecat": {
+      "type": "http",
+      "url": "https://mcp.revenuecat.ai/mcp",
+			"description": "RevenueCat MCP server for project configuration and data access"
+    }
+  }
+}

@@ -1,5 +1,5 @@
 ---
-name: status
+name: revenuecat-status
 description: Get a quick overview of your RevenueCat project configuration including apps, products, entitlements, offerings, and webhooks.
 ---
 
@@ -19,7 +19,7 @@ This command provides a summary of your RevenueCat project including:
 ## Usage
 
 ```
-/rc:status [project_name]
+/revenuecat-status [project_name]
 ```
 
 **Arguments:**
@@ -29,6 +29,8 @@ Can be referenced as `$ARGUMENTS` in the skill.
 
 ## Instructions
 
+Use the RevenueCat MCP server for all tool calls.
+
 When the user invokes this skill, perform the following steps:
 
 1. **Parse Arguments** (from $ARGUMENTS)
@@ -36,18 +38,18 @@ When the user invokes this skill, perform the following steps:
    - Project name matching is case-insensitive and supports partial matches
 
 2. **Get Projects**
-   - Call `mcp_RC_get_project` to retrieve all accessible projects
+   - Use `list-projects` tool to retrieve all accessible projects
    - If `project_name` is specified in arguments, filter projects by name (case-insensitive partial match)
    - If no matching project found, inform the user and list available projects
    - If no `project_name` provided, show status for all projects
 
 3. **Gather Statistics for Each Project**
-   For each project (filtered or all):
-   - Call `mcp_RC_list_apps` with the project_id
-   - Call `mcp_RC_list_products` with the project_id
-   - Call `mcp_RC_list_entitlements` with the project_id
-   - Call `mcp_RC_list_offerings` with the project_id
-   - Call `mcp_RC_list_webhook_integrations` with the project_id
+   For each project (filtered or all), use the following tools: 
+   - `list-apps` 
+   - `list-products`
+   - `list-entitlements`
+   - `list-offerings`
+   - `list-webhook-integrations`
 
 4. **Present Summary**
    Format the results as a clear status report:
@@ -82,64 +84,3 @@ When the user invokes this skill, perform the following steps:
    - Products not attached to any entitlement
    - Offerings without packages
    - Apps without products
-
-## Example Output
-
-### Example 1: Status for a specific project
-```
-/rc:status "Fitness Tracker"
-```
-
-Output:
-```
-📊 RevenueCat Project Status
-============================
-Project: Fitness Tracker (proj8f7f2106)
-
-📱 Apps: 3
-   - Fitness Tracker (app_store) - iOS
-   - Fitness Tracker (Web) (rc_billing) - Web
-   - Fitness Tracker (Stripe) (stripe) - Stripe
-
-📦 Products: 20
-   - com.fitness.premium_monthly (subscription)
-   - com.fitness.premium_yearly (subscription)
-   - ...
-
-🔑 Entitlements: 1
-   - Premium: Unlock all features
-
-🎁 Offerings: 11
-   - default (current: yes)
-   - annual-promo
-   - ...
-
-🔗 Webhooks: 1
-   - Production Backend → https://api.myapp.com/webhooks/rc
-
-✅ Configuration looks healthy!
-```
-
-### Example 2: Status for all projects (no project name)
-```
-/rc:status
-```
-
-Shows status for all accessible projects, one after another.
-
-### Example 3: No matching project
-```
-/rc:status NonExistentApp
-```
-
-Output:
-```
-⚠️ No project found matching "NonExistentApp"
-
-Available projects:
-- Fitness Tracker
-- Recipe App
-- Photo Editor
-- Music Player
-- Task Manager
-```
