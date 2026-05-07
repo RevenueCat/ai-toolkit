@@ -2,6 +2,8 @@
 
 Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your agent — works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
+The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini.
+
 ## Installation
 
 ### Claude Code CLI
@@ -115,7 +117,7 @@ Claude: RevenueCat Project Status
 
 ## MCP Tools Reference
 
-This plugin uses the RevenueCat MCP server for common configuration actions.
+The plugins contain the RevenueCat MCP server setup and uses it to access your RevenueCat projects.
 
 ## Support
 
