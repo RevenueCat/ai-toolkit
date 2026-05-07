@@ -48,21 +48,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
-          /tmp/revenuecat.tar.gz#revenuecat.tar.gz \
+          /tmp/revenuecat.tar.gz \
           --title "RevenueCat AI Toolkit ${{ steps.version.outputs.tag }}" \
           --notes "## Gemini CLI
           
           Install this extension with:
           
-          ```
+          \`\`\`
           gemini extensions install https://github.com/${{ github.repository }} --tag ${{ steps.version.outputs.tag }}
-          ```
+          \`\`\`
           
           Or install the latest release:
 
-          ```
+          \`\`\`
           gemini extensions install https://github.com/${{ github.repository }}
-          ```
+          \`\`\`
 
           See the [README](https://github.com/${{ github.repository }}#readme) for full setup instructions." \
           --latest
