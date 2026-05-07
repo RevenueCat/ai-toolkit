@@ -11,9 +11,9 @@ The AI toolkit is distributed as a marketplace (containing a single plugin) for 
 From within Claude Code
 
 ```
-/plugin marketplace add RevenueCat/ai-toolkit
-/plugin install RevenueCat
+/plugin 
 ```
+Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `RevenueCat` plugin.
 
 Or from the command line:
 
