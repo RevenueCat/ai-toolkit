@@ -1,6 +1,6 @@
 # revenuecat-troubleshoot: Flutter
 
-Work the universal checklist in `../README.md` first. Most Flutter reports reproduce against the underlying native SDK, so the platform files in `platforms/ios.md` and `platforms/android.md` apply.
+Work the universal checklist in `../SKILL.md` first. Most Flutter reports reproduce against the underlying native SDK, so the platform files in `platforms/ios.md` and `platforms/android.md` apply.
 
 ## Turn on debug logging
 

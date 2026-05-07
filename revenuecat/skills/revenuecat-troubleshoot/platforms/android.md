@@ -1,6 +1,6 @@
 # revenuecat-troubleshoot: Android (native Kotlin/Java)
 
-Work the universal checklist in `../README.md` first. This file covers issues that only show up on Android.
+Work the universal checklist in `../SKILL.md` first. This file covers issues that only show up on Android.
 
 ## Turn on debug logging
 
