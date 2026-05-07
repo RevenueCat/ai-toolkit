@@ -10,6 +10,14 @@ Walk them in order. Most integrations need both halves, even when the user asks 
 > If a project + app already exist and the user only wants to wire the SDK into code, jump to **Section 3** below.
 > If the user wants to bootstrap a brand new RevenueCat project (apps + products + entitlements + offerings), use the `create-revenuecat-project` skill instead, then come back here for the SDK install.
 
+## Arguments
+
+Available as `$ARGUMENTS` when invoked as a slash command:
+
+- `platform` (optional): One of `ios`, `android`, `kmp`, `flutter`, `react-native`. If omitted, run the detection algorithm in Section 3a.
+- `app_identifier` (optional): Bundle ID (iOS) or package name (Android). If omitted, read it from the project files (`Info.plist`, `AndroidManifest.xml`, `app.json`, `pubspec.yaml`).
+- `project_name` (optional): Name of the RevenueCat project to use. If omitted, list projects via MCP and ask the user.
+
 ## 1. Understand the status quo
 
 Before touching the dashboard, gather the facts:
