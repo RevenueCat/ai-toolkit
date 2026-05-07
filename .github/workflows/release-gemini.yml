@@ -35,12 +35,14 @@ jobs:
       - name: Build Gemini extension archive
         if: steps.check.outputs.exists == 'false'
         run: |
-          # Archive revenuecat/ contents, excluding dot-directories and dot-files,
-          # with gemini-extension.json at the archive root.
-          tar -czf /tmp/revenuecat.tar.gz \
-            -C revenuecat \
-            --exclude='.*' \
-            .
+          # Archive revenuecat/ contents, excluding dot-files and dot-directories.
+          # Run tar from inside revenuecat so '*' expands to real entries there.
+          (
+            cd revenuecat
+            tar -czf /tmp/revenuecat.tar.gz \
+              --exclude='.*' \
+              *
+          )
 
       - name: Create GitHub release
         if: steps.check.outputs.exists == 'false'
