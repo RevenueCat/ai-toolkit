@@ -5,6 +5,17 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-06-04
+
+### Added
+
+#### Plugins
+
+- **revenuecat-play-billing** — New skills-only plugin with 20 deep Google Play subscription lifecycle skills for the RevenueCat Android SDK (purchase flow, plan and price changes, payment recovery, subscription states, webhooks, security, and more). Vendored from [RevenueCat/play-billing-skills](https://github.com/RevenueCat/play-billing-skills) (the source of truth) with an `rc-` skill prefix; licensed Apache-2.0
+- Sync automation: `scripts/sync-play-billing.mjs` (`npm run sync:play-billing`) and a weekly `sync-play-billing.yml` workflow that opens a PR when the source collection changes
+
+---
+
 ## [2.0.0] - 2026-05-06
 
 ### Added
@@ -103,5 +114,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store-specific setup instructions (App Store Connect, Google Play Console)
 - Configuration validation and issue highlighting
 
+[2.1.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/RevenueCat/ai-toolkit/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/RevenueCat/ai-toolkit/releases/tag/v1.0.0

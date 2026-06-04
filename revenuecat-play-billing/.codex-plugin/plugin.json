@@ -1,0 +1,34 @@
+{
+  "name": "revenuecat-play-billing",
+  "version": "1.0.0",
+  "description": "Deep Google Play subscription lifecycle skills for the RevenueCat Android SDK — purchases, plan and price changes, payment recovery, webhooks, security.",
+  "homepage": "https://www.revenuecat.com/guides/revenuecat-android-sdk",
+  "repository": "https://github.com/RevenueCat/ai-toolkit",
+  "license": "Apache-2.0",
+  "keywords": ["revenuecat", "android", "google-play", "play-billing", "subscriptions", "iap"],
+  "skills": "./skills/",
+  "author": {
+    "name": "RevenueCat",
+    "url": "https://github.com/RevenueCat",
+    "email": "support@revenuecat.com"
+  },
+  "interface": {
+    "displayName": "RevenueCat Play Billing",
+    "shortDescription": "Google Play billing depth for the RevenueCat Android SDK.",
+    "longDescription": "Deep Google Play subscription lifecycle skills for the RevenueCat Android SDK — purchases, plan and price changes, payment recovery, webhooks, security. From the RevenueCat Android SDK handbook.",
+    "developerName": "RevenueCat",
+    "category": "Productivity",
+    "capabilities": ["read"],
+    "websiteURL": "https://www.revenuecat.com",
+    "privacyPolicyURL": "https://www.revenuecat.com/privacy",
+    "termsOfServiceURL": "https://www.revenuecat.com/terms",
+    "brandColor": "#F2545B",
+    "logo": "./assets/logo.png",
+    "composerIcon": "./assets/logo.png",
+    "defaultPrompt": [
+      "Implement the RevenueCat purchase flow in my Android app.",
+      "Handle a failed renewal with a grace period on Android.",
+      "Consume RevenueCat webhooks on my backend."
+    ]
+  }
+}

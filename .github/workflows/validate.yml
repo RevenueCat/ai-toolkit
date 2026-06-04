@@ -26,7 +26,11 @@ jobs:
             revenuecat/.claude-plugin/plugin.json \
             revenuecat/.cursor-plugin/plugin.json \
             revenuecat/.codex-plugin/plugin.json \
-            revenuecat/gemini-extension.json; do
+            revenuecat/gemini-extension.json \
+            revenuecat-play-billing/.claude-plugin/plugin.json \
+            revenuecat-play-billing/.cursor-plugin/plugin.json \
+            revenuecat-play-billing/.codex-plugin/plugin.json \
+            revenuecat-play-billing/gemini-extension.json; do
             echo "Validating $f..."
             node -e "JSON.parse(require('fs').readFileSync('$f','utf8'))" \
               && echo "  OK" \

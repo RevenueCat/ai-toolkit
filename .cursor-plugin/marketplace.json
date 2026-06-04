@@ -12,6 +12,10 @@
     {
       "name": "revenuecat",
       "source": "./revenuecat"
+    },
+    {
+      "name": "revenuecat-play-billing",
+      "source": "./revenuecat-play-billing"
     }
   ]
 }
