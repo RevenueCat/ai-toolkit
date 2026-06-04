@@ -18,6 +18,18 @@
       "repository": "https://github.com/RevenueCat/ai-toolkit",
       "license": "MIT",
       "keywords": ["revenuecat", "subscriptions", "iap", "in-app-purchases", "mobile"]
+    },
+    {
+      "name": "revenuecat-play-billing",
+      "source": "./revenuecat-play-billing",
+      "description": "Deep Google Play subscription lifecycle skills for the RevenueCat Android SDK — purchases, plan and price changes, payment recovery, webhooks, security.",
+      "version": "1.0.0",
+      "category": "developer-tools",
+      "author": { "name": "RevenueCat" },
+      "homepage": "https://www.revenuecat.com/guides/revenuecat-android-sdk",
+      "repository": "https://github.com/RevenueCat/ai-toolkit",
+      "license": "Apache-2.0",
+      "keywords": ["revenuecat", "android", "google-play", "play-billing", "subscriptions", "iap"]
     }
   ]
 }

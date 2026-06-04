@@ -1,0 +1,14 @@
+{
+	"name": "revenuecat-play-billing",
+	"description": "Deep Google Play subscription lifecycle skills for the RevenueCat Android SDK — purchases, plan and price changes, payment recovery, webhooks, security. From the RevenueCat Android SDK handbook.",
+	"version": "1.0.0",
+	"license": "Apache-2.0",
+	"keywords": ["revenuecat", "android", "google-play", "play-billing", "subscriptions", "iap"],
+	"author": {
+		"name": "RevenueCat",
+		"url": "https://www.revenuecat.com",
+		"email": "support@revenuecat.com"
+	},
+	"homepage": "https://www.revenuecat.com/guides/revenuecat-android-sdk",
+	"repository": "https://github.com/RevenueCat/ai-toolkit"
+}
