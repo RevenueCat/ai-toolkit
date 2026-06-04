@@ -1,6 +1,8 @@
 # RevenueCat AI Toolkit
 
-Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Manage your in-app purchase backend without leaving your agent — works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
+Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Access data about your revenue, conversion funnel, and experiments. Manage your in-app purchase monetization without leaving your agent. Works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
+
+The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini.
 
 ## Plugins
 
@@ -20,10 +22,9 @@ Most users want the `RevenueCat` plugin. Add `revenuecat-play-billing` on top if
 From within Claude Code
 
 ```
-/plugin marketplace add RevenueCat/ai-toolkit
-/plugin install RevenueCat
-/plugin install revenuecat-play-billing
+/plugin
 ```
+Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `RevenueCat` plugin. If you ship Android and want handbook-level Google Play depth, also select `revenuecat-play-billing`.
 
 Or from the command line:
 
@@ -61,7 +62,12 @@ Then, in the Codex app, click on "Plugins". From the "Built by OpenAI" dropdown,
 ### Gemini CLI
 
 ```bash
-gemini extensions install https://github.com/RevenueCat/ai-toolkit --path revenuecat
+gemini extensions install https://github.com/RevenueCat/ai-toolkit
+```
+
+The `revenuecat-play-billing` plugin is not part of the Gemini release archive; install it from the repository source:
+
+```bash
 gemini extensions install https://github.com/RevenueCat/ai-toolkit --path revenuecat-play-billing
 ```
 
@@ -129,7 +135,7 @@ Claude: RevenueCat Project Status
 
 ## MCP Tools Reference
 
-This plugin uses the RevenueCat MCP server for common configuration actions.
+The plugins contain the RevenueCat MCP server setup and uses it to access your RevenueCat projects.
 
 ## Support
 

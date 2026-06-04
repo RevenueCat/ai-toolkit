@@ -1,0 +1,70 @@
+name: Release Gemini extension
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Read version from package.json
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check if release already exists
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" > /dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "Release ${{ steps.version.outputs.tag }} already exists — skipping."
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build Gemini extension archive
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          # Archive revenuecat/ contents, excluding dot-files and dot-directories.
+          # Run tar from inside revenuecat so '*' expands to real entries there.
+          (
+            cd revenuecat
+            tar -czf /tmp/revenuecat.tar.gz \
+              --exclude='.*' \
+              *
+          )
+
+      - name: Create GitHub release
+        if: steps.check.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+          /tmp/revenuecat.tar.gz \
+          --title "RevenueCat AI Toolkit ${{ steps.version.outputs.tag }}" \
+          --notes "## Gemini CLI
+          
+          Install this extension with:
+          
+          \`\`\`
+          gemini extensions install https://github.com/${{ github.repository }} --tag ${{ steps.version.outputs.tag }}
+          \`\`\`
+          
+          Or install the latest release:
+
+          \`\`\`
+          gemini extensions install https://github.com/${{ github.repository }}
+          \`\`\`
+
+          See the [README](https://github.com/${{ github.repository }}#readme) for full setup instructions." \
+          --latest

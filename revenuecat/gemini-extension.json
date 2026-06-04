@@ -2,7 +2,6 @@
   "name": "revenuecat",
   "version": "2.0.0",
   "description": "Configure RevenueCat projects, products, entitlements, and offerings from Gemini CLI.",
-  "contextFileName": "GEMINI.md",
   "mcpServers": {
     "revenuecat": {
       "type": "http",
