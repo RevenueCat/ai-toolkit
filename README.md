@@ -65,11 +65,7 @@ Then, in the Codex app, click on "Plugins". From the "Built by OpenAI" dropdown,
 gemini extensions install https://github.com/RevenueCat/ai-toolkit
 ```
 
-The `revenuecat-play-billing` plugin is not part of the Gemini release archive; install it from the repository source:
-
-```bash
-gemini extensions install https://github.com/RevenueCat/ai-toolkit --path revenuecat-play-billing
-```
+Gemini has no marketplace and supports a single extension per repository, so it installs the `RevenueCat` plugin only. The `revenuecat-play-billing` plugin is available on Claude Code, Cursor, Codex, and VS Code.
 
 
 ### Visual Studio Code
