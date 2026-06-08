@@ -1,6 +1,6 @@
 ---
 name: create-revenuecat-project
-description: Set up a complete RevenueCat project from scratch — creates apps, products, entitlements, offerings, and packages in the correct order.
+description: "Set up a complete RevenueCat project from scratch — creates apps, products, entitlements, offerings, and packages in the correct order. Use when the user wants to create a new RevenueCat project, configure in-app purchases, set up subscriptions or monetization, or bootstrap IAP infrastructure for iOS, Android, or Web."
 ---
 
 # RevenueCat Project Bootstrap
@@ -32,7 +32,7 @@ Store project_id for all subsequent calls
 
 2. Create Apps (for each platform): 
     - For mobile apps, ask if the user already has set up their app in App Store Connect / Google Play Console. If so, create an app using the `create-app` tool (type: app_store | play_store). If not, use the automatically generated `test_store` app and tell the user that they can set up the integration with App Store Connect / Google Play Console later.
-    - For web apps, `create-app` with type rc_billing (rc_billing is RevenueCat's own web billing engine with payments powered by Stripe, but without paying extra for Stripe Billing / Stripe Checkout)
+    - For web apps, `create-app` with type rc_billing
 
 3. Create Products (for each subscription/purchase): `create-product` tool
 
@@ -46,7 +46,7 @@ Store project_id for all subsequent calls
 
 8. Attach Products to Packages: `attach-products-to-package` tool
 
-9. Get API Keys: `list-app-public-api-keys` tool. Note that these API keys are public and safe to embed in app code.
+9. Get API Keys: `list-app-public-api-keys` tool
 
 ### Phase 3: Summary & Next Steps
 
