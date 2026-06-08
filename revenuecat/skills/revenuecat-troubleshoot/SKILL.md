@@ -31,10 +31,11 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 Walk these nine items in order. Most reports are resolved by steps 1 through 5.
 
 1. **Turn on debug logging and reproduce.** The SDK narrates what it is doing. Roughly 80% of reports are diagnosable from the log output alone. Each platform file shows how to set `logLevel` to debug.
-2. **Verify the API key platform matches the app.** iOS apps must use an `appl_…` public SDK key. Android apps must use `goog_…` (or `amzn_…` for Amazon). A mismatched key produces an authentication error on the first network call. On iOS this surfaces as an `INVALID_CREDENTIALS` error code. On Android it surfaces as `PurchasesErrorCode.InvalidCredentialsError`.
-3. **Verify the bundle ID / applicationId matches the dashboard.** Open the RevenueCat dashboard → Project → Apps. The bundle identifier (iOS) or applicationId (Android) registered there must match the built app exactly, including capitalization. A mismatch causes offerings to come back empty because the app is not recognized.
-4. **Verify offerings in the dashboard.** Dashboard → Products → Offerings. The offering marked "current" must have at least one package attached, and each package must reference a store product. An offering with zero packages returns an empty `availablePackages` list even though `getOfferings` succeeds.
-5. **Verify store products are live.** Products must be in "Ready to Submit" on App Store Connect or "Active" on Google Play Console. A product in a draft state will not be returned by the store, even in sandbox. If the SDK logs show offerings arriving from RevenueCat but products failing to resolve, this is almost always the cause.
+2. **Verify the API key platform matches the app.** iOS apps must use an `appl_…` public SDK key. Android apps must use `goog_…` (or `amzn_…` for Amazon). A mismatched key produces an authentication error on the first network call. On iOS this surfaces as an `INVALID_CREDENTIALS` error code. On Android it surfaces as `PurchasesErrorCode.InvalidCredentialsError`. Use the `list-app-public-api-keys` RevenueCat MCP tool to list the API keys for the project.
+3. **Verify the bundle ID / package name matches the one set up in the RevenueCat project.** 
+List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / App Store) or `package_name` (Android / Play Store / Amazon Appstore) registered there must match the built app exactly, including capitalization. A mismatch causes offerings to come back empty because the app is not recognized.
+4. **Verify offerings in the RevenueCat project.** List the project's offerings using the `list-offerings` RevenueCat MCP tool, passing the parameter `expand=items.package.product`. The offering marked with `is_current: true` must have at least one package attached, and each package must reference a store product. An offering with zero packages returns an empty `availablePackages` list even though `getOfferings` succeeds.
+5. **Verify store products are live.** Products must be in "Ready to Submit" on App Store Connect or "Active" on Google Play Console. A product in a draft state will not be returned by the store, even in sandbox. If the SDK logs show offerings arriving from RevenueCat but products failing to resolve, this is almost always the cause. Use the `get-product-store-state` RevenueCat MCP tool to understand the state of product in App Store Connect or Google Play Console (field `store_status`).
 6. **Verify the testing account.** iOS: the device must be signed into a Sandbox Apple ID under Settings → App Store → Sandbox Account (set on iOS 14+ after the first sandbox prompt). Android: the tester's Gmail must be added to Google Play Console → Setup → License testing, and the app must be installed via the Internal Testing opt-in link, not sideloaded.
 7. **Verify the network.** Corporate VPNs, captive portals, and some DNS filters silently block the RevenueCat API or the store APIs. Try a different network before digging deeper.
 8. **Verify the appUserID.** If `logIn(appUserID)` was called with an ID that does not match what the user expects, entitlements appear missing because they are attached to a different RC user. Print `Purchases.shared.appUserID` (iOS) / `Purchases.sharedInstance.appUserID` (Android) and confirm it matches.
@@ -65,11 +66,13 @@ list-apps (with selected project_id)
 #### Check 2: Products
 ```
 list-products
+get-product-store-state
 ```
 - [ ] Products exist for each store item.
 - [ ] Store identifiers match App Store Connect / Play Console exactly.
 - [ ] Product types are correct (subscription vs one-time).
 - [ ] Play Store: using `product_id:base_plan_id` format.
+- [ ] Store State: `store_status.status` = `ok`.
 
 #### Check 3: Entitlements
 ```
