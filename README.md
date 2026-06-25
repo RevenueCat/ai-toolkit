@@ -37,7 +37,11 @@ claude plugins install revenuecat-play-billing
 
 ### Cursor
 
-Coming soon. In the meantime, you can [add the RevenueCat MCP directly](https://www.revenuecat.com/docs/tools/mcp/setup#using-with-cursor).
+You can add the RevenueCat AI Toolkit to Cursor from the [Cursor Marketplace](https://cursor.com/marketplace/revenuecat/revenuecat) or using the following command:
+
+```
+/add-plugin revenuecat
+```
 
 ### OpenAI Codex CLI
 
