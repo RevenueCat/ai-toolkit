@@ -25,7 +25,6 @@ giving advice, always use benchmark data to make sure you aren't incorrectly dia
 
 General guidelines:
 
-- If you are asked for metrics that there is no RevenueCat source for, confirm the definition of the metric with the user. You may make a suggestion, but do not assume a definition.
 - When using the data tools, date ranges are inclusive (start_date and end_date are included in the range). When asked for data for the "last N days", take that into account (use today as end date, start date is (N-1) days before today).
 - Provide links to RevenueCat charts (see the Dashboard URL Format section below) where it is useful. Provide specific links including filters, segments, date ranges, etc — eg. if you are asked for proceeds in the last 3 months, link to the revenue chart with custom date range of the last 3 months and the `revenue_type` selector set to `proceeds`, don't link to the plain revenue chart
 
