@@ -1,15 +1,118 @@
 ---
 name: revenuecat-charts
-description: Use when the user asks about RevenueCat data, analytics, charts, KPIs
+description:
+  Use when the user asks about RevenueCat data, analytics, charts, or KPIs — querying charts with
+  get-chart-options-schema and get-chart-data, interpreting subscription metrics, or sharing
+  dashboard chart links.
 ---
 
 # Accessing RevenueCat charts
-Use the following two tools of the RevenueCat MCP:
-- `get-chart-options-schema`: To understand the available options for each chart, including date resolution, segments, filters, and other selectors
-- `get-chart-data`: To retrieve data for a chart
+
+When querying a RevenueCat chart, follow this workflow:
+
+1. Use `get-chart-options-schema` to discover a chart's available options.
+2. Use `get-chart-data` with the right options to retrieve the chart data.
+3. Analyze the data, using scripts for any non-trivial arithmetic.
 
 In general, to avoid clogging the context, start with defined timeframes and larger resolution, then narrow down.
 
+## 1. Discover chart options with `get-chart-options-schema`
+
+- Treat `get-chart-options-schema` as the source of truth for each chart before calling
+  `get-chart-data`. It returns the chart's supported `resolutions`, `filters`, `segments`, and
+  `user_selectors`. Always call this tool with `"realtime": true`. Later `get-chart-data` calls must
+  use string IDs exactly as returned here.
+- `filters` are the dimensions you may later constrain in `get-chart-data`.
+  - Each filter has:
+    - an `id` to later use as the filter `name`.
+    - a `value_mode` that tells you how to choose valid values:
+      - `inline_enum` means you must use the `id` of one of the returned `options`. Resolve
+        user-supplied names first with the matching list tool, such as `list-products`,
+        `list-offerings`, `list-apps`, etc.
+      - `inferred_standard` means use the standard code from `value_source` such as an ISO country
+        code.
+      - `dynamic` means values come from observed project data and must match exactly.
+  - Do not pass display names, store product identifiers, bundle IDs, or guessed values unless the
+    schema says they are valid values.
+- `segments` are the dimensions you may later group by in `get-chart-data` using `segment`.
+  - A segment entry directly gives the dimension `id` to use. It does not list segment values
+    because the chart will group by it and show all values in the output.
+  - Filters and segments are separate per-chart lists, so never assume a filterable dimension is
+    segmentable. For example, `conversion_to_paying` may support `product_id` and
+    `offering_identifier` as filters but not as segments.
+- `user_selectors` are chart-specific switches that change what metric or window the chart returns.
+  Each selector is keyed by the selector ID to pass in `get-chart-data`'s `selectors` JSON object
+  and usually includes allowed option IDs plus a default. For example, the `revenue` chart may use
+  `revenue_type` (`revenue`, `revenue_net_of_taxes`, `proceeds`), while conversion charts may use
+  `conversion_timeframe` and default to `7_days`. State non-default selector choices when presenting
+  results.
+- `resolutions` list the supported time granularity and their string IDs for `get-chart-data`. You
+  must always pass one of these resolution IDs (such as `"0"` for day or `"2"` for month) when later
+  calling `get-chart-data`.
+
+## 2. Retrieve chart data with `get-chart-data`
+
+### Calling `get-chart-data`
+
+- Always set `"realtime": true` and specify start date, end date and resolution ID.
+- Always follow the guidelines from a prior `get-chart-options-schema` for that chart.
+- Consider rate limits: don't query too many charts at once.
+- Date ranges are inclusive (start_date and end_date are included in the range). When asked for
+  data for the "last N days", take that into account (use today as end date, start date is (N-1)
+  days before today).
+- Use available `filters` to constrain the output. They are a JSON-encoded array of
+  `{"name": "<filter id>", "values": ["<value id>", ...]}`.
+  - Values within one entry are ORed; separate entries are ANDed. Example: App Store revenue in the
+    US or the UK:
+    `"[{\"name\": \"store\", \"values\": [\"app_store\"]}, {\"name\": \"country\", \"values\": [\"US\", \"GB\"]}]"`.
+  - Use at most one entry per filter name: a repeated name silently replaces the earlier entry
+    (it does not combine with it). Filter values must not contain commas.
+- Use the available `selectors` for configuring the chart. They are a JSON-encoded object mapping
+  selector IDs to option IDs, e.g. `"{\"revenue_type\": \"proceeds\"}"`. Omitted selectors use their
+  defaults; the response echoes the applied values in `user_selectors`.
+- Use `segment` to group the output by some of the segmentable dimension IDs:
+  - Note that segmenting multiplies output size. You can keep responses small by using a coarser
+    resolution, a shorter date range, `limit_num_segments` (keeps the top N by value and folds the
+    rest into "Other"), or `aggregate` when you only need per-segment totals.
+- Use `aggregate` for summary-only questions such as totals or averages (e.g. "total Q1 revenue").
+  Prefer this over fetching and computing from raw data points yourself. Combined with `segment` it
+  returns compact per-segment summaries (e.g. country averages). In the output, `values` will be
+  empty and `summary` will contain just those operations.
+- Pass `currency` to convert outputs to some monetary unit (see `yaxis_currency` in the response).
+
+### Reading `get-chart-data` outputs
+
+- `measures` lists the metrics the chart returns (display name, unit, description). Most charts
+  return several, e.g. `revenue` may return Revenue, Transactions, and Ad Impressions.
+- `values` is a flat array of points `{cohort, measure, value, incomplete}`, plus `segment` when
+  segmented. `cohort` is the Unix timestamp of the period start; `measure` and `segment` are indexes
+  into the `measures` and `segments` arrays. The first segment is usually a `"is_total": true` -
+  never sum it together with the other segments.
+- `summary` holds `total` and `average` per measure display name, nested per segment when segmented.
+- Points with `incomplete: true` cover partial periods: the current period, and the first period
+  when `start_date` falls mid-period (since `expand_periods` defaults to false). Exclude them from
+  trend or comparison analysis, and call them out when presenting. Point-in-time charts (MRR,
+  actives, trials) ignore `expand_periods`: their values are snapshots at period boundaries and are
+  never partial.
+- `annotations` lists dated notes the user made on their dashboard (e.g. releases, launches or
+  experiments). Check them when explaining movements in the data.
+- Invalid filters, segments, or selector values fail with a 400 `parameter_error` whose message
+  lists the supported IDs. On such errors, re-read the options schema instead of retrying guesses.
+
+## 3. Analyze the data
+
+- Segmented responses include a `Total` segment, and the `limit_num_segments` cap folds segments
+  beyond the top N into an `Other` segment. Use `Total` as the baseline; do not sum segments
+  yourself.
+- Do complex arithmetic on chart output (growth rates, segment shares, combining numbers across
+  calls) with scripts (e.g. `jq` or a short Python script) instead of reasoning over the numbers.
+- The most recent period may be flagged incomplete. Do not compare it against full periods without
+  saying so.
+- Before speculating about the cause of a metric shift, first check the available user annotations.
+- Cohort charts measure within a cumulative window from first seen, chosen by a selector
+  (`conversion_timeframe` on conversion charts, `customer_lifetime` on realized LTV charts), one
+  window per call. State the window when presenting results and hold it constant when comparing
+  cohorts.
 
 # Interpreting metrics
 
@@ -54,11 +157,16 @@ The definition of conversion may vary depending on what model the app is using. 
 converting to a trial, that then converts into a subscription. Or they may be sending users directly
 to a subscription.
 
-- Use the Initial Conversion chart to see how many trial or subscriptions are started.
-- You can then further determine if they are using free trials by comparing that to the New Trials
-  chart
+- Use the Initial Conversion chart to see the proportion of new customers that start a subscription
+  or trial within the selected conversion timeframe.
+- Use the Conversion to Paying chart to see the proportion of new customers that made a payment
+  within the selected conversion timeframe.
+- You can then further determine if they are using free trials by looking at the New Trials chart.
 - The Trial Conversion Rate chart is a helpful chart for understanding the performance of just that
-  trial conversion
+  trial conversion.
+- Filtered charts keep the all-new-customers denominator. For example, filtering Conversion to
+  Paying on a specific `product_id` gives the share of ALL new customers converting to that product,
+  not that product's own conversion rate. State this caveat when presenting filtered results.
 
 ## Retention
 
@@ -85,10 +193,27 @@ to a subscription.
   revenue from all cohorts and renewals. If you cannot get a matching baseline, say so and avoid
   directional performance claims.
 
+# Chart Dashboard Links
 
-# Dashboard URL Format
+Generate shareable links to RevenueCat dashboard charts.
 
-Generate shareable links to RevenueCat dashboard charts with filters preserved.
+## Constructing a Link
+
+A chart link must follow a specific [Dashboard URL Format](#dashboard-url-format) and must be built
+from a verified previous successful `get-chart-data` call.
+
+0. If there isn't a previous successful `get-chart-data` call for this chart, follow the Querying
+   RevenueCat charts workflow above first.
+1. Construct the link, starting with base:
+   `https://app.revenuecat.com/projects/{project_id}/charts/{chart_name}`.
+2. Add [`range` param](#range-param--required) with date range. This is required.
+3. Add [`resolution` param](#resolution-param) with resolution. Don't trust defaults.
+4. Add any filters as [`filter` params](#filter-params).
+5. Add segment as [`segment` param](#segment-param), if segmenting.
+6. Add [chart-specific selectors](#chart-specific-selectors) as needed.
+7. URL-encode all values (spaces → `+`, colons → `%3A`, etc.)
+
+## Dashboard URL Format
 
 **IMPORTANT**: Use this exact structure:
 
@@ -96,14 +221,15 @@ Generate shareable links to RevenueCat dashboard charts with filters preserved.
 https://app.revenuecat.com/projects/{project_id}/charts/{chart_name}?range={range_value}
 ```
 
-- `{project_id}` — The short hex ID (e.g., `56965ae1`), NOT the full `proj56965ae1`
-- `{chart_name}` — Chart name like `revenue`, `churn`, `mrr`, etc.
+- `{project_id}` — The short hex ID (e.g., `56965ae1`), not the full `proj56965ae1`
+- `{chart_name}` — The same chart name used with `get-chart-data` (`revenue`, `churn`, `mrr`,
+  `conversion_to_paying`, etc.)
 - Project ID goes in the **path**, not as a query parameter
 
 **Correct example:**
 
 ```
-https://app.revenuecat.com/projects/56965ae1/charts/revenue?range=Last+90+days%3A2025-11-16%3A2026-02-13
+https://app.revenuecat.com/projects/56965ae1/charts/revenue?range=Custom%3A2025-11-16%3A2026-02-13
 ```
 
 **WRONG — do not use:**
@@ -114,18 +240,17 @@ https://app.revenuecat.com/charts/revenue?project=proj56965ae1&chart_start=...&c
 
 ## Query Parameters
 
-### Date Range (`range`) — REQUIRED
+### `range` param — required
 
 The `range` parameter controls the date range. Format: `{preset}:{start_date}:{end_date}`, with
-start_date and end_date in YYYY-MM-DD format. Use `Custom` as the preset for arbitrary date ranges.
+start_date and end_date in YYYY-MM-DD format. Use `Custom` as the preset.
 
-**You must use this format** — do NOT use `start_date`, `end_date`, `chart_start`, or `chart_end`
-params. Note: The `:` between parts must be URL-encoded as `%3A`. Spaces in the preset name become
-`+`.
+**Always use this format** — do not use `start_date`, `end_date`, `chart_start`, or `chart_end`
+params. Note: The `:` between parts must be URL-encoded as `%3A`.
 
 Example: `range=Custom%3A2025-01-01%3A2025-12-31`
 
-### Resolution (`resolution`)
+### `resolution` param
 
 | Value | Meaning               |
 | ----- | --------------------- |
@@ -135,28 +260,31 @@ Example: `range=Custom%3A2025-01-01%3A2025-12-31`
 | `3`   | Quarterly granularity |
 | `4`   | Yearly granularity    |
 
-### Segment (`segment`)
+### `segment` param
 
-Dimension to break down the data by. Use the exact value you were using to make the `get-chart-data`
-request.
+Dimension to break down the data by. Use the exact dimension ID you were using to make the
+`get-chart-data` request.
 
 - `country` — by country
 - `store` — by app store (App Store, Play Store, etc.)
 - `product_id` — by product identifier
 - `platform` — by platform (iOS, Android, etc.)
-- `offering_id` — by offering
+- `offering_identifier` — by offering
 
-### Filters
+Segments vary per chart — only link a segment you successfully used in a `get-chart-data` call for
+that chart.
+
+### `filter` params
 
 Filters are passed as individual query `filter` params with the content
 `{dimension}%3A%3D%3A{value}`. Use the dimension names you used for the `get-chart-data` request.
 
-| Dimension  | Example                                    |
-| ---------- | ------------------------------------------ |
-| `country`  | `filter=country%3A%3D%3AUS`                |
-| `store`    | `filter=store%3A%3D%3Aapp_store`           |
-| `product`  | `filter=product_id%3A%3D%3Aprodbb68905d98` |
-| `platform` | `filter=platform%3A%3D%3AiOS`              |
+| Dimension    | Example                                    |
+| ------------ | ------------------------------------------ |
+| `country`    | `filter=country%3A%3D%3AUS`                |
+| `store`      | `filter=store%3A%3D%3Aapp_store`           |
+| `product_id` | `filter=product_id%3A%3D%3Aprodbb68905d98` |
+| `platform`   | `filter=platform%3A%3D%3AiOS`              |
 
 To use multiple filters, regardless of whether they are for the same dimension or multiple
 dimensions, include multiple `filter` query parameters. Passing multiple filters for the same
@@ -165,23 +293,14 @@ AND operation.
 
 ### Chart-Specific Selectors
 
-Some charts have special selectors:
+Selectors are passed as individual query params, with the same names and values used in the
+`get-chart-data` `selectors` argument. Orientative examples (truth in `get-chart-data`):
 
-**Conversion/Retention charts:**
-
-- `customer_lifetime` — e.g., `30_days`, `60_days`, `90_days`
-- `conversion_timeframe` — e.g., `7_days`, `14_days`, `30_days`
-
-## Constructing a Link
-
-To generate a dashboard link:
-
-1. Start with base: `https://app.revenuecat.com/projects/{project_id}/charts/{chart_name}`
-2. Add `range` param with date range
-3. Add any filters as `filter` query params
-4. Add `segment` if segmenting
-5. Add chart-specific selectors as needed
-6. URL-encode all values (spaces → `+`, colons → `%3A`, etc.)
+- `revenue_type` (revenue chart) — `revenue`, `revenue_net_of_taxes`, or `proceeds`
+- `conversion_timeframe` (conversion charts) — `0_days`, `3_days`, `7_days`, `14_days`, `30_days`,
+  or `unbounded`
+- `customer_lifetime` (realized LTV charts) — `7_days`, `14_days`, `30_days`, `3_months` up to
+  `24_months`, or `unbounded`
 
 ## API to Dashboard Parameter Mapping
 
@@ -201,12 +320,10 @@ User wants: "Revenue chart for last 90 days, segmented by country, filtered to U
 Calculate dates: if today is 2026-02-13, then 90 days ago is 2025-11-16.
 
 ```
-https://app.revenuecat.com/projects/56965ae1/charts/revenue?range=Last+90+days%3A2025-11-16%3A2026-02-13&segment=country&filter=country%3A%3D%3AUS&filter=country%3A%3D%3ADE
+https://app.revenuecat.com/projects/56965ae1/charts/revenue?range=Custom%3A2025-11-16%3A2026-02-13&segment=country&filter=country%3A%3D%3AUS&filter=country%3A%3D%3ADE
 ```
 
 User wants: "Churn chart from August 2025 to now"
-
-Use the `Custom` preset for arbitrary date ranges:
 
 ```
 https://app.revenuecat.com/projects/56965ae1/charts/churn?range=Custom%3A2025-08-01%3A2026-02-13
@@ -214,7 +331,7 @@ https://app.revenuecat.com/projects/56965ae1/charts/churn?range=Custom%3A2025-08
 
 ## Getting Project ID
 
-The project ID can be found via the `list_projects` tool, which lists all projects with their ID.
+The project ID can be found via the `list-projects` tool, which lists all projects with their ID.
 
 - The tool returns IDs starting with `proj`, for example `proj56965ae1`
 - **For dashboard URLs, strip the `proj` prefix** — use just `56965ae1` in the path
