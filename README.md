@@ -51,6 +51,12 @@ codex plugin marketplace add RevenueCat/ai-toolkit
 
 Start Codex, then run `/plugins`, search for `RevenueCat`, and install.
 
+Installing the plugin does not trigger authentication automatically. If the RevenueCat MCP server shows as "Not logged in", run:
+
+```bash
+codex mcp login RevenueCat
+```
+
 
 ### OpenAI Codex Desktop App
 
@@ -61,6 +67,19 @@ codex plugin marketplace add RevenueCat/ai-toolkit
 ```
 
 Then, in the Codex app, click on "Plugins". From the "Built by OpenAI" dropdown, select "RevenueCat". Then, click the Plus button next to the plugin.
+
+Installing the plugin does not trigger authentication automatically. If the RevenueCat MCP server shows as "Not logged in", run the following in your terminal:
+
+```bash
+codex mcp login RevenueCat
+```
+
+**Troubleshooting (Codex CLI and Desktop App):** If the RevenueCat MCP server disappears from Settings or the agent loses access to RevenueCat tools after restarting Codex, you are hitting a known Codex issue with reloading plugin-provided MCP servers ([openai/codex#25809](https://github.com/openai/codex/issues/25809)). As a workaround, register the MCP server globally — the plugin's skills keep working, and the server survives restarts:
+
+```bash
+codex mcp add RevenueCat --url https://mcp.revenuecat.ai/mcp
+codex mcp login RevenueCat
+```
 
 
 ### Gemini CLI
@@ -90,7 +109,7 @@ Note that this will only install the skills from this repository, not the MCP se
 
 The plugin requires authentication with your RevenueCat account via OAuth.
 
-Depending on the environment, you might get prompted to authenticate immediately, when you first use a RevenueCat tool, or manually (in Gemini: `/mcp auth revenuecat`). Authentication happens via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
+Depending on the environment, you might get prompted to authenticate immediately, when you first use a RevenueCat tool, or manually (in Codex: `codex mcp login RevenueCat`; in Gemini: `/mcp auth revenuecat`). Authentication happens via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
 
 ## Example Workflows
 
