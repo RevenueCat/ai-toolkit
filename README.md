@@ -106,6 +106,30 @@ npx skills add RevenueCat/ai-toolkit --global
 Note that this will only install the skills from this repository, not the MCP server. Configure the MCP manually in your coding environment [following our instructions](https://www.revenuecat.com/docs/tools/mcp/setup).
 Omit `--global` only when you intentionally want the skills and lock file scoped to the current project.
 
+### Use an installed skill
+
+After installing or updating skills, start a new agent session or reload the
+agent so it discovers the latest skill metadata. Installation makes skills
+available; it does not execute a workflow.
+
+Agents can select a skill automatically when the request matches its
+description. To make project creation predictable across clients, name it:
+
+```text
+Use the create-revenuecat-project skill to create my RevenueCat account and
+configure my project, apps, products, entitlements, and offerings.
+```
+
+Natural requests such as “Set up RevenueCat for my new iOS app” should also
+select the project-creation skill. Explicit naming is recommended for testing
+and for clients that do not reliably auto-select skills.
+
+The project-creation skill checks authentication first. When account creation
+is needed, it asks for explicit authorization before accepting RevenueCat's
+Terms, keeps marketing opt-in separate, and can direct the local macOS CLI to
+generate a password and save it in Keychain. The skill then orchestrates the
+real `rc` commands for project and catalog setup directly.
+
 ## Authentication
 
 The plugin requires authentication with your RevenueCat account via OAuth.
