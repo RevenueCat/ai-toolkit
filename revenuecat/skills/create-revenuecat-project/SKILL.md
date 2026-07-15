@@ -1,89 +1,131 @@
 ---
 name: create-revenuecat-project
-description: "Set up a complete RevenueCat project from scratch — creates apps, products, entitlements, offerings, and packages in the correct order. Use when the user wants to create a new RevenueCat project, configure in-app purchases, set up subscriptions or monetization, or bootstrap IAP infrastructure for iOS, Android, or Web."
+description: "Bootstrap a complete RevenueCat project with apps, store products, credentials, entitlements, offerings, packages, and SDK keys. Use when creating a RevenueCat project, configuring in-app purchases, or setting up subscriptions for iOS, Android, or Web with the RevenueCat CLI or MCP server."
 ---
 
-# RevenueCat Project Bootstrap
+# RevenueCat project bootstrap
 
-Guide through setting up a complete RevenueCat project from scratch.
+Build a usable RevenueCat project in dependency order. Prefer the RevenueCat CLI (`rc`) when it is installed and exposes the required commands; otherwise use the RevenueCat MCP tools.
 
-## Instructions
+## Discover the available surface
 
-**Important:** Use the RevenueCat MCP server for all tool calls. The MCP server may have access to multiple projects. Always use `list-projects` first to retrieve all accessible projects. If multiple projects are returned, ask the user which project to use or if they want to create a new one.
+For the CLI path, inspect the installed version instead of assuming its flags:
 
-### Phase 1: Discovery
-
-Ask targeted questions to understand the developer's needs:
-
-1. **Platforms** — "Which platforms are you building for?" (iOS, Android, Web, or multiple)
-2. **Business Model** — "What type of monetization are you planning?" (subscriptions, one-time purchases, consumables, or a mix)
-3. **Subscription Tiers** (if applicable) — "What subscription options do you want to offer?" (common: Monthly + Annual, single tier, Freemium + Premium)
-4. **App Details** — Bundle ID (iOS, e.g. `com.company.appname`), package name (Android), and display name
-
-### Phase 2: Create Resources
-
-Execute in this order — dependencies matter. 
-
-1. Verify/Create Project
-`list-projects` - list accessible projects
-If multiple: ask user which to use, or offer to create a new one
-To create a new project, use the `create-project` MCP tool
-Store project_id for all subsequent calls
-
-2. Create Apps (for each platform): 
-    - For mobile apps, ask if the user already has set up their app in App Store Connect / Google Play Console. If so, create an app using the `create-app` tool (type: app_store | play_store). If not, use the automatically generated `test_store` app and tell the user that they can set up the integration with App Store Connect / Google Play Console later.
-    - For web apps, `create-app` with type rc_billing
-
-3. Create Products (for each subscription/purchase): `create-product` tool
-
-4. Create Entitlements (for each feature/access level): `create-entitlement` tool
-
-5. Attach Products to Entitlements: `attach-products-to-entitlement` tool
-
-6. Create Default Offering: `create-offering` tool (lookup_key: "default")
-
-7. Create Packages in Offering: `create-package` tool (for subscriptions, use $rc_monthly, $rc_annual, etc.)
-
-8. Attach Products to Packages: `attach-products-to-package` tool
-
-9. Get API Keys: `list-app-public-api-keys` tool
-
-### Phase 3: Summary & Next Steps
-
-Provide a complete setup summary:
-
-```
-Project Setup Complete!
-=======================
-
-Project: {project_name} ({project_id})
-
-Apps Created:
-  iOS: {app_name} - API Key: appl_xxxxx
-  Android: {app_name} - API Key: goog_xxxxx
-
-Products:
-  - monthly_premium (subscription, P1M)
-  - annual_premium (subscription, P1Y)
-
-Entitlements:
-  - premium → monthly_premium, annual_premium
-
-Offering: default (current)
-  └── $rc_monthly → monthly_premium
-  └── $rc_annual → annual_premium
-
-Next Steps:
-1. Configure store credentials in RevenueCat dashboard
-2. Create products in App Store Connect / Play Console
-3. Add SDK to your app (see /rc:create-app)
-4. Implement paywall UI using the "default" offering
+```bash
+rc commands --json
+rc schema projects create --json
+rc schema apps create --json
+rc schema products store plan --json
 ```
 
-## Error Handling
+Use `rc schema <command> --json` before any command whose arguments are unclear. In agent or script sessions, always pass `--json --no-input`, provide every required value explicitly, and parse the JSON envelope's `data` field. Do not scrape human-readable output.
 
-If any step fails:
-1. Report the specific error clearly
-2. Suggest fixes (e.g., "Bundle ID may already be in use")
-3. Offer to retry or skip that step
-4. Continue with remaining steps if possible
+For the MCP path, inspect the available RevenueCat tools and their schemas. Always call `list-projects` before selecting or creating a project.
+
+## Gather the design
+
+Ask only for information that cannot be discovered:
+
+1. Platforms: iOS, Android, Web, or a combination
+2. RevenueCat project name and whether an existing project should be reused
+3. App display names and bundle/package identifiers
+4. Products: subscriptions, non-consumables, consumables, durations, prices, currencies, and localizations
+5. Entitlements and which products unlock them
+6. Offering/package layout
+7. Whether each mobile app already exists in its store
+
+List existing resources before creating them. Reuse a resource that already represents the requested identifier. Never create duplicates merely because an earlier command's output is unavailable.
+
+## CLI workflow
+
+### 1. Create or select the project and apps
+
+List projects first. Create only when needed:
+
+```bash
+rc projects list --json --no-input
+rc projects create --name "Example" --json --no-input
+```
+
+The created project ID is `data.project.id`. Pass `--project-id <project-id>` to later commands so the workflow does not require writing repository or global configuration. Creating with `--use` is optional convenience for a human who wants to persist the active project.
+
+List apps, then create the missing platform apps according to `rc schema apps create --json`. Capture every app ID from the response.
+
+### 2. Configure Apple access locally
+
+For an App Store app, check access before attempting setup:
+
+```bash
+rc apps apple check <app-id>
+rc apps apple setup <app-id>
+```
+
+These commands log into Apple locally and may prompt for a masked password, trusted-device 2FA code, or SMS verification. Apple sign-in credentials go directly from the local CLI to Apple; RevenueCat does not receive or store them.
+
+Never ask the user to paste an Apple password, session cookie, or 2FA code into chat, a prompt visible to the model, a command-line flag, or a file. Never run Apple authentication through a remote unattended agent. Hand the exact command to the human in a local interactive terminal and wait for its result. Run `check` first because it is read-only. Run `setup` only after the user approves creating missing In-App Purchase and App Store Connect API keys and uploading those keys to RevenueCat. One-time key downloads cannot be recovered later.
+
+Apple Small Business Program dates are outside this workflow.
+
+### 3. Plan and apply store products
+
+Use the `revenuecat-store-state` skill for store product creation, pricing, availability, and localizations. For an agent, use the durable `plan` -> `show` -> `apply` lifecycle and retain the returned plan ID. Do not substitute a second plan for the reviewed plan.
+
+After apply succeeds, list RevenueCat products again and capture their IDs. Store identifiers and RevenueCat product IDs are different values.
+
+### 4. Create the RevenueCat graph
+
+Create in dependency order, checking for an existing matching resource before each create:
+
+1. Entitlements
+2. Product-to-entitlement attachments
+3. Offering, normally with lookup key `default`
+4. Packages, using standard identifiers such as `$rc_monthly` and `$rc_annual` when appropriate
+5. Product-to-package attachments
+6. Current offering selection
+
+The CLI attachment arguments are positional:
+
+```bash
+rc entitlements attach <entitlement-id> <product-id>... --json --no-input
+rc packages attach <package-id> <product-id>... --json --no-input
+rc offerings set-current <offering-id> --yes --json --no-input
+```
+
+Use `rc schema` to discover the create commands' required flags. Pass `--project-id <project-id>` throughout unless the user intentionally configured an active project.
+
+### 5. Retrieve typed SDK keys and verify
+
+```bash
+rc apps keys <app-id> --json --no-input
+```
+
+Retrieve keys separately for every app. Verify the final state by listing apps, products, entitlements, offerings, and packages. Report stable IDs and lookup keys, not secrets.
+
+## MCP fallback
+
+When `rc` is unavailable or lacks the required command, use RevenueCat MCP tools in the same dependency order:
+
+1. `list-projects`, then `create-project` only if needed
+2. `create-app` for each missing app (`app_store`, `play_store`, or `rc_billing`)
+3. `create-product`
+4. `create-entitlement`
+5. `attach-products-to-entitlement`
+6. `create-offering`
+7. `create-package`
+8. `attach-products-to-package`
+9. `list-app-public-api-keys`
+
+MCP can configure RevenueCat resources but does not replace the local Apple credential handoff. If a store app or product is not ready, explain the remaining store-console work rather than silently substituting a test-store app unless the user explicitly requests one.
+
+## Completion report
+
+Summarize:
+
+- Project and app IDs
+- Store identifiers and RevenueCat product IDs
+- Entitlement-to-product mapping
+- Current offering, packages, and their product mapping
+- Public SDK keys by app
+- Any skipped or failed step and the exact recovery command
+
+If a command fails, inspect current state before retrying. Continue independent steps when safe, but do not claim the bootstrap is complete while a required store operation is pending or failed.
