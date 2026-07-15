@@ -124,6 +124,26 @@ Natural requests such as “Set up RevenueCat for my new iOS app” should also
 select the project-creation skill. Explicit naming is recommended for testing
 and for clients that do not reliably auto-select skills.
 
+Copy a starter prompt that matches the intended workflow:
+
+```text
+Use the create-revenuecat-project skill to create my RevenueCat account if
+needed and configure my project, apps, products, entitlements, offerings, and
+packages. Ask before accepting legal terms or applying store changes.
+
+Use the integrate-revenuecat skill to inspect this app, connect it to the
+correct RevenueCat project, install and configure the Purchases SDK, and verify
+the integration.
+
+Use the revenuecat-store-state skill to design and plan my store products,
+pricing, availability, and localizations. Show me the persisted plan and wait
+for my approval before applying it.
+
+Use the revenuecat-status skill to audit my RevenueCat project, identify
+missing or inconsistent configuration, and give me exact recovery steps
+without changing anything first.
+```
+
 The project-creation skill checks authentication first. When account creation
 is needed, it asks for explicit authorization before accepting RevenueCat's
 Terms, keeps marketing opt-in separate, and can direct the local macOS CLI to
