@@ -100,10 +100,11 @@ Plugin marketplace support is currently in beta in Visual Studio Code. Refer to 
 Use `npx skills`:
 
 ```
-npx skills add RevenueCat/ai-toolkit
+npx skills add RevenueCat/ai-toolkit --global
 ```
 
 Note that this will only install the skills from this repository, not the MCP server. Configure the MCP manually in your coding environment [following our instructions](https://www.revenuecat.com/docs/tools/mcp/setup).
+Omit `--global` only when you intentionally want the skills and lock file scoped to the current project.
 
 ## Authentication
 
