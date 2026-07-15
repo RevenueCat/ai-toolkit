@@ -13,7 +13,7 @@ Use this skill when the user wants to add RevenueCat to a project for the first 
 Walk them in order. Most integrations need both halves, even when the user asks "just install the SDK" — the SDK needs an API key from the dashboard.
 
 > If a project + app already exist and the user only wants to wire the SDK into code, jump to **Section 3** below.
-> If the user wants to bootstrap a brand new RevenueCat project (apps + products + entitlements + offerings), use the `create-revenuecat-project` skill instead, then come back here for the SDK install.
+> If the user wants to create and fully configure a new RevenueCat project (apps + products + entitlements + offerings), use the `create-revenuecat-project` skill instead, then come back here for the SDK install.
 
 ## Arguments
 

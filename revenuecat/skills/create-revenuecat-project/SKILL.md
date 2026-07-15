@@ -1,11 +1,46 @@
 ---
 name: create-revenuecat-project
-description: "Bootstrap a complete RevenueCat project with apps, store products, credentials, entitlements, offerings, packages, and SDK keys. Use when creating a RevenueCat project, configuring in-app purchases, or setting up subscriptions for iOS, Android, or Web with the RevenueCat CLI or MCP server."
+description: "Create and configure a complete RevenueCat project with account signup, apps, store products, credentials, entitlements, offerings, packages, and SDK keys. Use when creating a RevenueCat account or project, configuring in-app purchases, or setting up subscriptions for iOS, Android, or Web with the RevenueCat CLI or MCP server."
 ---
 
-# RevenueCat project bootstrap
+# Create a RevenueCat project
 
 Build a usable RevenueCat project in dependency order. Prefer the RevenueCat CLI (`rc`) when it is installed and exposes the required commands; otherwise use the RevenueCat MCP tools.
+
+## Authenticate or create the account
+
+Run `rc auth status --json --no-input` before project discovery. If the user is already authenticated, continue without changing credentials.
+
+If no RevenueCat account exists and the user asks the agent to create one, gather:
+
+1. Email address
+2. Personal/display name, not a project or company name
+3. Explicit authorization to accept the RevenueCat Terms of Service and Privacy Policy
+
+Never infer legal acceptance from a general request to configure RevenueCat. Never opt into marketing email unless the user separately requests it.
+
+On the user's local Mac, create the account with a generated password saved directly to macOS Keychain:
+
+```bash
+rc auth signup \
+  --email "user@example.com" \
+  --name "User Name" \
+  --generate-password \
+  --save-password \
+  --accept-terms \
+  --json --no-input
+```
+
+Do not add `--marketing-emails` without explicit opt-in. Do not ask the user to paste a password into chat. Do not use `--password`; if the user requires a chosen password, ask them to run interactive `rc auth signup` locally or provide `RC_PASSWORD` outside the model-visible conversation.
+
+Require all of these response fields before continuing:
+
+- `data.account_created == true`
+- `data.authenticated == true`
+- `data.password_saved_to_keychain == true`
+- `data.method == "oauth"`
+
+A locked Keychain may require local user approval. If Keychain storage is false or the command fails after account creation, stop and report the exact recovery guidance; do not silently continue as though the website password is recoverable. Tell the user to complete email verification when RevenueCat sends the verification email.
 
 ## Discover the available surface
 
@@ -128,4 +163,4 @@ Summarize:
 - Public SDK keys by app
 - Any skipped or failed step and the exact recovery command
 
-If a command fails, inspect current state before retrying. Continue independent steps when safe, but do not claim the bootstrap is complete while a required store operation is pending or failed.
+If a command fails, inspect current state before retrying. Continue independent steps when safe, but do not claim setup is complete while a required store operation is pending or failed.
