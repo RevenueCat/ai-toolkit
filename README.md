@@ -116,8 +116,9 @@ Agents can select a skill automatically when the request matches its
 description. To make project creation predictable across clients, name it:
 
 ```text
-Use the create-revenuecat-project skill to create my RevenueCat account and
-configure my project, apps, products, entitlements, and offerings.
+Use the create-revenuecat-project skill to make the app in this directory
+RevenueCat Test Store-ready end to end, then report every production-store
+stage separately.
 ```
 
 Natural requests such as “Set up RevenueCat for my new iOS app” should also
@@ -127,24 +128,36 @@ and for clients that do not reliably auto-select skills.
 Copy a starter prompt that matches the intended workflow:
 
 ```text
-Use the create-revenuecat-project skill to create my RevenueCat account if
-needed and configure my project, apps, products, entitlements, offerings, and
-packages. Ask before accepting legal terms or applying store changes.
+Use the create-revenuecat-project skill to inspect the Swift app in this
+directory, create my RevenueCat account if needed, and finish the Test
+Store-ready stage end to end: project, Test Store products and prices,
+entitlement, offering and packages, dashboard paywall, Purchases and
+RevenueCatUI dependencies, debug test_ key configuration, app code, build, and
+a simulated purchase that unlocks the entitlement. Ask before accepting legal
+terms and report any incomplete stage explicitly.
 
-Use the integrate-revenuecat skill to inspect this app, connect it to the
-correct RevenueCat project, install and configure the Purchases SDK, and verify
-the integration.
+Continue this app's RevenueCat setup with the Apple stage of the
+create-revenuecat-project skill. Verify the App Store app and bundle ID, run the
+read-only Apple check first, then give me the local interactive rc apps apple
+setup command for Apple sign-in and 2FA. Verify the missing In-App Purchase and
+App Store Connect keys are configured without asking me to paste Apple
+credentials into chat.
 
-Use the revenuecat-store-state skill to design and plan my store products,
-pricing, availability, and localizations. Show me the persisted plan and wait
-for my approval before applying it.
+Use the revenuecat-store-state skill to create a persisted plan for App Store
+Connect products matching this app's verified Test Store catalog, including
+subscription groups, prices, availability, and localizations. Show me the exact
+plan and wait for approval before applying that same plan ID. After apply,
+attach the Apple products to the existing RevenueCat entitlement and packages,
+configure the release appl_ key separately from debug, and report Apple sandbox
+verification separately.
 
 Use the revenuecat-status skill to audit my RevenueCat project, identify
 missing or inconsistent configuration, and give me exact recovery steps
 without changing anything first.
 ```
 
-The project-creation skill checks authentication first. When account creation
+These prompts intentionally split a demo into Test Store, Apple credentials,
+and App Store catalog stages. The project-creation skill checks authentication first. When account creation
 is needed, it asks for explicit authorization before accepting RevenueCat's
 Terms, keeps marketing opt-in separate, and can direct the local macOS CLI to
 generate a password and save it in Keychain. The skill then orchestrates the

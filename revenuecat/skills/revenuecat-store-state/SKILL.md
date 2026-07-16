@@ -7,6 +7,8 @@ description: Manage App Store Connect and Google Play product state through Reve
 
 Use the RevenueCat CLI for creating or bulk-syncing desired store state and whenever a durable, auditable preview is important. Use RevenueCat MCP tools for direct inspection, screenshots, a focused existing-product update, or subscription price equalization. Reads are immediate; writes may be asynchronous.
 
+This skill manages real platform stores such as App Store Connect and Google Play. It does not configure RevenueCat Test Store prices. In a complete project workflow, create and verify Test Store products first through `create-revenuecat-project`, then use this skill to create the matching production-store products. The resulting products have distinct RevenueCat IDs and must be attached to the same entitlement and semantic packages as their Test Store counterparts.
+
 ## CLI: agent-safe plan lifecycle
 
 First inspect the installed command schemas:
@@ -88,3 +90,13 @@ Refer to each MCP tool schema for exact parameters.
 5. If warnings identify incomplete subscription territory pricing, call `equalize-subscription-prices` only after explaining the effect and obtaining approval.
 
 If an operation fails, report its error details and current state. Do not retry blindly or switch from a failed persisted CLI plan to an unreviewed MCP write.
+
+## Completion handoff
+
+After a plan applies successfully:
+
+1. Re-list RevenueCat products for the target app and capture their RevenueCat IDs.
+2. Compare store identifiers, durations, prices, availability, and localizations to the reviewed desired state.
+3. Hand the IDs back to the orchestrating workflow for entitlement and package attachment.
+4. Verify every production product is attached to the same entitlement and package as its Test Store counterpart.
+5. Do not claim sandbox or production readiness until an app build using the platform public key fetches the offering and completes a platform sandbox purchase.

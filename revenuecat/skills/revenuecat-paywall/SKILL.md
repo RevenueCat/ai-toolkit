@@ -1,13 +1,13 @@
 ---
 name: revenuecat-paywall
-description: Display a RevenueCat paywall inside an app using the RevenueCatUI SDK. Use when the user asks to add a paywall, show a RevenueCat paywall, present PaywallView, integrate RevenueCatUI, gate a premium screen with a paywall, launch PaywallActivity, call presentPaywall or presentPaywallIfNeeded, or show the dashboard configured paywall UI on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Configure and display a RevenueCat paywall using a dashboard paywall plus the RevenueCatUI SDK, or identify the exact dashboard handoff when paywall creation is not exposed by CLI/MCP. Use when adding a paywall, presenting PaywallView, gating a premium screen, installing RevenueCatUI, or verifying paywall purchases on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # revenuecat-paywall: display a RevenueCat paywall
 
 Use this skill when the user wants to show a paywall that is built and configured in the RevenueCat dashboard, using the native RevenueCatUI components. This skill does not cover building a custom paywall from scratch. For that, use `revenuecat-purchase-flow` (when available) and `Purchases.getOfferings(…)` directly.
 
-Prerequisite: `integrate-revenuecat` has already run. `Purchases.configure(…)` must succeed before a paywall can load.
+Prerequisites: `integrate-revenuecat` has run, `Purchases.configure(…)` succeeds, and the selected offering contains packages for the active store. For full project setup, this skill is a stage called by `create-revenuecat-project`, not a replacement for it.
 
 ## 1. Detect the platform
 
@@ -24,6 +24,8 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 ## 2. Shared concepts (all platforms)
 
 - **Paywalls require an Offering with a paywall attached in the RevenueCat dashboard.** The SDK pulls offerings via `getOfferings()`. If no offering has a paywall configured, RevenueCatUI falls back to a default paywall layout, which is not what you want in production.
+- **Dashboard creation and app presentation are separate.** Prefer `rc paywalls create --offering-id <id>` to create and attach the default draft. The public API may not expose publish or full template customization; verify `published_at`, then use an authorized signed-in dashboard session or hand off exactly: Paywalls → open the created draft → customize/review → Publish. Do not claim that creating a draft or installing RevenueCatUI created a published dashboard paywall.
+- **The active key selects the store products.** A debug build using `test_…` must render the Test Store products attached to each package; a release build using `appl_…` or `goog_…` must render the corresponding platform products attached to those same packages.
 - **Offering vs. entitlement.** Users purchase a product through a package in an offering. Access is granted via an entitlement (typically `"premium"` or `"pro"`). Gate premium features on the entitlement, not on the offering.
 - **Three presentation patterns**:
   - (a) First launch modal for users without the entitlement, typically driven by a "present if needed" helper that checks the entitlement and only shows the paywall when missing.
@@ -50,8 +52,9 @@ Each platform file is self contained: install command, exact snippet to present 
 Do not claim the integration is complete until:
 
 1. The project **builds** on the target platform.
-2. The app launches, the code path that presents the paywall runs, and the paywall UI renders with the template configured in the dashboard (not the default fallback layout).
-3. Tapping a package and completing a sandbox purchase dismisses the paywall and fires the purchase completed callback (or, for imperative APIs, resolves with a `PURCHASED` result).
-4. Closing the paywall without purchasing fires the dismiss / cancelled callback.
+2. The paywall exists, is published, and is attached to the intended offering; record its ID when available.
+3. The app launches, the code path that presents the paywall runs, and the paywall UI renders with the configured template—not the default fallback layout—and the expected products/prices for the active store key.
+4. Tapping a package and completing a sandbox or Test Store purchase dismisses the paywall and fires the purchase completed callback (or, for imperative APIs, resolves with a `PURCHASED` result).
+5. Closing the paywall without purchasing fires the dismiss / cancelled callback.
 
 If the paywall shows the default fallback layout instead of your template, the offering does not have a paywall attached in the dashboard. Fix this in the dashboard, then retry.

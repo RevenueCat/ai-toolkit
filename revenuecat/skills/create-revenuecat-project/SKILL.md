@@ -1,25 +1,91 @@
 ---
 name: create-revenuecat-project
-description: "Create and configure a complete RevenueCat project with account signup, apps, store products, credentials, entitlements, offerings, packages, and SDK keys. Use when creating a RevenueCat account or project, configuring in-app purchases, or setting up subscriptions for iOS, Android, or Web with the RevenueCat CLI or MCP server."
+description: "Create, bootstrap, or audit a working RevenueCat monetization setup end to end: account signup, project and app records, Test Store products and prices, entitlements, offerings, packages, paywalls, SDK and RevenueCatUI integration, environment-specific public keys, Apple credentials, App Store Connect products, and purchase verification. Use when setting up RevenueCat for an existing or new iOS, Android, Flutter, React Native, or Kotlin Multiplatform app, or when an agent must finish every stage of a launchable subscription project."
 ---
 
-# Create a RevenueCat project
+# Create a working RevenueCat project
 
-Build a usable RevenueCat project in dependency order. Prefer the RevenueCat CLI (`rc`) when it is installed and exposes the required commands; otherwise use the RevenueCat MCP tools.
+Own the complete lifecycle. Do not stop after creating dashboard objects or installing an SDK. A working setup has a configured RevenueCat graph, an app build that can make a Test Store purchase, and—when requested—a separately configured production store path.
 
-## Authenticate or create the account
+Prefer the RevenueCat CLI (`rc`) when installed and capable. Fall back to RevenueCat MCP tools for supported operations. Use a signed-in RevenueCat dashboard only when neither surface exposes a required operation, the user authorized the change, and browser control is available.
 
-Run `rc auth status --json --no-input` before project discovery. If the user is already authenticated, continue without changing credentials.
+## Define the requested finish line
 
-If no RevenueCat account exists and the user asks the agent to create one, gather:
+Classify the request before changing anything:
 
-1. Email address
-2. Personal/display name, not a project or company name
-3. Explicit authorization to accept the RevenueCat Terms of Service and Privacy Policy
+- **Test Store ready**: the app can display products or a paywall, simulate a purchase, and unlock the intended entitlement with a `test_` key.
+- **Store configured**: the real store app, credentials, products, prices, localizations, entitlement/package mappings, and platform SDK key exist.
+- **Sandbox verified**: a real platform sandbox purchase succeeds and unlocks the entitlement.
+- **Production ready**: sandbox verified plus release-key wiring, agreements, metadata, and launch prerequisites are confirmed.
 
-Never infer legal acceptance from a general request to configure RevenueCat. Never opt into marketing email unless the user separately requests it.
+Ask which finish line the user wants if it is not implied. For a request such as “fully set up RevenueCat,” target Test Store ready first, then Store configured, and report sandbox or production verification separately.
 
-On the user's local Mac, create the account with a generated password saved directly to macOS Keychain:
+Never collapse Test Store and a platform store into one app or one key:
+
+| Concern | Development/Test Store | Production Apple example |
+|---|---|---|
+| RevenueCat app | `test_store` | `app_store` |
+| Public SDK key | `test_...` | `appl_...` |
+| Product | Test Store product | App Store product |
+| Price source | RevenueCat Test Store configuration | App Store Connect territory pricing |
+| Purchase UI | RevenueCat simulated result dialog | StoreKit / Apple sandbox or production |
+
+Products in different stores have different RevenueCat product IDs even when their identifiers and commercial intent match. Attach every store-specific product for a package to the same entitlement and package so the offering is stable when builds switch keys.
+
+## Operating contract
+
+1. Inspect before creating. Reuse resources that already represent the requested app or identifier.
+2. Maintain a setup ledger containing project ID, every app ID and type, product IDs by store, entitlement IDs, offering/package IDs, paywall status, and public key type. Never put secret keys or Apple credentials in it.
+3. Execute stages in order and verify each stage before moving on.
+4. Use `--json --no-input` for agent commands and parse the JSON envelope's `data` field. Use `rc schema <command> --json` instead of guessing flags.
+5. Ask before legal acceptance, store-plan apply, destructive actions, or any consequential choice the user has not already authorized.
+6. Never claim a stage is complete because a command returned successfully; verify the resulting state.
+7. If an operation is unavailable through CLI/MCP, say so and use the exact dashboard handoff below. Do not silently omit it.
+
+## Stage 0: inspect the app and gather the design
+
+Inspect the repository before asking questions. Determine:
+
+- platform and framework;
+- bundle ID or package name;
+- existing RevenueCat dependencies, configuration, paywall code, and API-key handling;
+- build environments or flavors;
+- authentication and App User ID strategy;
+- premium feature gates and restore-purchases UI.
+
+Ask only for decisions that cannot be inferred:
+
+1. Project/app display names and whether to reuse an existing RevenueCat project.
+2. Entitlements or tiers and the features each unlocks.
+3. Products: subscription/one-time type, duration, identifiers, display names, titles, prices, currencies, localizations, trials, and availability.
+4. Offering/package layout, normally a `default` offering with standard package identifiers such as `$rc_monthly` and `$rc_annual`.
+5. Paywall intent: dashboard template or custom UI, presentation location, dismiss behavior, and desired copy/branding.
+6. Whether the platform app already exists in App Store Connect or Google Play.
+7. Requested finish line.
+
+Before writes, summarize the intended graph:
+
+```text
+entitlement: premium
+offering: default (current)
+  $rc_monthly -> Test Store monthly + Apple monthly
+  $rc_annual  -> Test Store annual  + Apple annual
+debug build   -> test_ key
+release build -> appl_ key
+```
+
+## Stage 1: authenticate and inventory RevenueCat
+
+Run:
+
+```bash
+rc auth status --json --no-input
+rc commands --json
+```
+
+If no account exists and the user explicitly asks the agent to create one, gather the email, the person's display name—not a company/project name—and explicit authorization to accept the RevenueCat Terms of Service and Privacy Policy. Keep marketing consent separate.
+
+On the user's Mac, create a recoverable account with a generated password saved directly to Keychain:
 
 ```bash
 rc auth signup \
@@ -31,136 +97,219 @@ rc auth signup \
   --json --no-input
 ```
 
-Do not add `--marketing-emails` without explicit opt-in. Do not ask the user to paste a password into chat. Do not use `--password`; if the user requires a chosen password, ask them to run interactive `rc auth signup` locally or provide `RC_PASSWORD` outside the model-visible conversation.
-
-Require all of these response fields before continuing:
+Do not add `--marketing-emails` without explicit opt-in. Never ask for a password in chat. Require:
 
 - `data.account_created == true`
 - `data.authenticated == true`
 - `data.password_saved_to_keychain == true`
 - `data.method == "oauth"`
 
-A locked Keychain may require local user approval. If Keychain storage is false or the command fails after account creation, stop and report the exact recovery guidance; do not silently continue as though the website password is recoverable. Tell the user to complete email verification when RevenueCat sends the verification email.
+Stop with recovery guidance if Keychain storage fails after account creation. Tell the user to complete email verification when requested.
 
-## Discover the available surface
-
-For the CLI path, inspect the installed version instead of assuming its flags:
-
-```bash
-rc commands --json
-rc schema projects create --json
-rc schema apps create --json
-rc schema products store plan --json
-```
-
-Use `rc schema <command> --json` before any command whose arguments are unclear. In agent or script sessions, always pass `--json --no-input`, provide every required value explicitly, and parse the JSON envelope's `data` field. Do not scrape human-readable output.
-
-For the MCP path, inspect the available RevenueCat tools and their schemas. Always call `list-projects` before selecting or creating a project.
-
-## Gather the design
-
-Ask only for information that cannot be discovered:
-
-1. Platforms: iOS, Android, Web, or a combination
-2. RevenueCat project name and whether an existing project should be reused
-3. App display names and bundle/package identifiers
-4. Products: subscriptions, non-consumables, consumables, durations, prices, currencies, and localizations
-5. Entitlements and which products unlock them
-6. Offering/package layout
-7. Whether each mobile app already exists in its store
-
-List existing resources before creating them. Reuse a resource that already represents the requested identifier. Never create duplicates merely because an earlier command's output is unavailable.
-
-## CLI workflow
-
-### 1. Create or select the project and apps
-
-List projects first. Create only when needed:
+List projects and all resources before creating:
 
 ```bash
 rc projects list --json --no-input
-rc projects create --name "Example" --json --no-input
 ```
 
-The created project ID is `data.project.id`. Pass `--project-id <project-id>` to later commands so the workflow does not require writing repository or global configuration. Creating with `--use` is optional convenience for a human who wants to persist the active project.
+Select or create the project, capture `data.project.id`, and pass `--project-id` explicitly thereafter. Do not require a repository config file or mutate the user's active profile unless requested.
 
-List apps, then create the missing platform apps according to `rc schema apps create --json`. Capture every app ID from the response.
+Inventory apps, products, entitlements, offerings, packages, paywalls, and public keys. Classify every existing app by store type. A new project normally contains a Test Store; if an older project does not, create it through an exposed MCP tool or the dashboard because `rc apps create` may not expose `test_store`.
 
-### 2. Configure Apple access locally
+## Stage 2: create the shared RevenueCat access graph
 
-For an App Store app, check access before attempting setup:
+Create or reuse entitlements first. Most single-tier apps need one stable identifier such as `premium` or `pro`. This identifier is an app-code contract; do not derive it from a price or duration.
 
-```bash
-rc apps apple check <app-id>
-rc apps apple setup <app-id>
-```
+Create or reuse:
 
-These commands log into Apple locally and may prompt for a masked password, trusted-device 2FA code, or SMS verification. Apple sign-in credentials go directly from the local CLI to Apple; RevenueCat does not receive or store them.
+1. Entitlements.
+2. An offering, normally `default`.
+3. Packages for each commercial choice.
+4. Current-offering selection.
 
-Never ask the user to paste an Apple password, session cookie, or 2FA code into chat, a prompt visible to the model, a command-line flag, or a file. Never run Apple authentication through a remote unattended agent. Hand the exact command to the human in a local interactive terminal and wait for its result. Run `check` first because it is read-only. Run `setup` only after the user approves creating missing In-App Purchase and App Store Connect API keys and uploading those keys to RevenueCat. One-time key downloads cannot be recovered later.
-
-Apple Small Business Program dates are outside this workflow.
-
-### 3. Plan and apply store products
-
-Use the `revenuecat-store-state` skill for store product creation, pricing, availability, and localizations. For an agent, use the durable `plan` -> `show` -> `apply` lifecycle and retain the returned plan ID. Do not substitute a second plan for the reviewed plan.
-
-After apply succeeds, list RevenueCat products again and capture their IDs. Store identifiers and RevenueCat product IDs are different values.
-
-### 4. Create the RevenueCat graph
-
-Create in dependency order, checking for an existing matching resource before each create:
-
-1. Entitlements
-2. Product-to-entitlement attachments
-3. Offering, normally with lookup key `default`
-4. Packages, using standard identifiers such as `$rc_monthly` and `$rc_annual` when appropriate
-5. Product-to-package attachments
-6. Current offering selection
-
-The CLI attachment arguments are positional:
+Do not attach products until their store-specific IDs are known. Use `rc schema` for exact creation flags. Set the current offering only after the user approves that externally visible choice:
 
 ```bash
-rc entitlements attach <entitlement-id> <product-id>... --json --no-input
-rc packages attach <package-id> <product-id>... --json --no-input
 rc offerings set-current <offering-id> --yes --json --no-input
 ```
 
-Use `rc schema` to discover the create commands' required flags. Pass `--project-id <project-id>` throughout unless the user intentionally configured an active project.
+## Stage 3: configure the Test Store catalog
 
-### 5. Retrieve typed SDK keys and verify
+Find the `test_store` app ID and its `test_` public SDK key. Never use an `appl_`, `goog_`, or secret key for this stage.
+
+For each desired product:
+
+1. Inspect `rc schema products create --json`, `rc schema products prices set --json`, and the MCP product/price schemas.
+2. Create or reuse a product under the Test Store app.
+3. Supply the user-facing title, display name, type, and subscription duration where supported.
+4. Configure the exact Test Store price and currency through the Test Store-specific price API.
+5. Capture its RevenueCat product ID.
+
+Example for a capable CLI version:
+
+```bash
+rc products create \
+  --app-id <test-store-app-id> \
+  --store-id premium_monthly \
+  --type subscription \
+  --duration P1M \
+  --display-name "Premium Monthly" \
+  --title "Premium Monthly" \
+  --json --no-input
+
+rc products prices set <test-product-id> \
+  --price USD=9.99 \
+  --price EUR=8.99 \
+  --json --no-input
+```
+
+Test Store pricing is not App Store pricing. Prefer `rc products prices set`, which idempotently creates missing currencies through the Test Store price API and updates existing currencies through the product-price API. When the CLI command is unavailable, use the MCP `create-product-prices` tool for missing Test Store prices and `list-prices` to verify; inspect the installed tool schemas for update support. Keep this Test Store-specific API path until an equivalent general product-management surface is available.
+
+Only fall back to the signed-in RevenueCat dashboard at Product catalog → Products → Test Store when neither installed CLI nor MCP can perform the required create/update. Otherwise give that exact handoff and mark Test Store pricing incomplete. Never invent a price field or claim the requested price was set merely because the product exists.
+
+Attach every Test Store product to its entitlement and package:
+
+```bash
+rc entitlements attach <entitlement-id> <test-product-id>... --json --no-input
+rc packages attach <package-id> <test-product-id>... --json --no-input
+```
+
+Verify the offering returns every expected Test Store package and that each package product has the requested identifier, duration, and price.
+
+## Stage 4: create and connect the paywall
+
+Decide whether the user wants a RevenueCat dashboard paywall or custom app UI.
+
+For a dashboard paywall:
+
+1. Confirm the current offering and packages are complete.
+2. Inspect `rc schema paywalls create --json` and create the default draft attached to the intended offering:
+
+   ```bash
+   rc paywalls create --offering-id <offering-id> --json --no-input
+   ```
+
+3. Capture the paywall ID and confirm `published_at` is populated before treating it as published. The public API may create only a draft.
+4. When publish or template customization is not exposed by CLI/MCP, use an authorized signed-in RevenueCat dashboard session. Otherwise hand off exactly: RevenueCat dashboard → Paywalls → open the created draft → customize/review → Publish.
+5. Re-list/show the paywall and verify it is attached to the intended offering and published.
+
+Do not confuse a created draft or fallback paywall layout with a published dashboard paywall. If `published_at` is empty or only the fallback renders, mark dashboard paywall configuration incomplete.
+
+For app-side presentation, load and follow the `revenuecat-paywall` skill after SDK integration. For custom UI, load `revenuecat-purchase-flow` and render products from the offering instead of installing RevenueCatUI solely for a dashboard template.
+
+## Stage 5: integrate the SDK for development and release
+
+Load and follow `integrate-revenuecat`. It owns framework detection, dependency installation, initialization, and build verification.
+
+Require environment-specific key selection:
+
+- development/debug/Test Store build: `test_...`;
+- iOS release build: `appl_...`;
+- Android release build: `goog_...`;
+- never ship a `test_` key.
+
+Prefer the project's existing build-configuration mechanism. Examples include `.xcconfig`/Xcode build settings, Gradle build config fields, Flutter `--dart-define`, and React Native environment configuration. Public SDK keys are safe to embed, but environment separation must be explicit and reviewable.
+
+Install a Test Store-compatible SDK version. At minimum verify iOS 5.43.0, Android 9.9.0, Flutter 9.8.0, React Native 9.5.4, and KMP 2.2.2, or later. Configure Purchases exactly once at app startup.
+
+If using a dashboard paywall, install the matching RevenueCatUI dependency and follow `revenuecat-paywall`. Implement or verify:
+
+- paywall presentation at the intended gate;
+- entitlement-based feature access;
+- restore purchases;
+- purchase cancellation/error handling;
+- App User ID login/logout behavior when the app has authentication.
+
+## Stage 6: verify Test Store end to end
+
+Do not mark Test Store ready until all checks pass:
+
+1. The app builds and launches with the `test_` key.
+2. Purchases configures without authentication errors.
+3. The current offering contains every expected package.
+4. The configured paywall or custom purchase UI renders the expected products and prices.
+5. Success, cancellation, and failure can be simulated.
+6. A successful purchase activates the intended entitlement in `CustomerInfo`.
+7. The gated feature unlocks, and restore behavior is verified where applicable.
+8. The test customer and sandbox transaction appear in RevenueCat.
+
+Record what was actually observed. A successful build alone is not a purchase verification.
+
+## Stage 7: configure the production store
+
+Create or reuse a separate RevenueCat app for each production store. Retrieve its typed public SDK key with:
 
 ```bash
 rc apps keys <app-id> --json --no-input
 ```
 
-Retrieve keys separately for every app. Verify the final state by listing apps, products, entitlements, offerings, and packages. Report stable IDs and lookup keys, not secrets.
+### Apple
 
-## MCP fallback
+Confirm first:
 
-When `rc` is unavailable or lacks the required command, use RevenueCat MCP tools in the same dependency order:
+- the app record and bundle ID already exist in App Store Connect;
+- the Apple account has sufficient access;
+- required agreements, tax, and banking setup are complete enough for product creation/testing.
 
-1. `list-projects`, then `create-project` only if needed
-2. `create-app` for each missing app (`app_store`, `play_store`, or `rc_billing`)
-3. `create-product`
-4. `create-entitlement`
-5. `attach-products-to-entitlement`
-6. `create-offering`
-7. `create-package`
-8. `attach-products-to-package`
-9. `list-app-public-api-keys`
+The CLI does not create the initial App Store Connect app record or accept Apple business agreements.
 
-MCP can configure RevenueCat resources but does not replace the local Apple credential handoff. If a store app or product is not ready, explain the remaining store-console work rather than silently substituting a test-store app unless the user explicitly requests one.
+Check Apple access read-only, then hand setup to the human in a local interactive terminal:
+
+```bash
+rc apps apple check <app-store-app-id>
+rc apps apple setup <app-store-app-id>
+```
+
+Never request an Apple password, session cookie, or 2FA code in chat, a model-visible prompt, a flag, or a file. Apple credentials go directly from the local CLI to Apple and are not stored by RevenueCat. `setup` may create one-time downloadable In-App Purchase and App Store Connect API keys and upload the generated keys to RevenueCat after approval. Apple Small Business Program dates are outside this workflow.
+
+After Apple access succeeds, load `revenuecat-store-state`. Create a persisted plan for App Store products, subscription groups, durations, territory prices, availability, and localizations. Show the exact plan and warnings; apply only the same reviewed plan ID after approval.
+
+After apply succeeds:
+
+1. Re-list products and capture the Apple RevenueCat product IDs.
+2. Attach each Apple product to the same entitlement and semantic package as its Test Store counterpart.
+3. Verify package coverage for Test Store and Apple independently.
+4. Wire the `appl_` key into the release configuration while retaining `test_` for debug.
+
+### Other stores
+
+Follow the same separation: distinct app, credentials, products, public key, and sandbox verification. Google Play requires configured service credentials before store-state operations.
+
+## Stage 8: verify the production-store path
+
+For Apple, build with the `appl_` key and test through Apple sandbox or TestFlight. Verify offering fetch, StoreKit purchase presentation, successful purchase, active entitlement, restore, and the sandbox customer/transaction in RevenueCat.
+
+Do not call a project production ready when only Test Store passed. Do not call it Test Store ready when only App Store products exist.
+
+## MCP and dashboard fallback rules
+
+Inspect tool schemas before use. For a supported MCP path, preserve the same dependency order:
+
+1. project and app inventory;
+2. entitlements, offering, and packages;
+3. store-specific products;
+4. product-to-entitlement and product-to-package attachments;
+5. paywall creation/attachment when exposed;
+6. public keys;
+7. final verification reads.
+
+MCP does not replace local Apple authentication. Dashboard fallback does not justify asking the user for credentials; use an existing signed-in browser session or give the exact handoff.
 
 ## Completion report
 
-Summarize:
+Report a stage matrix with `complete`, `incomplete`, `blocked`, or `not requested` for:
 
-- Project and app IDs
-- Store identifiers and RevenueCat product IDs
-- Entitlement-to-product mapping
-- Current offering, packages, and their product mapping
-- Public SDK keys by app
-- Any skipped or failed step and the exact recovery command
+- account/authentication;
+- project and app inventory;
+- entitlement/offering/package graph;
+- Test Store products and prices;
+- dashboard paywall;
+- SDK and RevenueCatUI dependencies;
+- debug `test_` configuration;
+- Test Store purchase verification;
+- production store credentials;
+- production products/prices/localizations;
+- release platform-key configuration;
+- platform sandbox verification.
 
-If a command fails, inspect current state before retrying. Continue independent steps when safe, but do not claim setup is complete while a required store operation is pending or failed.
+Include stable IDs and store identifiers, but redact all keys. For every incomplete or blocked stage, state the missing prerequisite, who must act, and the exact next command or dashboard location. Never summarize the entire project as complete while any requested stage remains incomplete.
