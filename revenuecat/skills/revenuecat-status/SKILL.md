@@ -29,7 +29,7 @@ Can be referenced as `$ARGUMENTS` in the skill.
 
 ## Instructions
 
-Use the RevenueCat MCP server for all tool calls.
+Prefer `rc ... --json --no-input` when installed. Confirm RevenueCat MCP is authenticated before using it as a fallback.
 
 When the user invokes this skill, perform the following steps:
 
@@ -84,3 +84,5 @@ When the user invokes this skill, perform the following steps:
    - Products not attached to any entitlement
    - Offerings without packages
    - Apps without products
+
+For each current offering, run `rc offerings verify <offering-id> --json --no-input` when available. Use its package/product/price/entitlement graph and issues array instead of reconstructing the same graph from repeated calls. For SDK delivery questions, run `rc offerings preview <app-id> --json --no-input` and report whether `paywall_components` is present.

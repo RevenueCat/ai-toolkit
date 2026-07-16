@@ -35,6 +35,8 @@ Before touching the dashboard, gather the facts:
 
 Use the RevenueCat MCP server for every tool call below.
 
+Before depending on this section, enumerate the available RevenueCat MCP tools and confirm the connector is already authenticated. If it is unavailable or would require an interactive login the agent cannot complete, use the equivalent `rc ... --json --no-input` inventory commands or hand control back to `create-revenuecat-project`; do not assume MCP fallback exists.
+
 ### 2a. Get or create the project
 - `list-projects` — list accessible projects. If multiple, ask the user which one matches this app, or offer to create a new one.
 - If there is no project, hand off to the `create-revenuecat-project` skill, then resume here.

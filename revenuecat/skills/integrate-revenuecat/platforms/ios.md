@@ -43,6 +43,44 @@ pod 'RevenueCat'
 
 Then `pod install`.
 
+### Tuist
+
+If the project contains `Project.swift`, preserve Tuist as the source of truth instead of editing the generated `.xcodeproj`:
+
+```swift
+let project = Project(
+    name: "MyApp",
+    packages: [
+        .remote(
+            url: "https://github.com/RevenueCat/purchases-ios",
+            requirement: .upToNextMajor(from: "<latest>")
+        )
+    ],
+    targets: [
+        .target(
+            name: "MyApp",
+            destinations: .iOS,
+            product: .app,
+            bundleId: "com.example.myapp",
+            dependencies: [
+                .package(product: "RevenueCat"),
+                .package(product: "RevenueCatUI"),
+            ],
+            settings: .settings(
+                configurations: [
+                    .debug(name: "Debug", settings: ["RC_PUBLIC_SDK_KEY": "test_YOUR_TEST_STORE_KEY"]),
+                    .release(name: "Release", settings: ["RC_PUBLIC_SDK_KEY": "appl_YOUR_APP_STORE_KEY"]),
+                ]
+            )
+        )
+    ]
+)
+```
+
+Merge these declarations into the existing `Project.swift` shape; do not replace unrelated targets or settings. Run `tuist generate`, inspect the resolved package version, and build the generated workspace. If the project uses `Tuist/Package.swift`, declare the remote package there and keep only `.external(name: "RevenueCat")` / `.external(name: "RevenueCatUI")` in target dependencies, matching the installed Tuist version's conventions.
+
+Expose `RC_PUBLIC_SDK_KEY` to `Info.plist` as `RevenueCatPublicSDKKey: $(RC_PUBLIC_SDK_KEY)` through the target's `infoPlist` dictionary or its checked-in plist. Do not put Test Store and App Store keys behind `#if targetEnvironment(simulator)`.
+
 ## Configure
 
 Call `Purchases.configure(withAPIKey:)` once at app launch. Select the key from the Xcode build configuration; do not decide based on simulator/device at runtime.

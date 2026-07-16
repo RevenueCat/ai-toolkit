@@ -83,6 +83,10 @@ rc auth status --json --no-input
 rc commands --json
 ```
 
+Require `data.project_status` from `rc auth status` to be `valid` or `not_configured`. If it is `not_found`, select a real project with `rc projects use` or pass `--project-id` explicitly; never trust a dangling profile project ID.
+
+Inventory the available RevenueCat MCP tools now, before planning any fallback. Record MCP as `available` only when the connector is authenticated and its tools can be called without another interactive step. If it is unavailable, stay CLI-only and identify dashboard handoffs early instead of discovering the limitation mid-run.
+
 If no account exists and the user explicitly asks the agent to create one, gather the email, the person's display name—not a company/project name—and explicit authorization to accept the RevenueCat Terms of Service and Privacy Policy. Keep marketing consent separate.
 
 On the user's Mac, create a recoverable account with a generated password saved directly to Keychain:
@@ -174,7 +178,7 @@ rc entitlements attach <entitlement-id> <test-product-id>... --json --no-input
 rc packages attach <package-id> <test-product-id>... --json --no-input
 ```
 
-Verify the offering returns every expected Test Store package and that each package product has the requested identifier, duration, and price.
+Verify attachments with `rc packages products <package-id> --json --no-input`. Then run `rc offerings verify <offering-id> --json --no-input`; require every package to contain the intended product, every product to have the requested price, and every product to be covered by an entitlement.
 
 ## Stage 4: create and connect the paywall
 
@@ -189,9 +193,17 @@ For a dashboard paywall:
    rc paywalls create --offering-id <offering-id> --json --no-input
    ```
 
-3. Capture the paywall ID and confirm `published_at` is populated before treating it as published. The public API may create only a draft.
-4. When publish or template customization is not exposed by CLI/MCP, use an authorized signed-in RevenueCat dashboard session. Otherwise hand off exactly: RevenueCat dashboard → Paywalls → open the created draft → customize/review → Publish.
-5. Re-list/show the paywall and verify it is attached to the intended offering and published.
+3. Capture the paywall ID. Creation always produces a draft; `published_at` is null until publish succeeds.
+4. Review the selected template, then publish the customer-facing draft only after approval:
+
+   ```bash
+   rc paywalls publish <paywall-id> --yes --json --no-input
+   ```
+
+5. Require the publish response and `rc paywalls show <paywall-id> --json --no-input` to contain a non-null `published_at`.
+6. Verify the SDK payload with `rc offerings preview <test-store-app-id> --json --no-input`. Require the intended current offering and non-null `paywall_components`; null means the SDK is still receiving fallback components.
+
+If `rc schema paywalls publish --json` is unavailable in the installed build, check an authenticated MCP publish tool. Otherwise hand off exactly: RevenueCat dashboard → Paywalls → open the created draft → customize/review → Publish.
 
 Do not confuse a created draft or fallback paywall layout with a published dashboard paywall. If `published_at` is empty or only the fallback renders, mark dashboard paywall configuration incomplete.
 
@@ -233,7 +245,24 @@ Do not mark Test Store ready until all checks pass:
 7. The gated feature unlocks, and restore behavior is verified where applicable.
 8. The test customer and sandbox transaction appear in RevenueCat.
 
-Record what was actually observed. A successful build alone is not a purchase verification.
+Use the read-only verification primitives before launching:
+
+```bash
+rc offerings verify <offering-id> --json --no-input
+rc offerings preview <test-store-app-id> --app-user-id <verification-user> --json --no-input
+```
+
+Run one real headless success through the Test Store receipt flow:
+
+```bash
+rc customer simulate-purchase \
+  --app-id <test-store-app-id> \
+  --product <product-id-or-store-identifier> \
+  --app-user-id <verification-user> \
+  --yes --json --no-input
+```
+
+Require the returned customer info to show the intended active entitlement, then confirm the customer through `rc customer show`. This proves backend Test Store purchase processing and entitlement activation. It does not prove the app's paywall UI, cancellation/failure UI, gated screen, or restore interaction; observe those in the running app before claiming the entire UI flow is verified.
 
 ## Stage 7: configure the production store
 
@@ -294,6 +323,8 @@ Inspect tool schemas before use. For a supported MCP path, preserve the same dep
 7. final verification reads.
 
 MCP does not replace local Apple authentication. Dashboard fallback does not justify asking the user for credentials; use an existing signed-in browser session or give the exact handoff.
+
+Never write “fall back to MCP” unless Stage 1 confirmed the connector is authenticated and the required tool exists. Otherwise choose a supported CLI command or state the dashboard handoff.
 
 ## Completion report
 
