@@ -1,6 +1,6 @@
 ---
 name: revenuecat-paywall
-description: Configure and display a RevenueCat paywall using a dashboard paywall plus the RevenueCatUI SDK, or identify the exact dashboard handoff when paywall creation is not exposed by CLI/MCP. Use when adding a paywall, presenting PaywallView, gating a premium screen, installing RevenueCatUI, or verifying paywall purchases on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Generate or edit a RevenueCat paywall with Paywall AI Editor, publish it, and display it through RevenueCatUI, or identify the exact dashboard handoff when an operation is unavailable. Use when creating or revising paywall design/copy, adding a paywall, presenting PaywallView, gating a premium screen, installing RevenueCatUI, or verifying paywall purchases on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # revenuecat-paywall: display a RevenueCat paywall
@@ -24,7 +24,7 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 ## 2. Shared concepts (all platforms)
 
 - **Paywalls require an Offering with a paywall attached in the RevenueCat dashboard.** The SDK pulls offerings via `getOfferings()`. If no offering has a paywall configured, RevenueCatUI falls back to a default paywall layout, which is not what you want in production.
-- **Dashboard creation, publication, and app presentation are separate.** Use `rc paywalls create --offering-id <id>` for the attached draft, review it, then `rc paywalls publish <paywall-id> --yes`. Require a non-null `published_at`. Use `rc offerings preview <app-id>` to confirm the SDK response contains non-null `paywall_components`; null means fallback components. If the installed CLI lacks publish, use an authenticated MCP publish tool or hand off exactly: Paywalls → open draft → customize/review → Publish. Do not claim that creating a draft or installing RevenueCatUI published it.
+- **Design, publication, and app presentation are separate.** Prefer `rc paywalls generate <offering-id> --prompt "<direction>" --context "<app context>"` to create an AI-designed draft and `rc paywalls edit <paywall-id> --prompt "<change>"` for revisions. These commands wait for Astra by default and return an editor URL; `--async` returns a task for `rc paywalls task <task-id> --wait`. They never publish. Review the resulting draft, then run `rc paywalls publish <paywall-id> --yes`. Require a non-null `published_at` and use `rc offerings preview <app-id>` to confirm non-null `paywall_components`. If AI generation is unavailable, use `rc paywalls create --offering-id <id>` for the default draft or the exact dashboard handoff. Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
 - **The active key selects the store products.** A debug build using `test_…` must render the Test Store products attached to each package; a release build using `appl_…` or `goog_…` must render the corresponding platform products attached to those same packages.
 - **Offering vs. entitlement.** Users purchase a product through a package in an offering. Access is granted via an entitlement (typically `"premium"` or `"pro"`). Gate premium features on the entitlement, not on the offering.
 - **Three presentation patterns**:

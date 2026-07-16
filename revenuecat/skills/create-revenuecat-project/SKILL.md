@@ -187,14 +187,21 @@ Decide whether the user wants a RevenueCat dashboard paywall or custom app UI.
 For a dashboard paywall:
 
 1. Confirm the current offering and packages are complete.
-2. Inspect `rc schema paywalls create --json` and create the default draft attached to the intended offering:
+2. Inspect `rc schema paywalls generate --json`. When available, use Paywall AI Editor to create a designed draft from the user's direction and the app context already gathered in Stage 0:
 
    ```bash
-   rc paywalls create --offering-id <offering-id> --json --no-input
+   rc paywalls generate <offering-id> \
+     --prompt "<approved paywall direction>" \
+     --context "<concise product, audience, brand, and premium-feature context>" \
+     --json --no-input
    ```
 
-3. Capture the paywall ID. Creation always produces a draft; `published_at` is null until publish succeeds.
-4. Review the selected template, then publish the customer-facing draft only after approval:
+   The command waits for the persisted Astra task by default. If using `--async`, capture `data.task_id` and run `rc paywalls task <task-id> --wait --json --no-input`; do not start the same generation again while its task is queued or running.
+
+   If AI generation is unavailable or the user explicitly wants the default template, use `rc paywalls create --offering-id <offering-id> --json --no-input`.
+
+3. Capture `data.paywall_id` and `data.editor_url`. Paywall AI Editor always saves an unpublished draft. For requested revisions, run `rc paywalls edit <paywall-id> --prompt "<change>" --context "<relevant context>" --json --no-input`; do not manipulate the raw components JSON.
+4. Review the draft and editor link, then publish the customer-facing draft only after approval:
 
    ```bash
    rc paywalls publish <paywall-id> --yes --json --no-input
@@ -203,7 +210,7 @@ For a dashboard paywall:
 5. Require the publish response and `rc paywalls show <paywall-id> --json --no-input` to contain a non-null `published_at`.
 6. Verify the SDK payload with `rc offerings preview <test-store-app-id> --json --no-input`. Require the intended current offering and non-null `paywall_components`; null means the SDK is still receiving fallback components.
 
-If `rc schema paywalls publish --json` is unavailable in the installed build, check an authenticated MCP publish tool. Otherwise hand off exactly: RevenueCat dashboard → Paywalls → open the created draft → customize/review → Publish.
+If neither `rc paywalls generate` nor the Cloud MCP Paywall AI Editor tools are available, create the default draft or hand customization off exactly: RevenueCat dashboard → Paywalls → open the draft → customize/review. If `rc schema paywalls publish --json` is unavailable, check an authenticated MCP publish tool or hand off the final Publish action.
 
 Do not confuse a created draft or fallback paywall layout with a published dashboard paywall. If `published_at` is empty or only the fallback renders, mark dashboard paywall configuration incomplete.
 
