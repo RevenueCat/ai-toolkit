@@ -41,6 +41,7 @@ Products in different stores have different RevenueCat product IDs even when the
 5. Ask before legal acceptance, store-plan apply, destructive actions, or any consequential choice the user has not already authorized.
 6. Never claim a stage is complete because a command returned successfully; verify the resulting state.
 7. If an operation is unavailable through CLI/MCP, say so and use the exact dashboard handoff below. Do not silently omit it.
+8. Respect human-only commands: `rc schema <command> --json` and `rc commands --json` mark some commands with `requires_human: true` and a reason. Never run one yourself, script it, or collect its inputs (passwords, 2FA codes) in chat or flags. Give the user the exact command to run in their local interactive terminal, wait for them to confirm it finished, then verify the resulting state read-only. `rc apps apple check` / `rc apps apple setup` (Apple sign-in with two-factor) are the canonical examples.
 
 ## Stage 0: inspect the app and gather the design
 
