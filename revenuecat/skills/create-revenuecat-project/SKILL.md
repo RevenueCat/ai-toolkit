@@ -281,7 +281,7 @@ Confirm first:
 - the Apple account has sufficient access;
 - required agreements, tax, and banking setup are complete enough for product creation/testing.
 
-The CLI does not create the initial App Store Connect app record or accept Apple business agreements.
+`rc apps apple setup` can create a missing App Store Connect app record (it offers to register the bundle ID and create the app after the human signs in). The CLI cannot accept Apple business agreements.
 
 Check Apple access read-only, then hand setup to the human in a local interactive terminal:
 
