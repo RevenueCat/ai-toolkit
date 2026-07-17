@@ -58,3 +58,33 @@ Do not claim the integration is complete until:
 5. Closing the paywall without purchasing fires the dismiss / cancelled callback.
 
 If the paywall shows the default fallback layout, run `rc offerings preview <app-id> --json --no-input`. A null `paywall_components` value means no published paywall is being served; publish the draft and retry.
+
+## 5. Enable in-app paywall preview (custom URL scheme)
+
+Wire up live paywall previews so dashboard edits can be opened directly on
+device (see https://www.revenuecat.com/docs/tools/paywalls/testing-paywalls).
+Do this for every native integration; hybrid SDK support is not yet available
+(check the doc before wiring Flutter/React Native).
+
+Requires purchases-ios >= 5.80.0 or purchases-android >= 10.11.0.
+
+1. Get the app's custom URL scheme from the RevenueCat dashboard: the app's
+   settings page, "Custom URL Scheme" (unique per app). It is not available
+   via the public API — this is a dashboard read; ask the user for the value
+   if you cannot obtain it.
+2. Register the scheme like a Redemption Link scheme: iOS `CFBundleURLTypes`
+   in Info.plist; Android an intent filter with the scheme on the launcher
+   activity.
+3. Handle the link with the SDK API and let it no-op for unrelated URLs:
+
+   SwiftUI: `.onOpenURL { url in if Purchases.shared.presentPaywall(from: url) { return } /* other URL handling */ }`
+
+   UIKit (scene delegate): `if Purchases.shared.presentPaywall(from: url, scene: scene as? UIWindowScene) { return }`
+
+   Android: call a helper from `onCreate` and `onNewIntent`:
+   `if (Purchases.sharedInstance.previewPaywall(intent, this)) return`
+
+4. Verify: build, open the preview link from the dashboard's paywall editor
+   (or `xcrun simctl openurl booted "<scheme>://..."` / `adb shell am start -a
+   android.intent.action.VIEW -d "<scheme>://..."`), and confirm the paywall
+   presents. Unrelated deep links must still reach the app's own handler.
