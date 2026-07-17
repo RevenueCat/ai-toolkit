@@ -25,7 +25,7 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 
 - **Paywalls require an Offering with a paywall attached in the RevenueCat dashboard.** The SDK pulls offerings via `getOfferings()`. If no offering has a paywall configured, RevenueCatUI falls back to a default paywall layout, which is not what you want in production.
 - **Design, publication, and app presentation are separate.** Prefer `rc paywalls generate <offering-id> --prompt "<direction>" --session <file>` to create an AI-designed draft (optionally `--image <png>` for visual references, up to 3) and `rc paywalls edit --session <file> --prompt "<change>"` for follow-up turns; `rc paywalls rewind --session <file>` undoes the last turn. The commands stream Astra live and persist the full editor state in the session file — keep that file for the whole design conversation; a lost session file means starting the design over. Astra may reply with a clarifying question instead of a design (its reply is in the `activity` output); answer it with another `edit` turn.
-- **Known limitation — the AI design is not yet persisted to RevenueCat.** The RevenueCat paywall record created by `generate` still holds the default template; the Astra-designed components exist only in the session file. `rc paywalls publish` therefore publishes the default template, NOT the AI design. Until the public API accepts paywall components, persisting the design requires the dashboard paywall editor — say so explicitly and hand off; never claim the designed paywall shipped via CLI publish. `rc offerings preview <app-id>` confirming non-null `paywall_components` verifies that *some* paywall is published, not that it is the AI design.
+- **Designs persist to RevenueCat automatically.** Every completed generate/edit turn saves the designed components onto the paywall draft via the public API (revision-guarded; a warning is printed if the save fails — re-run an edit turn to retry). `rc paywalls edit <paywall-id>` also works on any existing paywall, including dashboard-authored ones, by fetching its draft (or published) components as the starting state. After review, `rc paywalls publish <paywall-id> --yes` ships the design; verify non-null `published_at` and `rc offerings preview <app-id>` returning non-null `paywall_components`.
 - If AI generation is unavailable, use `rc paywalls create --offering-id <id>` for the default draft or the exact dashboard handoff. Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
 - **The active key selects the store products.** A debug build using `test_…` must render the Test Store products attached to each package; a release build using `appl_…` or `goog_…` must render the corresponding platform products attached to those same packages.
 - **Offering vs. entitlement.** Users purchase a product through a package in an offering. Access is granted via an entitlement (typically `"premium"` or `"pro"`). Gate premium features on the entitlement, not on the offering.
@@ -86,10 +86,11 @@ Do this for every native integration; hybrid SDK support is not yet available
 
 Requires purchases-ios >= 5.80.0 or purchases-android >= 10.11.0.
 
-1. Get the app's custom URL scheme from the RevenueCat dashboard: the app's
-   settings page, "Custom URL Scheme" (unique per app). It is not available
-   via the public API — this is a dashboard read; ask the user for the value
-   if you cannot obtain it.
+1. Get the app's custom URL scheme: `rc apps keys <app-id> --json --no-input`
+   returns it as `custom_url_scheme` (also on the app object via
+   `rc apps show`). If the field is empty or absent (older server), fall back
+   to the dashboard: the app's settings page, "Custom URL Scheme" — ask the
+   user for the value.
 2. Register the scheme like a Redemption Link scheme: iOS `CFBundleURLTypes`
    in Info.plist; Android an intent filter with the scheme on the launcher
    activity.
