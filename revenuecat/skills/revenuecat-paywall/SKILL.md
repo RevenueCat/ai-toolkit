@@ -24,7 +24,9 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 ## 2. Shared concepts (all platforms)
 
 - **Paywalls require an Offering with a paywall attached in the RevenueCat dashboard.** The SDK pulls offerings via `getOfferings()`. If no offering has a paywall configured, RevenueCatUI falls back to a default paywall layout, which is not what you want in production.
-- **Design, publication, and app presentation are separate.** Prefer `rc paywalls generate <offering-id> --prompt "<direction>" --context "<app context>"` to create an AI-designed draft and `rc paywalls edit <paywall-id> --prompt "<change>"` for revisions. These commands wait for Astra by default and return an editor URL; `--async` returns a task for `rc paywalls task <task-id> --wait`. They never publish. Review the resulting draft, then run `rc paywalls publish <paywall-id> --yes`. Require a non-null `published_at` and use `rc offerings preview <app-id>` to confirm non-null `paywall_components`. If AI generation is unavailable, use `rc paywalls create --offering-id <id>` for the default draft or the exact dashboard handoff. Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
+- **Design, publication, and app presentation are separate.** Prefer `rc paywalls generate <offering-id> --prompt "<direction>" --session <file>` to create an AI-designed draft (optionally `--image <png>` for visual references, up to 3) and `rc paywalls edit --session <file> --prompt "<change>"` for follow-up turns; `rc paywalls rewind --session <file>` undoes the last turn. The commands stream Astra live and persist the full editor state in the session file — keep that file for the whole design conversation; a lost session file means starting the design over. Astra may reply with a clarifying question instead of a design (its reply is in the `activity` output); answer it with another `edit` turn.
+- **Known limitation — the AI design is not yet persisted to RevenueCat.** The RevenueCat paywall record created by `generate` still holds the default template; the Astra-designed components exist only in the session file. `rc paywalls publish` therefore publishes the default template, NOT the AI design. Until the public API accepts paywall components, persisting the design requires the dashboard paywall editor — say so explicitly and hand off; never claim the designed paywall shipped via CLI publish. `rc offerings preview <app-id>` confirming non-null `paywall_components` verifies that *some* paywall is published, not that it is the AI design.
+- If AI generation is unavailable, use `rc paywalls create --offering-id <id>` for the default draft or the exact dashboard handoff. Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
 - **The active key selects the store products.** A debug build using `test_…` must render the Test Store products attached to each package; a release build using `appl_…` or `goog_…` must render the corresponding platform products attached to those same packages.
 - **Offering vs. entitlement.** Users purchase a product through a package in an offering. Access is granted via an entitlement (typically `"premium"` or `"pro"`). Gate premium features on the entitlement, not on the offering.
 - **Three presentation patterns**:
@@ -46,6 +48,22 @@ Read the platform file that matches detection:
 - `platforms/react-native.md`
 
 Each platform file is self contained: install command, exact snippet to present the paywall, and the callback shape you listen to.
+
+## 3b. Parallelize design and integration
+
+Astra turns take one to several minutes each. Do not sit idle on them:
+
+- Run `rc paywalls generate` / `edit` in a background shell or a dedicated
+  subagent while a second worker wires the app code in parallel —
+  RevenueCatUI installation, the presentation snippet from the platform
+  file, and the preview URL scheme registration are all independent of the
+  design until Verify.
+- Multiple paywalls can be designed concurrently (one per offering): give
+  each run its own `--session` file. Never share a session file between
+  concurrent runs, and never run two turns against the same session at once
+  — the file is the conversation state and last-write-wins would corrupt it.
+- Serialize anything that mutates the same RevenueCat resources (offerings,
+  packages, publishing); parallelize only across independent resources.
 
 ## 4. Verify
 
