@@ -277,9 +277,10 @@ rc apps keys <app-id> --json --no-input
 
 Confirm first:
 
-- the app record and bundle ID already exist in App Store Connect;
 - the Apple account has sufficient access;
 - required agreements, tax, and banking setup are complete enough for product creation/testing.
+
+The App Store Connect app record does not need to pre-exist: `rc apps apple setup` detects a missing record for the bundle ID and offers to create it (Developer Portal registration + ASC app) during the human's interactive run.
 
 `rc apps apple setup` can create a missing App Store Connect app record (it offers to register the bundle ID and create the app after the human signs in). The CLI cannot accept Apple business agreements.
 
