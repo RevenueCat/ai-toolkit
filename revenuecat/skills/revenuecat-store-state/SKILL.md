@@ -71,6 +71,31 @@ rc products store plan <app-id> --file catalog.csv --json --no-input
 
 For a human working in a TTY, `rc products store sync <app-id>` provides a single-process prompt, review, confirmation, and apply flow. It also accepts `--file catalog.csv`. Agents should use the explicit multi-command lifecycle so approval is attached to a persisted plan ID.
 
+## App Store submission readiness
+
+Three warnings on App Store plans mark *submission* requirements, not creation blockers. Products create fine without them, but Apple's review needs them, so resolve them in the plan or explicitly surface them to the user — never silently move past them:
+
+| Warning field | What Apple needs | How to set it |
+|---|---|---|
+| `store_state.review_information.notes` | Reviewer instructions (test account, how to reach the paywall) | JSON `store_state.review_information.notes`; CSV `app_store_review_notes` column |
+| `store_state.review_information.screenshot` | A paywall screenshot for review | Upload first (MCP `upload-product-store-state-screenshot`), then reference the returned `screenshot_id` in `store_state.review_information.screenshot`. If omitted, RevenueCat uploads a placeholder so the product still reaches READY_TO_SUBMIT — flag to the user that a real screenshot should replace it before submission. |
+| `store_state.subscription_group_localizations` | Localized subscription group display name | JSON `store_state.subscription_group_localizations.<locale>.name` (and optional `.custom_app_name`); CSV `app_store_subscription_group_name` / `app_store_subscription_group_localized_name` columns |
+
+Nesting matters: these fields live inside `store_state`, not at the desired-state top level and not under `common`. The schema rejects misplaced fields with `Additional properties are not allowed` — that error means wrong nesting, not a missing capability.
+
+```json
+{
+  "store": "app_store",
+  "create_revenuecat_product": { "...": "..." },
+  "common": { "title": "Pro Monthly" },
+  "store_state": {
+    "subscription_group_name": "Premium",
+    "subscription_group_localizations": { "en-US": { "name": "Premium Subscriptions" } },
+    "review_information": { "notes": "Log in with demo@example.com / demo123; the paywall appears after onboarding." }
+  }
+}
+```
+
 ## Store prerequisites
 
 An App Store plan requires configured Apple access. If it is missing, use `rc apps apple check <app-id>` and then hand `rc apps apple setup <app-id>` to the user in their local interactive terminal. Never request Apple credentials or 2FA codes in chat. Apple credentials are sent locally to Apple and are not stored by RevenueCat; generated API keys are uploaded to RevenueCat only after user approval.
