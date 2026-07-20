@@ -118,7 +118,7 @@ If an operation fails, report its error details and current state. Do not retry 
 
 ## Reading prices
 
-`rc products list`/`show` do not include price data. Store prices live in the plan diff (`rc products store show <plan-id>`) or in the store itself; `rc products prices <id>` covers Test Store products only.
+`rc products show <id> --store-state` reads the product's live store state: next effective territory prices (scheduled changes include a start date), availability, localizations, and App Review metadata. It reaches the store directly, so it needs configured store credentials and takes a few seconds. `rc products list`/plain `show` carry no price data; `rc products prices <id>` covers Test Store products only.
 
 ## Completion handoff
 
