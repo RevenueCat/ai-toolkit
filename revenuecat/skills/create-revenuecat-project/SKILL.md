@@ -59,7 +59,7 @@ Ask only for decisions that cannot be inferred:
 2. Entitlements or tiers and the features each unlocks.
 3. Products: subscription/one-time type, duration, identifiers, display names, titles, prices, currencies, localizations, trials, and availability.
 4. Offering/package layout, normally a `default` offering with standard package identifiers such as `$rc_monthly` and `$rc_annual`.
-5. Paywall intent: dashboard template or custom UI, presentation location, dismiss behavior, and desired copy/branding.
+5. Paywall intent: dashboard template or custom UI, dismiss behavior, and desired copy/branding — plus placement: which monetization model (freemium gates, hard paywall after onboarding, trial-first) and where the paywall surfaces. Every app gets a persistent upgrade entry point (settings row / profile CTA) in addition to any feature gates — a paywall reachable only by tapping a locked feature is an incomplete integration.
 6. Whether the platform app already exists in App Store Connect or Google Play.
 7. Requested finish line.
 

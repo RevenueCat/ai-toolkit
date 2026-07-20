@@ -29,10 +29,12 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 - If AI generation is unavailable, use `rc paywalls create --offering-id <id>` for the default draft or the exact dashboard handoff. Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
 - **The active key selects the store products.** A debug build using `test_…` must render the Test Store products attached to each package; a release build using `appl_…` or `goog_…` must render the corresponding platform products attached to those same packages.
 - **Offering vs. entitlement.** Users purchase a product through a package in an offering. Access is granted via an entitlement (typically `"premium"` or `"pro"`). Gate premium features on the entitlement, not on the offering.
-- **Three presentation patterns**:
-  - (a) First launch modal for users without the entitlement, typically driven by a "present if needed" helper that checks the entitlement and only shows the paywall when missing.
-  - (b) Gated premium screen. The user taps a premium feature and the paywall opens before the screen loads.
-  - (c) Conditional present on a CTA tap, such as an "Upgrade" button in settings.
+- **Placement is a strategy, not a mechanism choice.** A complete integration surfaces the paywall in MORE than one place. Requirements:
+  1. **Always ship a persistent upgrade entry point** — an "Upgrade"/"Go Pro" row in settings, a profile badge, or a visible CTA users can find whenever they decide to pay. An app whose paywall only appears when a locked feature is tapped is not done: users who want to subscribe should never have to hunt for the door.
+  2. **Add contextual triggers on top of it** — feature gates ("present if needed" before a premium screen), moment-of-value prompts (finishing a workout, hitting a usage limit, exporting), and/or an onboarding-completion paywall (typically the highest-converting placement for users without the entitlement).
+  3. **Ask the user which monetization model fits their app** when interactive — freemium with gates, hard paywall after onboarding, or trial-first — and place accordingly; the persistent entry point applies to all of them.
+  4. Presentation mechanics per placement: first-launch/onboarding modal via a "present if needed" helper; gated screens present before the premium screen loads; explicit CTAs present directly.
+  Do not consider the paywall stage complete until the app has the persistent entry point AND at least one contextual trigger — name both in your completion report.
 - **RevenueCatUI owns the purchase flow.** Do not call `Purchases.purchase(…)` manually alongside a RevenueCatUI paywall. The paywall calls it internally. Listen for the dismiss or purchase completed callback to react in app code.
 - **Close button is opt in on most platforms.** Pass `displayCloseButton = true` (iOS / Flutter / RN) or `setShouldDisplayDismissButton(true)` (Android / KMP) when the paywall is presented modally and the user needs a way out. Skip it when presenting behind a sheet with its own grabber, or when wrapping the paywall in a navigation controller.
 - **If the app needs a fully custom UI**, do not use this skill. Call `Purchases.getOfferings()` and render your own components. RevenueCatUI is only for dashboard templated paywalls.
