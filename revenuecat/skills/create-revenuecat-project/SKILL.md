@@ -212,6 +212,8 @@ For a dashboard paywall:
 5. Require the publish response and `rc paywalls show <paywall-id> --json --no-input` to contain a non-null `published_at`.
 6. Verify the SDK payload with `rc offerings preview <test-store-app-id> --json --no-input`. Require the intended current offering and non-null `paywall_components`; null means the SDK is still receiving fallback components.
 
+`rc paywalls publish` may return 404 "Resource not found" even for a real draft: the v2 publish action is currently beta-gated. That is not a paywall-existence bug — hand publishing to the user as a dashboard step (Paywalls → open the draft → Publish) and continue.
+
 If neither `rc paywalls generate` nor the Cloud MCP Paywall AI Editor tools are available, create the default draft or hand customization off exactly: RevenueCat dashboard → Paywalls → open the draft → customize/review. If `paywalls publish` is absent from the fetched command surface, check an authenticated MCP publish tool or hand off the final Publish action.
 
 Do not confuse a created draft or fallback paywall layout with a published dashboard paywall. If `published_at` is empty or only the fallback renders, mark dashboard paywall configuration incomplete.
