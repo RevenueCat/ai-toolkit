@@ -39,7 +39,7 @@ Capture the returned `data.id`, then inspect that exact persisted plan from a se
 rc products store show <plan-id> --json --no-input
 ```
 
-Review every proposed action and warning. Treat blocker warnings as failures that require user action. Apply only the same plan ID that was reviewed:
+Review every proposed action and warning. Warnings appear at TWO levels: `.warnings` on the plan and `.plan_items[].warnings` on each item — check both before reporting anything as clear; per-item warnings persist after the top-level array empties. Treat blocker warnings as failures that require user action. Apply only the same plan ID that was reviewed:
 
 ```bash
 rc products store apply <plan-id> --yes --json --no-input
@@ -55,7 +55,7 @@ Never run `plan` again between review and apply. A newly generated plan is a dif
 
 ### CSV input
 
-CSV is convenient for a customer-maintained catalog. It can contain price and localization rows:
+CSV is convenient for a customer-maintained catalog. It can contain price and localization rows. Product-level fields (`title`, `display_name`, `product_type`, `duration`) must be byte-identical on every row for the same `store_identifier` — differing values fail with a conflict error:
 
 ```csv
 row_type,store,store_identifier,product_type,display_name,title,duration,territory,amount,currency,start_date,available,available_in_new_territories,locale,localized_name,localized_description
@@ -78,7 +78,7 @@ Three warnings on App Store plans mark *submission* requirements, not creation b
 | Warning field | What Apple needs | How to set it |
 |---|---|---|
 | `store_state.review_information.notes` | Reviewer instructions (test account, how to reach the paywall) | JSON `store_state.review_information.notes`; CSV `app_store_review_notes` column |
-| `store_state.review_information.screenshot` | A paywall screenshot for review | CLI: `rc products store screenshot <product-id> --file paywall.png` (reserves the slot, uploads to Apple, attaches — one command). MCP alternative: `upload-product-store-state-screenshot`, then reference the returned `screenshot_id` in `store_state.review_information.screenshot`. If omitted, RevenueCat uploads a placeholder so the product still reaches READY_TO_SUBMIT — flag to the user that a real screenshot should replace it before submission. |
+| `store_state.review_information.screenshot` | A paywall screenshot for review | Post-apply step — it takes a RevenueCat product ID, so the plan-level screenshot warning is expected pre-apply and cannot be cleared in the plan. After apply: `rc products store screenshot <product-id> --file paywall.png` (reserves the slot, uploads to Apple, attaches — one command). MCP alternative: `upload-product-store-state-screenshot`, then reference the returned `screenshot_id` in `store_state.review_information.screenshot`. If omitted, RevenueCat uploads a placeholder so the product still reaches READY_TO_SUBMIT — flag to the user that a real screenshot should replace it before submission. |
 | `store_state.subscription_group_localizations` | Localized subscription group display name | JSON `store_state.subscription_group_localizations.<locale>.name` (and optional `.custom_app_name`); CSV `app_store_subscription_group_name` / `app_store_subscription_group_localized_name` columns |
 
 Nesting matters: these fields live inside `store_state`, not at the desired-state top level and not under `common`. The schema rejects misplaced fields with `Additional properties are not allowed` — that error means wrong nesting, not a missing capability.
@@ -98,7 +98,7 @@ Nesting matters: these fields live inside `store_state`, not at the desired-stat
 
 ## Store prerequisites
 
-An App Store plan requires configured Apple access. If it is missing, use `rc apps apple check <app-id>` and then hand `rc apps apple setup <app-id>` to the user in their local interactive terminal. Never request Apple credentials or 2FA codes in chat. Apple credentials are sent locally to Apple and are not stored by RevenueCat; generated API keys are uploaded to RevenueCat only after user approval.
+An App Store plan requires configured Apple access. To verify what is already configured, read it from RevenueCat — `rc apps show <app-id> --json` → `app_store.subscription_key_configured` and `app_store.app_store_connect_api_key_configured`. Do not use `rc apps apple check` for this: it signs in to Apple live and dead-ends at an interactive 2FA prompt. If keys are missing, hand `rc apps apple setup <app-id>` to the user in their local interactive terminal. Never request Apple credentials or 2FA codes in chat. Apple credentials are sent locally to Apple and are not stored by RevenueCat; generated API keys are uploaded to RevenueCat only after user approval.
 
 Google Play operations require the app's Play credentials to be configured in RevenueCat.
 
@@ -115,6 +115,10 @@ Refer to each MCP tool schema for exact parameters.
 5. If warnings identify incomplete subscription territory pricing, call `equalize-subscription-prices` only after explaining the effect and obtaining approval.
 
 If an operation fails, report its error details and current state. Do not retry blindly or switch from a failed persisted CLI plan to an unreviewed MCP write.
+
+## Reading prices
+
+`rc products list`/`show` do not include price data. Store prices live in the plan diff (`rc products store show <plan-id>`) or in the store itself; `rc products prices <id>` covers Test Store products only.
 
 ## Completion handoff
 
