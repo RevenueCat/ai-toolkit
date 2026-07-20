@@ -226,7 +226,7 @@ Load and follow `integrate-revenuecat`. It owns framework detection, dependency 
 
 Require environment-specific key selection:
 
-- development/debug/Test Store build: `test_...`;
+- development/debug/Test Store build: `test_...`. The key selects WHICH environment, never WHETHER to configure: `Purchases.configure()` runs on every normal launch of that build, including simulator and in-memory/test-harness runs. Never gate configuration behind DEBUG, test, or storage flags — a build whose paywall only works during verification runs is broken;
 - iOS release build: `appl_...`;
 - Android release build: `goog_...`;
 - never ship a `test_` key.
@@ -347,7 +347,8 @@ Report a stage matrix with `complete`, `incomplete`, `blocked`, or `not requeste
 - Test Store products and prices;
 - dashboard paywall;
 - SDK and RevenueCatUI dependencies;
-- debug `test_` configuration;
+- debug `test_` configuration (active on every normal launch, not gated);
+- the real in-app upgrade flow exercised end to end — a user taps the Upgrade entry, the RevenueCat paywall opens, a purchase completes, the entitlement unlocks — in the app's NORMAL dev/simulator run mode (check the repo's docs for its test-harness flags and verify under them). CLI-simulated purchases and log assertions supplement this; they never replace it;
 - Test Store purchase verification;
 - production store credentials;
 - production products/prices/localizations;
