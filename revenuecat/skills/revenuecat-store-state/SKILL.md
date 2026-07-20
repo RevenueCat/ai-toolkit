@@ -11,12 +11,10 @@ This skill manages real platform stores such as App Store Connect and Google Pla
 
 ## CLI: agent-safe plan lifecycle
 
-First inspect the installed command schemas:
+The command invocations in this skill are current; run them directly and only consult schemas when one errors. If you do need discovery, fetch the entire command surface in one call — never one `rc schema` per command:
 
 ```bash
-rc schema products store plan --json
-rc schema products store show --json
-rc schema products store apply --json
+rc commands --schemas
 ```
 
 The CLI accepts CSV or JSON desired state from a file or stdin and stores the resulting plan in RevenueCat. This requires no repository, `.revenuecat` directory, or local state file.
