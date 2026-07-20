@@ -49,6 +49,17 @@ Read the platform file that matches detection:
 
 Each platform file is self contained: install command, exact snippet to present the paywall, and the callback shape you listen to.
 
+## 3a. Design brief — the paywall must look like THEIR app
+
+A generated paywall that resembles the stock template is a failed generation, even if Astra "customized" it. You have something Astra does not: the app's codebase. Build a design brief before the first `generate` call:
+
+1. **Extract the app's brand from its code.** Primary/accent/background colors as exact hex (iOS asset catalogs `*.xcassets` Colors, `Theme`/`Color` extensions; Android `colors.xml`/Compose theme; Flutter `ThemeData`; RN/Expo tailwind config or theme files), the display font family, corner-radius/spacing conventions, dark-mode palette, the app's name and icon style, and its voice (read onboarding/marketing strings — playful? clinical? luxe?).
+2. **Ask the user for direction when interactive.** One question: how custom should this be — (a) match my app's existing look, (b) elevated take on my brand, (c) something new, here's a reference — and whether they have a screenshot/design to match (`--image`, up to 3, is the strongest signal you can send).
+3. **Write a specific prompt.** Include the exact hex colors, font vibe, tone words, the app's actual feature bullets (from its code/store listing, not generic "unlock premium"), and what to avoid ("do not use the default template's gradient/stock layout"). Specific briefs produce distinct paywalls; "make a nice paywall for a fitness app" produces the template.
+4. **Judge the result against the brief, not against "looks fine."** Compare the returned design's colors/copy to the brief; if it still reads as the stock template with swapped text, iterate with `edit` turns naming the exact deltas ("background should be #0E1B2A, not white; headline in the app's serif voice; feature list should name streak tracking and offline maps").
+
+Screenshot the app (or its icon/onboarding) and pass it via `--image` whenever possible — a visual reference outperforms any text description.
+
 ## 3b. Parallelize design and integration
 
 Astra turns take one to several minutes each. Do not sit idle on them:
