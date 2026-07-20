@@ -80,12 +80,14 @@ Run:
 
 ```bash
 rc auth status --json --no-input
-rc commands --json
+rc commands --schemas --json
 ```
+
+`rc commands --schemas` returns the entire command surface — every flag, arg, and example — in one call. Do not run `rc schema` per command afterward; consult the fetched document, and re-check a single schema only when a command errors unexpectedly.
 
 Require `data.project_status` from `rc auth status` to be `valid` or `not_configured`. If it is `not_found`, select a real project with `rc projects use` or pass `--project-id` explicitly; never trust a dangling profile project ID.
 
-Inventory the available RevenueCat MCP tools now, before planning any fallback. Record MCP as `available` only when the connector is authenticated and its tools can be called without another interactive step. If it is unavailable, stay CLI-only and identify dashboard handoffs early instead of discovering the limitation mid-run.
+The `rc` CLI is the primary tool for every step in this skill. Do not inventory or call RevenueCat MCP tools upfront — reach for MCP only when a specific step below names it as a fallback and the CLI path is unavailable or fails, and record it as `available` only if the connector is already authenticated. If neither works, identify the dashboard handoff instead.
 
 If no account exists and the user explicitly asks the agent to create one, gather the email, the person's display name—not a company/project name—and explicit authorization to accept the RevenueCat Terms of Service and Privacy Policy. Keep marketing consent separate.
 
@@ -143,7 +145,7 @@ Find the `test_store` app ID and its `test_` public SDK key. Never use an `appl_
 
 For each desired product:
 
-1. Inspect `rc schema products create --json`, `rc schema products prices set --json`, and the MCP product/price schemas.
+1. Use the product/price command schemas from the Stage 1 `rc commands --schemas` document — no additional schema calls.
 2. Create or reuse a product under the Test Store app.
 3. Supply the user-facing title, display name, type, and subscription duration where supported.
 4. Configure the exact Test Store price and currency through the Test Store-specific price API.
@@ -210,7 +212,7 @@ For a dashboard paywall:
 5. Require the publish response and `rc paywalls show <paywall-id> --json --no-input` to contain a non-null `published_at`.
 6. Verify the SDK payload with `rc offerings preview <test-store-app-id> --json --no-input`. Require the intended current offering and non-null `paywall_components`; null means the SDK is still receiving fallback components.
 
-If neither `rc paywalls generate` nor the Cloud MCP Paywall AI Editor tools are available, create the default draft or hand customization off exactly: RevenueCat dashboard → Paywalls → open the draft → customize/review. If `rc schema paywalls publish --json` is unavailable, check an authenticated MCP publish tool or hand off the final Publish action.
+If neither `rc paywalls generate` nor the Cloud MCP Paywall AI Editor tools are available, create the default draft or hand customization off exactly: RevenueCat dashboard → Paywalls → open the draft → customize/review. If `paywalls publish` is absent from the fetched command surface, check an authenticated MCP publish tool or hand off the final Publish action.
 
 Do not confuse a created draft or fallback paywall layout with a published dashboard paywall. If `published_at` is empty or only the fallback renders, mark dashboard paywall configuration incomplete.
 
