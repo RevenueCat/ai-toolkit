@@ -122,6 +122,8 @@ Select or create the project, capture `data.project.id`, and pass `--project-id`
 
 Inventory apps, products, entitlements, offerings, packages, paywalls, and public keys. Classify every existing app by store type. A new project normally contains a Test Store; if an older project does not, create it through an exposed MCP tool or the dashboard because `rc apps create` may not expose `test_store`.
 
+Create the PLATFORM store app record(s) now too, not later: for iOS an `app_store` app with the bundle ID read from the codebase (`PRODUCT_BUNDLE_IDENTIFIER` in the Xcode project), for Android a `play_store` app with the applicationId from Gradle, both for cross-platform. The record needs no credentials to exist — creating it upfront means the project mirrors real life from the start, the Apple/Play credential stages have their target ready, and `rc setup`'s stage detection reports honestly. If Apple keys are already configured (for example by `rc setup`'s upfront Apple connect) or key material is provided, attach both keys (in-app purchase key AND App Store Connect API key) to the `app_store` app at creation/update time — never leave an app half-credentialed if both are available.
+
 ## Stage 2: create the shared RevenueCat access graph
 
 Create or reuse entitlements first. Most single-tier apps need one stable identifier such as `premium` or `pro`. This identifier is an app-code contract; do not derive it from a price or duration.
