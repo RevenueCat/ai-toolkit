@@ -281,6 +281,10 @@ Require the returned customer info to show the intended active entitlement, then
 
 ## Stage 7: configure the production store
 
+Never block on this stage. Apple sign-in is the user's action (`requires_human`); if the user has deferred it, declined it, or is not present, SKIP this stage and Stage 8, finish everything else, and list the exact deferred commands in the completion report as remaining work. Do not pause mid-run to wait or poll for Apple credentials — "not now" means continue, not stop.
+
+
+
 Create or reuse a separate RevenueCat app for each production store. Retrieve its typed public SDK key with:
 
 ```bash
