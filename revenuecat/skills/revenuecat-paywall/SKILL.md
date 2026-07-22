@@ -61,7 +61,7 @@ A generated paywall that resembles the stock template is a failed generation, ev
 3. **Write a specific prompt.** Include the exact hex colors, font vibe, tone words, the app's actual feature bullets (from its code/store listing, not generic "unlock premium"), and what to avoid ("do not use the default template's gradient/stock layout"). Specific briefs produce distinct paywalls; "make a nice paywall for a fitness app" produces the template.
 4. **Judge the result against the brief, not against "looks fine."** Compare the returned design's colors/copy to the brief; if it still reads as the stock template with swapped text, iterate with `edit` turns naming the exact deltas ("background should be #0E1B2A, not white; headline in the app's serif voice; feature list should name streak tracking and offline maps").
 
-Screenshot the app (or its icon/onboarding) and pass it via `--image` whenever possible — a visual reference outperforms any text description.
+Screenshot the app (or its icon/onboarding) and pass it via `--image` whenever possible — a visual reference outperforms any text description. If the repo has a DESIGN.md, style guide, or design tokens file, pass it with `--attachment` (text references fold into the direction; images attach visually).
 
 ## 3b. Parallelize design and integration
 
