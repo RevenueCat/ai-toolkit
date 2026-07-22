@@ -41,6 +41,8 @@ Products in different stores have different RevenueCat product IDs even when the
 5. Ask before legal acceptance, store-plan apply, destructive actions, or any consequential choice the user has not already authorized.
 6. Never claim a stage is complete because a command returned successfully; verify the resulting state.
 7. If an operation is unavailable through CLI/MCP, say so and use the exact dashboard handoff below. Do not silently omit it.
+8. Respect human-only commands: `rc schema <command> --json` and `rc commands --json` mark some commands with `requires_human: true` and a reason. Never run one yourself, script it, or collect its inputs (passwords, 2FA codes) in chat or flags. Give the user the exact command to run in their local interactive terminal, wait for them to confirm it finished, then verify the resulting state read-only. `rc apps apple check` / `rc apps apple setup` (Apple sign-in with two-factor) are the canonical examples.
+9. Parallelize across independent surfaces, serialize within one. When multiple agents/subagents are available, run these tracks concurrently once Stage 1 (project + apps) exists: (a) RevenueCat catalog configuration via the CLI (products, entitlements, offerings, packages); (b) app-code integration (SDK install, initialization, paywall presentation, preview URL scheme) — it touches only the repo; (c) long-running AI paywall design turns, which take minutes each. Per-store stages (Test Store vs App Store vs Play) are independent after their shared prerequisites and can run in parallel. Rules: exactly one agent mutates the RevenueCat catalog at a time (concurrent creates collide on lookup keys and current-offering state); the human-only Apple sign-in stays a single human session; verification stages still run after their tracks join.
 
 ## Stage 0: inspect the app and gather the design
 
@@ -289,11 +291,12 @@ rc apps keys <app-id> --json --no-input
 
 Confirm first:
 
-- the app record and bundle ID already exist in App Store Connect;
 - the Apple account has sufficient access;
 - required agreements, tax, and banking setup are complete enough for product creation/testing.
 
-The CLI does not create the initial App Store Connect app record or accept Apple business agreements.
+The App Store Connect app record does not need to pre-exist: `rc apps apple setup` detects a missing record for the bundle ID and offers to create it (Developer Portal registration + ASC app) during the human's interactive run.
+
+`rc apps apple setup` can create a missing App Store Connect app record (it offers to register the bundle ID and create the app after the human signs in). The CLI cannot accept Apple business agreements.
 
 Check Apple access read-only, then hand setup to the human in a local interactive terminal:
 
