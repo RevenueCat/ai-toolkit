@@ -85,7 +85,11 @@ rc auth status --json --no-input
 rc commands --schemas --json
 ```
 
-`rc commands --schemas` returns the entire command surface — every flag, arg, and example — in one call. Do not run `rc schema` per command afterward; consult the fetched document, and re-check a single schema only when a command errors unexpectedly.
+Error output contract: failures print a JSON error envelope on STDERR with a nonzero exit code; stdout stays empty. An empty stdout is not a silent success — check the exit code and read stderr.
+
+To check whether an entitlement is active for a customer, use `rc customer show <id> --json` and read `active_entitlements.items[]` — that is the canonical shape. `simulate-purchase`'s customer_info blob differs; do not assert activeness from it.
+
+`rc commands --schemas` returns the entire command surface — every flag, arg, and example — in one call. Do not run `rc schema` per command afterward; consult the fetched document, and re-check a single schema only when a command errors unexpectedly. The document is large (~300KB): write it to a file and query it with jq — do not pull it whole into context or into truncating read buffers.
 
 Require `data.project_status` from `rc auth status` to be `valid` or `not_configured`. If it is `not_found`, select a real project with `rc projects use` or pass `--project-id` explicitly; never trust a dangling profile project ID.
 
