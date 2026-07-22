@@ -350,7 +350,7 @@ Report a stage matrix with `complete`, `incomplete`, `blocked`, or `not requeste
 - dashboard paywall;
 - SDK and RevenueCatUI dependencies;
 - debug `test_` configuration (active on every normal launch, not gated);
-- the real in-app upgrade flow exercised end to end — a user taps the Upgrade entry, the RevenueCat paywall opens, a purchase completes, the entitlement unlocks — in the app's NORMAL dev/simulator run mode (check the repo's docs for its test-harness flags and verify under them). CLI-simulated purchases and log assertions supplement this; they never replace it;
+- the real in-app upgrade flow verified with the human in the loop: the agent builds and installs the app, then hands the user a 30-second checklist (launch the app, find the Upgrade entry, open the paywall, complete a purchase, confirm the entitlement unlocks) and waits for their confirmation. Do NOT puppet the simulator UI (boot/tap/screenshot loops are slow and flaky); do not claim completion from CLI-simulated purchases or log assertions alone — those supplement the human tap-through, never replace it;
 - Test Store purchase verification;
 - production store credentials;
 - production products/prices/localizations;
