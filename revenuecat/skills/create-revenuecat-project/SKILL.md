@@ -197,6 +197,9 @@ Decide whether the user wants a RevenueCat dashboard paywall or custom app UI.
 For a dashboard paywall:
 
 1. Confirm the current offering and packages are complete.
+
+An offering can only have ONE paywall. If the target offering already has one, do not hand-build a new offering by copying the old one's shape — pass `rc paywalls create --offering-id <id> --duplicate-offering` and the CLI forks the offering (same packages and products) and attaches the new paywall to the copy. Or `rc paywalls create --standalone` to create the paywall unattached and connect it later.
+
 2. Build a design brief first — a generated paywall that still resembles the stock template is a failed generation. Extract the app's real brand from its code (exact hex colors from asset catalogs/theme files, font, tone from its strings, actual premium-feature names), ask the user how custom they want it (match my app / elevated brand take / new direction with a reference image), and put all of it in the prompt; pass an app screenshot via `--image` when available. Judge the result against the brief and iterate with `edit` turns naming exact deltas — see the revenuecat-paywall skill's design-brief section. Then generate:
 
    ```bash
