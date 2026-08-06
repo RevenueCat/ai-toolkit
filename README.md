@@ -95,9 +95,6 @@ Gemini has no marketplace and supports a single extension per repository, so it 
 
 Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
 
-VS Code reads the portable Agent Plugins manifest, so the plugin appears there under its lowercase identifier `revenuecat` (see [Agent Plugins clients](#agent-plugins-clients)).
-
-
 ### Agent Plugins clients
 
 Both plugins conform to [Agent Plugins 1.0.0](https://agent-plugins.org/specification): each plugin directory has a root `plugin.json`, its skills under `skills/`, and — for the `RevenueCat` plugin — the MCP server in a root `mcp.json`. Any conformant client can load `revenuecat/` or `revenuecat-play-billing/` directly from a checkout of this repo.
