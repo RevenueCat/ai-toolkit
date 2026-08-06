@@ -2,7 +2,7 @@
 
 Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Access data about your revenue, conversion funnel, and experiments. Manage your in-app purchase monetization without leaving your agent. Works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
-The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini.
+The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini. Both plugins also ship a portable [Agent Plugins 1.0.0](https://agent-plugins.org/) manifest, so any client implementing that standard can load them.
 
 ## Plugins
 
@@ -94,6 +94,15 @@ Gemini has no marketplace and supports a single extension per repository, so it 
 ### Visual Studio Code
 
 Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+
+VS Code reads the portable Agent Plugins manifest, so the plugin appears there under its lowercase identifier `revenuecat` (see [Agent Plugins clients](#agent-plugins-clients)).
+
+
+### Agent Plugins clients
+
+Both plugins conform to [Agent Plugins 1.0.0](https://agent-plugins.org/specification): each plugin directory has a root `plugin.json`, its skills under `skills/`, and — for the `RevenueCat` plugin — the MCP server in a root `mcp.json`. Any conformant client can load `revenuecat/` or `revenuecat-play-billing/` directly from a checkout of this repo.
+
+The Agent Plugins `name` field is restricted to lowercase, so the portable manifest identifies the main plugin as `revenuecat` rather than `RevenueCat`. Clients that read the Claude, Cursor, or Codex manifests are unaffected and keep the existing names.
 
 
 ### Other (unsupported agentic coding environments)

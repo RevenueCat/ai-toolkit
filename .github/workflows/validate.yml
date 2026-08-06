@@ -23,10 +23,13 @@ jobs:
             .claude-plugin/marketplace.json \
             .cursor-plugin/marketplace.json \
             .agents/plugins/marketplace.json \
+            revenuecat/plugin.json \
+            revenuecat/mcp.json \
             revenuecat/.claude-plugin/plugin.json \
             revenuecat/.cursor-plugin/plugin.json \
             revenuecat/.codex-plugin/plugin.json \
             revenuecat/gemini-extension.json \
+            revenuecat-play-billing/plugin.json \
             revenuecat-play-billing/.claude-plugin/plugin.json \
             revenuecat-play-billing/.cursor-plugin/plugin.json \
             revenuecat-play-billing/.codex-plugin/plugin.json; do
@@ -36,9 +39,23 @@ jobs:
               || { echo "  INVALID JSON: $f"; exit 1; }
           done
 
+      - name: Install ajv-cli
+        run: npm install -g ajv-cli@5
+
+      # Blocking: the Agent Plugins 1.0.0 schemas are immutable per spec, so they
+      # are vendored under scripts/schemas/ and validated offline.
+      - name: Validate Agent Plugins manifests
+        run: |
+          ajv validate --spec=draft2020 --strict=false \
+            -s scripts/schemas/agent-plugins-1.0.0-plugin.schema.json \
+            -d revenuecat/plugin.json \
+            -d revenuecat-play-billing/plugin.json
+          ajv validate --spec=draft2020 --strict=false \
+            -s scripts/schemas/agent-plugins-1.0.0-mcp.schema.json \
+            -d revenuecat/mcp.json
+
       - name: Validate Claude marketplace schema
         run: |
-          npm install -g ajv-cli
           curl -fsSL https://json.schemastore.org/claude-code-marketplace.json -o /tmp/claude-marketplace-schema.json || true
           if [ -f /tmp/claude-marketplace-schema.json ]; then
             ajv validate -s /tmp/claude-marketplace-schema.json -d .claude-plugin/marketplace.json && echo "Schema valid" || echo "Schema validation failed (non-blocking)"
