@@ -97,9 +97,7 @@ Plugin marketplace support is currently in beta in Visual Studio Code. Refer to 
 
 ### Agent Plugins clients
 
-Both plugins conform to [Agent Plugins 1.0.0](https://agent-plugins.org/specification): each plugin directory has a root `plugin.json`, its skills under `skills/`, and — for the `RevenueCat` plugin — the MCP server in a root `mcp.json`. Any conformant client can load `revenuecat/` or `revenuecat-play-billing/` directly from a checkout of this repo.
-
-The Agent Plugins `name` field is restricted to lowercase, so the portable manifest identifies the main plugin as `revenuecat` rather than `RevenueCat`. Clients that read the Claude, Cursor, or Codex manifests are unaffected and keep the existing names.
+Both plugins conform to [Agent Plugins 1.0.0](https://agent-plugins.org/specification): You can install them depending on the client as the `revenuecat` or `revenuecat-play-billing` plugin.
 
 
 ### Other (unsupported agentic coding environments)
