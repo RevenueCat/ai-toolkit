@@ -93,7 +93,7 @@ Gemini has no marketplace and supports a single extension per repository, so it 
 
 ### Visual Studio Code
 
-Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+Plugin marketplace support is currently experimental in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
 
 ### Agent Plugins clients
 
