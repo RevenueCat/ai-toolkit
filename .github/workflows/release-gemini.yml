@@ -36,11 +36,16 @@ jobs:
         if: steps.check.outputs.exists == 'false'
         run: |
           # Archive revenuecat/ contents, excluding dot-files and dot-directories.
+          # plugin.json and mcp.json are the portable Agent Plugins manifests and
+          # are not dot-files, so exclude them explicitly — Gemini reads
+          # gemini-extension.json and has no use for them.
           # Run tar from inside revenuecat so '*' expands to real entries there.
           (
             cd revenuecat
             tar -czf /tmp/revenuecat.tar.gz \
               --exclude='.*' \
+              --exclude='plugin.json' \
+              --exclude='mcp.json' \
               *
           )
 

@@ -2,7 +2,7 @@
 
 Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Access data about your revenue, conversion funnel, and experiments. Manage your in-app purchase monetization without leaving your agent. Works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
-The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini.
+The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini. Both plugins also ship a portable [Agent Plugins 1.0.0](https://agent-plugins.org/) manifest, so any client implementing that standard can load them.
 
 ## Plugins
 
@@ -93,7 +93,11 @@ Gemini has no marketplace and supports a single extension per repository, so it 
 
 ### Visual Studio Code
 
-Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+Plugin marketplace support is currently experimental in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+
+### Agent Plugins clients
+
+Both plugins conform to [Agent Plugins 1.0.0](https://agent-plugins.org/specification): You can install them depending on the client as the `revenuecat` or `revenuecat-play-billing` plugin.
 
 
 ### Other (unsupported agentic coding environments)

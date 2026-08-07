@@ -5,7 +5,16 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - 2026-06-04
+## [2.0.0r3] – 2026-08-07
+
+### Added
+
+- **Agent Plugins 1.0.0 support** — Both plugins now ship a portable [Agent Plugins](https://agent-plugins.org/) manifest at their root (`revenuecat/plugin.json`, `revenuecat-play-billing/plugin.json`), plus `revenuecat/mcp.json` for the RevenueCat MCP server. The existing Claude, Cursor, Codex, and Gemini manifests are unchanged. Note that the Agent Plugins `name` field is lowercase-only, so the portable manifest identifies the main plugin as `revenuecat`
+- CI now validates the portable manifests against the vendored Agent Plugins schemas in `scripts/schemas/` (blocking)
+
+---
+
+## [2.0.0r2] - 2026-06-04
 
 ### Added
 

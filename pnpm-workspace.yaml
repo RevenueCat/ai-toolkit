@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/pnpm-workspace.json
+
+minimumReleaseAge: 4320 # 3 days
+minimumReleaseAgeExclude:
+  - '@revenuecat/*'
+
+saveExact: true
