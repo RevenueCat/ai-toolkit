@@ -7,7 +7,9 @@ description: "Create, bootstrap, or audit a working RevenueCat monetization setu
 
 Own the complete lifecycle. Do not stop after creating dashboard objects or installing an SDK. A working setup has a configured RevenueCat graph, an app build that can make a Test Store purchase, and—when requested—a separately configured production store path.
 
-Prefer the RevenueCat CLI (`rc`) when installed and capable. Fall back to RevenueCat MCP tools for supported operations. Use a signed-in RevenueCat dashboard only when neither surface exposes a required operation, the user authorized the change, and browser control is available.
+`rc setup` is the guided entry point for standing up a RevenueCat project. Start there when bootstrapping from nothing: it handles auth, the project and app records, and upfront Apple connect, then this skill's stages finish and verify the catalog, paywall, SDK integration, and stores.
+
+Use whichever surface you have for a given operation, the RevenueCat CLI (`rc`) or the RevenueCat MCP tools. Paywalls are the exception: lean on the CLI, which owns the `generate`/`edit` AI design loop with screenshot references (`--image`). Use a signed-in RevenueCat dashboard only when neither surface exposes a required operation, the user authorized the change, and browser control is available.
 
 ## Define the requested finish line
 
@@ -35,7 +37,7 @@ Products in different stores have different RevenueCat product IDs even when the
 ## Operating contract
 
 1. Inspect before creating. Reuse resources that already represent the requested app or identifier.
-2. Maintain a setup ledger containing project ID, every app ID and type, product IDs by store, entitlement IDs, offering/package IDs, paywall status, and public key type. Never put secret keys or Apple credentials in it.
+2. Maintain a setup ledger containing project ID, every app ID and type, product IDs by store, entitlement IDs, offering/package IDs, paywall status, and public key type. Never put secret keys or Apple credentials in it. Reference a paywall or workflow by both name and id, e.g. `Moodly Pro (pw_abc123)`, in the ledger, handoffs, and the report so the reference is unambiguous.
 3. Execute stages in order and verify each stage before moving on.
 4. Use `--json --no-input` for agent commands and parse the JSON envelope's `data` field. Use `rc schema <command> --json` instead of guessing flags.
 5. Ask before legal acceptance, store-plan apply, destructive actions, or any consequential choice the user has not already authorized.
@@ -198,7 +200,7 @@ For a dashboard paywall:
 
 1. Confirm the current offering and packages are complete.
 
-An offering can only have ONE paywall. If the target offering already has one, do not hand-build a new offering by copying the old one's shape — pass `rc paywalls create --offering-id <id> --duplicate-offering` and the CLI forks the offering (same packages and products) and attaches the new paywall to the copy. Or `rc paywalls create --standalone` to create the paywall unattached and connect it later.
+An offering can only have ONE paywall. If the target offering already has one, edit that paywall in place with `rc paywalls edit <paywall-id>` rather than hand-building a duplicate offering. To design a separate paywall, run `rc paywalls generate` against a different offering.
 
 2. Build a design brief first — a generated paywall that still resembles the stock template is a failed generation. Extract the app's real brand from its code (exact hex colors from asset catalogs/theme files, font, tone from its strings, actual premium-feature names), ask the user how custom they want it (match my app / elevated brand take / new direction with a reference image), and put all of it in the prompt; pass an app screenshot via `--image` when available. Judge the result against the brief and iterate with `edit` turns naming exact deltas — see the revenuecat-paywall skill's design-brief section. Then generate:
 
@@ -211,7 +213,7 @@ An offering can only have ONE paywall. If the target offering already has one, d
 
    The command waits for the persisted Astra task by default. If using `--async`, capture `data.task_id` and run `rc paywalls task <task-id> --wait --json --no-input`; do not start the same generation again while its task is queued or running.
 
-   If AI generation is unavailable or the user explicitly wants the default template, use `rc paywalls create --offering-id <offering-id> --json --no-input`.
+   If AI generation is unavailable, hand the paywall build off to the dashboard (Paywalls, open the offering, build and publish).
 
 3. Capture `data.paywall_id` and `data.editor_url`. Paywall AI Editor always saves an unpublished draft. For requested revisions, run `rc paywalls edit <paywall-id> --prompt "<change>" --context "<relevant context>" --json --no-input`; do not manipulate the raw components JSON.
 4. Review the draft and editor link, then publish the customer-facing draft only after approval:
@@ -225,7 +227,7 @@ An offering can only have ONE paywall. If the target offering already has one, d
 
 `rc paywalls publish` may return 404 "Resource not found" even for a real draft: the v2 publish action is currently beta-gated. That is not a paywall-existence bug — hand publishing to the user as a dashboard step (Paywalls → open the draft → Publish) and continue.
 
-If neither `rc paywalls generate` nor the Cloud MCP Paywall AI Editor tools are available, create the default draft or hand customization off exactly: RevenueCat dashboard → Paywalls → open the draft → customize/review. If `paywalls publish` is absent from the fetched command surface, check an authenticated MCP publish tool or hand off the final Publish action.
+If neither `rc paywalls generate` nor the Cloud MCP Paywall AI Editor tools are available, hand the paywall off exactly: RevenueCat dashboard → Paywalls → open the offering → build/customize/review. If `paywalls publish` is absent from the fetched command surface, check an authenticated MCP publish tool or hand off the final Publish action.
 
 Do not confuse a created draft or fallback paywall layout with a published dashboard paywall. If `published_at` is empty or only the fallback renders, mark dashboard paywall configuration incomplete.
 
