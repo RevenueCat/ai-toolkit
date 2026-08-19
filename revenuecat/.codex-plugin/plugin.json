@@ -1,6 +1,6 @@
 {
-  "name": "RevenueCat",
-  "version": "2.0.0",
+  "name": "revenuecat",
+  "version": "2.0.1",
   "description": "Configure your RevenueCat integration and access data from your RevenueCat projects.",
   "homepage": "https://www.revenuecat.com/docs/tools/mcp/overview",
   "repository": "https://github.com/RevenueCat/ai-toolkit",

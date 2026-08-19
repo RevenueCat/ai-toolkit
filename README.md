@@ -24,13 +24,13 @@ From within Claude Code
 ```
 /plugin
 ```
-Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `RevenueCat` plugin. If you ship Android and want handbook-level Google Play depth, also select `revenuecat-play-billing`.
+Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `revenuecat` plugin. If you ship Android and want handbook-level Google Play depth, also select `revenuecat-play-billing`.
 
 Or from the command line:
 
 ```
 claude plugins marketplace add RevenueCat/ai-toolkit
-claude plugins install RevenueCat
+claude plugins install revenuecat
 claude plugins install revenuecat-play-billing
 ```
 
@@ -49,7 +49,7 @@ You can add the RevenueCat AI Toolkit to Cursor from the [Cursor Marketplace](ht
 codex plugin marketplace add RevenueCat/ai-toolkit
 ```
 
-Start Codex, then run `/plugins`, search for `RevenueCat`, and install.
+Start Codex, then run `/plugins`, search for `revenuecat`, and install.
 
 Installing the plugin does not trigger authentication automatically. If the RevenueCat MCP server shows as "Not logged in", run:
 
@@ -74,6 +74,8 @@ Installing the plugin does not trigger authentication automatically. If the Reve
 codex mcp login RevenueCat
 ```
 
+**Upgrading from v2.0.0 or earlier (Codex CLI and Desktop App):** The plugin was renamed from `RevenueCat` to `revenuecat` in v2.0.1. A previously installed `RevenueCat` plugin keeps working from Codex's local cache but no longer receives updates. To get back on the update path, open `/plugins`, uninstall `RevenueCat`, and install `revenuecat`. Your MCP server login is preserved — no need to run `codex mcp login` again.
+
 **Troubleshooting (Codex CLI and Desktop App):** If the RevenueCat MCP server disappears from Settings or the agent loses access to RevenueCat tools after restarting Codex, you are hitting a known Codex issue with reloading plugin-provided MCP servers ([openai/codex#25809](https://github.com/openai/codex/issues/25809)). As a workaround, register the MCP server globally — the plugin's skills keep working, and the server survives restarts:
 
 ```bash
@@ -88,7 +90,7 @@ codex mcp login RevenueCat
 gemini extensions install https://github.com/RevenueCat/ai-toolkit
 ```
 
-Gemini has no marketplace and supports a single extension per repository, so it installs the `RevenueCat` plugin only. The `revenuecat-play-billing` plugin is available on Claude Code, Cursor, Codex, and VS Code.
+Gemini has no marketplace and supports a single extension per repository, so it installs the `revenuecat` plugin only. The `revenuecat-play-billing` plugin is available on Claude Code, Cursor, Codex, and VS Code.
 
 
 ### Visual Studio Code
