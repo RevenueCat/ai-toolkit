@@ -6,12 +6,14 @@
     "name": "RevenueCat",
     "email": "support@revenuecat.com"
   },
+  "renames": { "RevenueCat": "revenuecat" },
   "plugins": [
     {
-      "name": "RevenueCat",
+      "name": "revenuecat",
+      "displayName": "RevenueCat",
       "source": "./revenuecat",
       "description": "Set up RevenueCat, integrate it, and access data.",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "category": "developer-tools",
       "author": { "name": "RevenueCat" },
       "homepage": "https://www.revenuecat.com",
