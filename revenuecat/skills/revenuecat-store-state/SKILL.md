@@ -139,6 +139,8 @@ rc products store submit <product-id> [<product-id>...] --yes --json --no-input
 - All products submitted together must belong to the same app bundle.
 - The response reports each product as `submitted` or `skipped` (with a reason) — relay per-product outcomes, including skips. If a submission fails, report why and stop; submit again only if the user asks.
 
+**First product exception:** the first-ever In-App Purchase or subscription for an app cannot be submitted this way. App Store Connect requires the first one to be reviewed **with a new app version** — add it on the app's version page in App Store Connect ("In-App Purchases and Subscriptions") and submit that version. Until the app has at least one approved product, `submit` returns `skipped` with that explanation; that is expected, not a failure. Tell the user to submit through the app version, don't retry.
+
 Apple's [Submit an In-App Purchase](https://developer.apple.com/help/app-store-connect/manage-submissions-to-app-review/submit-an-in-app-purchase) documents what happens next — link it when the user asks how review works.
 
 ## Store prerequisites
