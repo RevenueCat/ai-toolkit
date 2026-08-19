@@ -31,7 +31,7 @@ rc products store plan <app-id> \
   --no-input
 ```
 
-The JSON input is either an array of desired states or an object with a `desired_states` array. Use `rc schema products store plan --json` and the command's validation errors to determine the installed version's exact fields.
+The JSON input is either an array of desired states or an object with a `desired_states` array. Consult the `rc commands --schemas` output and the command's validation errors for the installed version's exact fields.
 
 Each new plan re-reads the current store state and computes the diff against it, so a plan reflects manual App Store Connect / Play Console edits too — **with one caveat**: the read is cached for about 4 hours and only evicted when a plan is applied. If someone edited the store by hand after a recent unapplied plan, a fresh plan can still diff against the stale cached state. When that matters, apply or discard the stale plan first, or warn the user that very recent manual store edits may not be reflected yet.
 
@@ -52,6 +52,8 @@ If the user rejects it, discard it:
 ```bash
 rc products store discard <plan-id> --yes --json --no-input
 ```
+
+There can be at most one active plan per project. If `plan` or `sync` fails because a plan is already active, inspect it with `rc products store show <plan-id>`, then apply or discard it before creating a new one.
 
 Never run `plan` again between review and apply. A newly generated plan is a different artifact even when the input appears identical. Never add `--yes` until the user or the calling workflow has approved the displayed actions.
 
@@ -106,7 +108,7 @@ Three warnings on App Store plans mark *submission* requirements, not creation b
 |---|---|---|
 | `store_state.review_information.notes` | Reviewer instructions (test account, how to reach the paywall) | JSON `store_state.review_information.notes`; CSV `app_store_review_notes` column |
 | `store_state.review_information.screenshot` | A paywall screenshot for review | Post-apply step — it takes a RevenueCat product ID, so the plan-level screenshot warning is expected pre-apply and cannot be cleared in the plan. After apply: `rc products store screenshot <product-id> --file paywall.png` (reserves the slot, uploads to Apple, attaches — one command). MCP alternative: `upload-product-store-state-screenshot`, then reference the returned `screenshot_id` in `store_state.review_information.screenshot`. If omitted, RevenueCat uploads a placeholder so the product still reaches READY_TO_SUBMIT — flag to the user that a real, Apple-compliant screenshot should replace it before submission. |
-| `store_state.subscription_group_localizations` | Localized subscription group display name | JSON `store_state.subscription_group_localizations.<locale>.name` (and optional `.custom_app_name`); CSV `app_store_subscription_group_name` / `app_store_subscription_group_localized_name` columns |
+| `store_state.subscription_group_localizations` | Localized subscription group display name | JSON `store_state.subscription_group_localizations.<locale>.name` (and optional `.custom_app_name`); CSV `app_store_subscription_group_localized_name` (and `app_store_subscription_group_custom_app_name`). Note `app_store_subscription_group_name` sets the group's name, not its localization. |
 
 Nesting matters: these fields live inside `store_state`, not at the desired-state top level and not under `common`. The schema rejects misplaced fields with `Additional properties are not allowed` — that error means wrong nesting, not a missing capability.
 
@@ -128,7 +130,7 @@ Nesting matters: these fields live inside `store_state`, not at the desired-stat
 Applying a plan configures the product in App Store Connect but does **not** submit it for Apple review — until it is submitted, an App Store product is not purchasable no matter how ready it looks. This is the most common reason a product applies "successfully" yet never goes live.
 
 ```bash
-rc products store submit <product-id> [<product-id>...] --json --no-input
+rc products store submit <product-id> [<product-id>...] --yes --json --no-input
 ```
 
 - App Store only. Play Store, RC Billing, and Test Store products do not have this step.

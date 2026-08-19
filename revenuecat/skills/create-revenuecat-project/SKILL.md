@@ -89,7 +89,7 @@ rc commands --schemas --json
 
 Error output contract: failures print a JSON error envelope on STDERR with a nonzero exit code; stdout stays empty. An empty stdout is not a silent success — check the exit code and read stderr.
 
-To check whether an entitlement is active for a customer, use `rc customer show <id> --json` and read `active_entitlements.items[]` — that is the canonical shape. `simulate-purchase`'s customer_info blob differs; do not assert activeness from it.
+To check whether an entitlement is active for a customer, use `rc customers show <id> --json` and read `active_entitlements.items[]` — that is the canonical shape. `simulate-purchase`'s customer_info blob differs; do not assert activeness from it.
 
 `rc commands --schemas` returns the entire command surface — every flag, arg, and example — in one call. Do not run `rc schema` per command afterward; consult the fetched document, and re-check a single schema only when a command errors unexpectedly. The document is large (~300KB): write it to a file and query it with jq — do not pull it whole into context or into truncating read buffers.
 
@@ -205,17 +205,17 @@ An offering can only have ONE paywall. If the target offering already has one, e
 2. Build a design brief first — a generated paywall that still resembles the stock template is a failed generation. Extract the app's real brand from its code (exact hex colors from asset catalogs/theme files, font, tone from its strings, actual premium-feature names), ask the user how custom they want it (match my app / elevated brand take / new direction with a reference image), and put all of it in the prompt; pass an app screenshot via `--image` when available. Judge the result against the brief and iterate with `edit` turns naming exact deltas — see the revenuecat-paywall skill's design-brief section. Then generate:
 
    ```bash
-   rc paywalls generate <offering-id> \
+   rc paywalls generate --offering-id <offering-id> \
      --prompt "<approved paywall direction>" \
      --context "<concise product, audience, brand, and premium-feature context>" \
      --json --no-input
    ```
 
-   The command waits for the persisted generation task by default. If using `--async`, capture `data.task_id` and run `rc paywalls task <task-id> --wait --json --no-input`; do not start the same generation again while its task is queued or running.
+   `generate` runs synchronously and streams progress; when it returns, the draft is saved and a session file is written. Do not start the same generation again — continue from the draft with `edit`.
 
    If AI generation is unavailable, hand the paywall build off to the dashboard (Paywalls, open the offering, build and publish).
 
-3. Capture `data.paywall_id` and `data.editor_url`. Paywall AI Editor always saves an unpublished draft. For requested revisions, run `rc paywalls edit <paywall-id> --prompt "<change>" --context "<relevant context>" --json --no-input`; do not manipulate the raw components JSON.
+3. Capture `data.paywall_id` and `data.dashboard_url`. Paywall AI Editor always saves an unpublished draft. For requested revisions, run `rc paywalls edit <paywall-id> --prompt "<change>" --context "<relevant context>" --json --no-input`; do not manipulate the raw components JSON.
 4. Review the draft and editor link, then publish the customer-facing draft only after approval:
 
    ```bash
@@ -286,7 +286,7 @@ rc customer simulate-purchase \
   --yes --json --no-input
 ```
 
-Require the returned customer info to show the intended active entitlement, then confirm the customer through `rc customer show`. This proves backend Test Store purchase processing and entitlement activation. It does not prove the app's paywall UI, cancellation/failure UI, gated screen, or restore interaction; observe those in the running app before claiming the entire UI flow is verified.
+Require the returned customer info to show the intended active entitlement, then confirm the customer through `rc customers show`. This proves backend Test Store purchase processing and entitlement activation. It does not prove the app's paywall UI, cancellation/failure UI, gated screen, or restore interaction; observe those in the running app before claiming the entire UI flow is verified.
 
 ## Stage 7: configure the production store
 
