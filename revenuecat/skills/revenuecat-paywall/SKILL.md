@@ -24,9 +24,9 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 ## 2. Shared concepts (all platforms)
 
 - **Paywalls require an Offering with a paywall attached in the RevenueCat dashboard.** The SDK pulls offerings via `getOfferings()`. If no offering has a paywall configured, RevenueCatUI falls back to a default paywall layout, which is not what you want in production.
-- **Design, publication, and app presentation are separate.** Prefer `rc paywalls generate <offering-id> --prompt "<direction>" --session <file>` to create an AI-designed draft (optionally `--image <png>` for visual references, up to 3) and `rc paywalls edit --session <file> --prompt "<change>"` for follow-up turns; `rc paywalls rewind --session <file>` undoes the last turn. The commands stream Astra live and persist the full editor state in the session file — keep that file for the whole design conversation; a lost session file means starting the design over. Astra may reply with a clarifying question instead of a design (its reply is in the `activity` output); answer it with another `edit` turn.
+- **Design, publication, and app presentation are separate.** Prefer `rc paywalls generate <offering-id> --prompt "<direction>" --session <file>` to create an AI-designed draft (optionally `--image <png>` for visual references, up to 3) and `rc paywalls edit --session <file> --prompt "<change>"` for follow-up turns; `rc paywalls rewind --session <file>` undoes the last turn. The commands stream the paywall AI live and persist the full editor state in the session file — keep that file for the whole design conversation; a lost session file means starting the design over. The AI may reply with a clarifying question instead of a design (its reply is in the `activity` output); answer it with another `edit` turn.
 - **Designs persist to RevenueCat automatically.** Every completed generate/edit turn saves the designed components onto the paywall draft via the public API (revision-guarded; a warning is printed if the save fails — re-run an edit turn to retry). `rc paywalls edit <paywall-id>` also works on any existing paywall, including dashboard-authored ones, by fetching its draft (or published) components as the starting state. After review, `rc paywalls publish <paywall-id> --yes` ships the design; verify non-null `published_at` and `rc offerings preview <app-id>` returning non-null `paywall_components`.
-- The CLI owns the paywall design loop: `generate` and `edit` run Astra with screenshot references (`--image`), so lean on the CLI for design even when MCP is available. If AI generation is unavailable, hand the design off to the dashboard exactly (Paywalls, open the offering, build the paywall). Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
+- The CLI owns the paywall design loop: `generate` and `edit` run the paywall AI with screenshot references (`--image`), so lean on the CLI for design even when MCP is available. If AI generation is unavailable, hand the design off to the dashboard exactly (Paywalls, open the offering, build the paywall). Do not claim that generating, editing, or installing RevenueCatUI published the paywall.
 - **The active key selects the store products.** A debug build using `test_…` must render the Test Store products attached to each package; a release build using `appl_…` or `goog_…` must render the corresponding platform products attached to those same packages.
 - **Offering vs. entitlement.** Users purchase a product through a package in an offering. Access is granted via an entitlement (typically `"premium"` or `"pro"`). Gate premium features on the entitlement, not on the offering.
 - **Placement is a strategy, not a mechanism choice.** A complete integration surfaces the paywall in MORE than one place. Requirements:
@@ -54,7 +54,7 @@ Each platform file is self contained: install command, exact snippet to present 
 
 ## 3a. Design brief — the paywall must look like THEIR app
 
-A generated paywall that resembles the stock template is a failed generation, even if Astra "customized" it. You have something Astra does not: the app's codebase. Build a design brief before the first `generate` call:
+A generated paywall that resembles the stock template is a failed generation, even if the AI "customized" it. You have something the AI does not: the app's codebase. Build a design brief before the first `generate` call:
 
 1. **Extract the app's brand from its code.** Primary/accent/background colors as exact hex (iOS asset catalogs `*.xcassets` Colors, `Theme`/`Color` extensions; Android `colors.xml`/Compose theme; Flutter `ThemeData`; RN/Expo tailwind config or theme files), the display font family, corner-radius/spacing conventions, dark-mode palette, the app's name and icon style, and its voice (read onboarding/marketing strings — playful? clinical? luxe?).
 2. **Ask the user for direction when interactive.** One question: how custom should this be — (a) match my app's existing look, (b) elevated take on my brand, (c) something new, here's a reference — and whether they have a screenshot/design to match (`--image`, up to 3, is the strongest signal you can send).
@@ -65,7 +65,7 @@ Screenshot the app (or its icon/onboarding) and pass it via `--image` whenever p
 
 ## 3b. Parallelize design and integration
 
-Astra turns take one to several minutes each. Do not sit idle on them:
+Paywall AI turns take one to several minutes each. Do not sit idle on them:
 
 - Run `rc paywalls generate` / `edit` in a background shell or a dedicated
   subagent while a second worker wires the app code in parallel —

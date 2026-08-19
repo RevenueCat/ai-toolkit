@@ -211,7 +211,7 @@ An offering can only have ONE paywall. If the target offering already has one, e
      --json --no-input
    ```
 
-   The command waits for the persisted Astra task by default. If using `--async`, capture `data.task_id` and run `rc paywalls task <task-id> --wait --json --no-input`; do not start the same generation again while its task is queued or running.
+   The command waits for the persisted generation task by default. If using `--async`, capture `data.task_id` and run `rc paywalls task <task-id> --wait --json --no-input`; do not start the same generation again while its task is queued or running.
 
    If AI generation is unavailable, hand the paywall build off to the dashboard (Paywalls, open the offering, build and publish).
 
