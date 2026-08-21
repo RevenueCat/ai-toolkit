@@ -11,7 +11,7 @@ Refer to the MCP tool schemas for the exact parameters of each tool.
 
 ## Prerequisites
 
-Store-state writes require store credentials connected to the RevenueCat project (an App Store Connect API key or a Google Play service account) and a RevenueCat login with write access to the project. If a write fails with a credentials or permission error, report what is missing and how to fix it (dashboard app settings for store credentials) instead of retrying.
+Store-state writes require store credentials connected to the RevenueCat project (an App Store Connect API key, or a Google Play service account with the **Manage store presence** permission) and a RevenueCat login with write access to the project. If a write fails with a credentials or permission error, report what is missing and how to fix it (dashboard app settings for store credentials) instead of retrying.
 
 ## Confirm before writing
 
