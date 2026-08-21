@@ -49,6 +49,23 @@ Claude: RevenueCat Project Status
         ✅ Configuration looks healthy!
 ```
 
+### Store Product Management
+
+```
+You: Raise the price of my annual plan to $89.99 on the App Store
+
+Claude: [reads current store state]
+        rc_annual — currently $79.99 (USD base), live in 175 territories
+        Proposed: $89.99 base price, other territories equalized by Apple
+
+        This changes what live customers pay. Apply?
+
+You: Yes
+
+Claude: [applies the change and polls the operation]
+        Done — the new price is live in App Store Connect.
+```
+
 ## MCP
 
 This plugin contains the RevenueCat MCP server setup and uses it to access your RevenueCat projects.

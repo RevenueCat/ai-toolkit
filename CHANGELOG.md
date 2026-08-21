@@ -5,6 +5,18 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] – 2026-08-21
+
+### Added
+
+- **Store-state product management is now generally available** — The RevenueCat MCP server's store-state tools (`get-product-store-state`, `set-product-store-state`, `get-product-store-state-operation`, `upload-product-store-state-screenshot`, `create-product-prices`, `equalize-subscription-prices`, `submit-products-to-store`) let agents inspect and change product state — prices, availability, review metadata — directly in App Store Connect and Google Play Console
+
+### Changed
+
+- **revenuecat-store-state** skill updated for the GA tool set: covers `create-product-prices` and `submit-products-to-store`, documents the store-credentials prerequisite, and instructs agents to show a before → after summary and get explicit user confirmation before production-store writes (price changes on live products, availability removal, store submission)
+
+---
+
 ## [2.0.0r3] – 2026-08-07
 
 ### Added
