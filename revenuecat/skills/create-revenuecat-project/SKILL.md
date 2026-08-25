@@ -281,15 +281,13 @@ Confirm first:
 - the Apple account has sufficient access;
 - required agreements, tax, and banking setup are complete enough for product creation/testing.
 
-The App Store Connect app record does not need to pre-exist: `rc apps apple setup` detects a missing record for the bundle ID and offers to create it (Developer Portal registration + ASC app) during the human's interactive run.
-
-`rc apps apple setup` can create a missing App Store Connect app record (it offers to register the bundle ID and create the app after the human signs in). The CLI cannot accept Apple business agreements.
+The App Store Connect app record does not need to pre-exist: `rc setup apple` detects a missing record for the bundle ID and offers to create it (Developer Portal registration + ASC app) during the human's interactive run. It cannot accept Apple business agreements.
 
 Check Apple access read-only, then hand setup to the human in a local interactive terminal:
 
 ```bash
 rc apps apple check <app-store-app-id>
-rc apps apple setup <app-store-app-id>
+rc setup apple <app-store-app-id>
 ```
 
 Never request an Apple password, session cookie, or 2FA code in chat, a model-visible prompt, a flag, or a file. Apple credentials go directly from the local CLI to Apple and are not stored by RevenueCat. `setup` may create one-time downloadable In-App Purchase and App Store Connect API keys and upload the generated keys to RevenueCat after approval. Apple Small Business Program dates are outside this workflow.
@@ -305,7 +303,7 @@ After apply succeeds:
 
 ### Other stores
 
-Follow the same separation: distinct app, credentials, products, public key, and sandbox verification. Google Play requires configured service credentials before store-state operations.
+Follow the same separation: distinct app, credentials, products, public key, and sandbox verification. Google Play requires configured service credentials before store-state operations — set them up with `rc setup google <play-store-app-id>` (guided, human-run: local Google sign-in, bootstraps and uploads the service-account credential).
 
 ## Stage 8: verify the production-store path
 

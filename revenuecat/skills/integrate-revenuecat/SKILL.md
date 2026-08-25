@@ -7,7 +7,7 @@ description: Install and configure the RevenueCat Purchases SDK in an app, inclu
 
 Use this skill when the user wants to add RevenueCat to a project for the first time, or to reconfigure the SDK with public API keys. The skill covers two halves:
 
-1. **Dashboard side** — set up the project, register the app, and obtain the public API key, all through the RevenueCat MCP server.
+1. **Dashboard side** — set up the project, register the app, and obtain the public API key, using whichever surface the user has: the `rc` CLI or the RevenueCat MCP server.
 2. **App side** — install the Purchases SDK, call `Purchases.configure(…)` at app entry, and verify the configuration banner in the logs.
 
 Walk them in order. Most integrations need both halves, even when the user asks "just install the SDK" — the SDK needs an API key from the dashboard.
@@ -31,27 +31,25 @@ Before touching the dashboard, gather the facts:
 - **Technology**: native iOS (Swift), native Android (Kotlin / Java), React Native, Flutter, Kotlin Multiplatform. SDK list: https://www.revenuecat.com/docs/getting-started/installation.md.
 - **App identifier**: bundle ID (iOS), package name (Android). Pull from `Info.plist` / `AndroidManifest.xml` / `app.json` / `pubspec.yaml` rather than asking.
 
-## 2. Dashboard side — RevenueCat MCP
+## 2. Dashboard side
 
-Use the RevenueCat MCP server for every tool call below.
-
-Before depending on this section, enumerate the available RevenueCat MCP tools and confirm the connector is already authenticated. If it is unavailable or would require an interactive login the agent cannot complete, use the equivalent `rc ... --json --no-input` inventory commands or hand control back to `create-revenuecat-project`; do not assume MCP fallback exists.
+These steps work through either surface — the `rc` CLI or the RevenueCat MCP server. Use whichever the user has set up; each step lists both. Confirm your chosen surface is available before depending on it (for MCP, that the connector is authenticated); if neither is, hand control back to `create-revenuecat-project`.
 
 ### 2a. Get or create the project
-- `list-projects` — list accessible projects. If multiple, ask the user which one matches this app, or offer to create a new one.
+- List accessible projects: `rc projects list --json --no-input` or MCP `list-projects`. If multiple, ask the user which one matches this app, or offer to create one (`rc projects create` / MCP `create-project`).
 - If there is no project, hand off to the `create-revenuecat-project` skill, then resume here.
-- Store the `project_id` for the rest of the steps.
+- Capture `data.project.id` and pass `--project-id` explicitly thereafter.
 
 ### 2b. Get or create the app
-- Check which apps are already configured in the project. A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
+- Check which apps exist: `rc apps list --json --no-input` or MCP `list-apps`. A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
 - Ask the user whether their app is already set up in App Store Connect (iOS) or Google Play Console (Android). Reassure them that store-side setup can come later — the `test_store` app is enough to start integrating.
-- If the user confirms store-side setup is done, call `create-app`:
-  - **iOS**: `type: "app_store"`, `bundle_id` from Section 1.
-  - **Android**: `type: "play_store"`, `package_name` from Section 1.
+- If the user confirms store-side setup is done, create it (`rc apps create` / MCP `create-app`):
+  - **iOS**: type `app_store`, bundle ID from Section 1.
+  - **Android**: type `play_store`, package name from Section 1.
   - `name` derived from the identifier or asked from the user.
 
 ### 2c. Get every required public API key
-- Call `list-public-api-keys` separately for the Test Store app and each production app being configured.
+- List public keys for the Test Store app and each production app being configured: `rc apps keys <app-id> --json --no-input` or MCP `list-public-api-keys`.
 - Classify keys by prefix and app ID:
   - Test Store: `test_…`
   - App Store: `appl_…`
@@ -118,17 +116,13 @@ Check whether products, entitlements, and offerings are already set up in the pr
 
 ### 5b. Store-side setup
 
-**iOS (App Store Connect)**
+Each store's credentials are set up with a single guided `rc` command — no manual key downloads or Cloud Console clicking. Both are **human-run** (Apple needs 2FA; Google opens a local browser sign-in), so hand the exact command to the user in their own terminal and verify the result read-only afterward. Never collect Apple or Google credentials in chat, a model-visible prompt, a flag, or a file — they go straight from the local CLI to Apple/Google.
 
-1. **In-App Purchase Key (recommended for StoreKit 2)** — App Store Connect → Users and Access → Integrations → In-App Purchase. Generate key, download the `.p8` file. Note the Key ID and Issuer ID.
-2. **Shared Secret (legacy StoreKit 1)** — App Store Connect → App → App Information → App-Specific Shared Secret.
-3. If the user provides this information, register it on the RevenueCat side via `create-app` / `update-app`.
+**iOS (App Store Connect)** — `rc setup apple <app-store-app-id>`: signs in to App Store Connect, creates and uploads the In-App Purchase and App Store Connect API keys, and fetches the vendor number. Run `rc apps apple check <app-id>` first for a read-only preview.
 
-**Android (Google Play Console)**
+**Android (Google Play)** — `rc setup google <play-store-app-id>`: local Google sign-in, bootstraps the RevenueCat service-account credential, grants package-scoped Play access, and uploads it to RevenueCat.
 
-1. **Service account credentials** — Create a service account in Google Cloud Console. Grant "Service Account User" role. Create a JSON key. In Play Console, grant the service account access with "View financial data" permission.
-2. **Real-time Developer Notifications (RTDN)** — Set up a Cloud Pub/Sub topic. Configure in Play Console → Monetization setup.
-3. If the user provides this information, register it via `create-app` / `update-app`.
+If the user would rather not use the CLI, the same credentials can be configured manually in the RevenueCat dashboard (App → store settings) using App Store Connect / Google Play Console; the `rc setup` commands just automate that.
 
 ### 5c. Subsequent skills
 
