@@ -10,7 +10,7 @@ Use this skill when the user reports a RevenueCat behavior that does not match e
 This skill combines two angles:
 
 1. **Code-side diagnosis** — turn on debug logging, walk a universal checklist, drop into platform specifics.
-2. **Dashboard inspection** — use the RevenueCat MCP server to read the project, apps, products, entitlements, offerings, and webhooks, and offer fixes.
+2. **Dashboard inspection** — use the RevenueCat MCP server or the `rc` CLI (see the `revenuecat-cli` skill) to read the project, apps, products, entitlements, offerings, and webhooks, and offer fixes.
 
 Work them in order. Most reports resolve before you reach the platform specifics.
 

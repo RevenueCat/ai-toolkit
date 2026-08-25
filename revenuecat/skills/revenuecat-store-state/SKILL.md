@@ -7,6 +7,8 @@ description: Use when the user wants to inspect or change the state of products 
 
 The RevenueCat MCP store-state tools read and write product state — status, pricing, availability, and review metadata — directly in App Store Connect and Google Play Console. Reads are immediate; writes are asynchronous operations that must be polled for completion.
 
+The same operations are available via the `rc` CLI (see the `revenuecat-cli` skill): `rc products store show|plan|apply|sync` and `rc products prices set`.
+
 Refer to the MCP tool schemas for the exact parameters of each tool.
 
 ## Prerequisites

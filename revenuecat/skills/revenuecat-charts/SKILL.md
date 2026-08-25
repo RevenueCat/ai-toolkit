@@ -14,6 +14,8 @@ When querying a RevenueCat chart, follow this workflow:
 2. Use `get-chart-data` with the right options to retrieve the chart data.
 3. Analyze the data, using scripts for any non-trivial arithmetic.
 
+Via the `rc` CLI (see the `revenuecat-cli` skill): `rc charts list` to list charts, `rc charts options <chart>` for the schema, and `rc charts show <chart>` for the data.
+
 In general, to avoid clogging the context, start with defined timeframes and larger resolution, then narrow down.
 
 ## 1. Discover chart options with `get-chart-options-schema`

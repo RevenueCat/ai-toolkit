@@ -9,7 +9,7 @@ Guide through setting up a complete RevenueCat project from scratch.
 
 ## Instructions
 
-**Important:** Use the RevenueCat MCP server or the `rc` CLI (whichever the user has available) for all operations below; both expose the same actions. Always list projects first (`list-projects` or `rc projects list`) to retrieve all accessible projects. If multiple projects are returned, ask the user which project to use or if they want to create a new one.
+**Important:** Use the RevenueCat MCP server or the `rc` CLI (whichever the user has available) for all operations below; both expose the same actions. See the `revenuecat-cli` skill for CLI discovery and conventions. Always list projects first (`list-projects` or `rc projects list`) to retrieve all accessible projects. If multiple projects are returned, ask the user which project to use or if they want to create a new one.
 
 ### Phase 1: Discovery
 
