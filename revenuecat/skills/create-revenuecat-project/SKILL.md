@@ -257,14 +257,14 @@ rc offerings preview <test-store-app-id> --app-user-id <verification-user> --jso
 Run one real headless success through the Test Store receipt flow:
 
 ```bash
-rc customer simulate-purchase \
+rc customers simulate-purchase \
   --app-id <test-store-app-id> \
   --product <product-id-or-store-identifier> \
   --app-user-id <verification-user> \
   --yes --json --no-input
 ```
 
-Require the returned customer info to show the intended active entitlement, then confirm the customer through `rc customer show`. This proves backend Test Store purchase processing and entitlement activation. It does not prove the app's paywall UI, cancellation/failure UI, gated screen, or restore interaction; observe those in the running app before claiming the entire UI flow is verified.
+Require the returned customer info to show the intended active entitlement, then confirm the customer through `rc customers show`. This proves backend Test Store purchase processing and entitlement activation. It does not prove the app's paywall UI, cancellation/failure UI, gated screen, or restore interaction; observe those in the running app before claiming the entire UI flow is verified.
 
 ## Stage 7: configure the production store
 
