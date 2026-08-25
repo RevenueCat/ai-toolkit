@@ -10,7 +10,7 @@ Use this skill when the user reports a RevenueCat behavior that does not match e
 This skill combines two angles:
 
 1. **Code-side diagnosis** — turn on debug logging, walk a universal checklist, drop into platform specifics.
-2. **Dashboard inspection** — use the RevenueCat MCP server to read the project, apps, products, entitlements, offerings, and webhooks, and offer fixes.
+2. **Dashboard inspection** — use the RevenueCat MCP server or the `rc` CLI (see the `revenuecat-cli` skill) to read the project, apps, products, entitlements, offerings, and webhooks, and offer fixes.
 
 Work them in order. Most reports resolve before you reach the platform specifics.
 
@@ -41,7 +41,7 @@ List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / 
 8. **Verify the appUserID.** If `logIn(appUserID)` was called with an ID that does not match what the user expects, entitlements appear missing because they are attached to a different RC user. Print `Purchases.shared.appUserID` (iOS) / `Purchases.sharedInstance.appUserID` (Android) and confirm it matches.
 9. **Reset and retry.** Uninstall the app, re-sign into the sandbox / tester account, reinstall from the correct channel, relaunch.
 
-## 3. Dashboard inspection via the RevenueCat MCP
+## 3. Dashboard inspection via the RevenueCat MCP or the `rc` CLI
 
 Use this when steps 3, 4, or 5 above point at dashboard configuration, when the user has no working app yet, or when you need to confirm a fix landed.
 
@@ -54,7 +54,7 @@ Use this when steps 3, 4, or 5 above point at dashboard configuration, when the 
 
 ### Phase B: systematic diagnosis
 
-Work through this checklist via MCP tools:
+Work through this checklist via MCP tools or their `rc` CLI equivalents (see the `revenuecat-cli` skill). Each `list-*` tool maps to `rc <noun> list` (e.g. `list-offerings` → `rc offerings list`, `list-apps` → `rc apps list`), `list-app-public-api-keys` → `rc apps keys <app-id>`, and `get-product-store-state` → `rc products show <product-id> --store-state`.
 
 #### Check 1: Project overview
 ```

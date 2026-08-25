@@ -29,7 +29,7 @@ Can be referenced as `$ARGUMENTS` in the skill.
 
 ## Instructions
 
-Use the RevenueCat MCP server for all tool calls.
+Use the RevenueCat MCP server or the `rc` CLI for all tool calls (see the `revenuecat-cli` skill). Each `list-*` tool below has an `rc <noun> list` equivalent (e.g. `list-offerings` → `rc offerings list`; note `list-webhook-integrations` → `rc webhooks list`).
 
 When the user invokes this skill, perform the following steps:
 

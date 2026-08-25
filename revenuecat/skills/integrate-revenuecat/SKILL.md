@@ -1,13 +1,13 @@
 ---
 name: integrate-revenuecat
-description: End-to-end RevenueCat integration — sets up the dashboard side via the RevenueCat MCP (project, app, public API key) and installs/configures the Purchases SDK in the app. Use when the user asks to add RevenueCat, integrate Purchases, install the RevenueCat SDK, set up a RevenueCat API key, configure Purchases on launch, or set up a brand new RevenueCat integration on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: End-to-end RevenueCat integration — sets up the dashboard side via the RevenueCat MCP or the `rc` CLI (project, app, public API key) and installs/configures the Purchases SDK in the app. Use when the user asks to add RevenueCat, integrate Purchases, install the RevenueCat SDK, set up a RevenueCat API key, configure Purchases on launch, or set up a brand new RevenueCat integration on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # integrate-revenuecat: end-to-end RevenueCat integration
 
 Use this skill when the user wants to add RevenueCat to a project for the first time, or to reconfigure the SDK with a public API key. The skill covers two halves:
 
-1. **Dashboard side** — set up the project, register the app, and obtain the public API key, all through the RevenueCat MCP server.
+1. **Dashboard side** — set up the project, register the app, and obtain the public API key, through the RevenueCat MCP server or the `rc` CLI.
 2. **App side** — install the Purchases SDK, call `Purchases.configure(…)` at app entry, and verify the configuration banner in the logs.
 
 Walk them in order. Most integrations need both halves, even when the user asks "just install the SDK" — the SDK needs an API key from the dashboard.
@@ -21,7 +21,7 @@ Available as `$ARGUMENTS` when invoked as a slash command:
 
 - `platform` (optional): One of `ios`, `android`, `kmp`, `flutter`, `react-native`. If omitted, run the detection algorithm in Section 3a.
 - `app_identifier` (optional): Bundle ID (iOS) or package name (Android). If omitted, read it from the project files (`Info.plist`, `AndroidManifest.xml`, `app.json`, `pubspec.yaml`).
-- `project_name` (optional): Name of the RevenueCat project to use. If omitted, list projects via MCP and ask the user.
+- `project_name` (optional): Name of the RevenueCat project to use. If omitted, list projects (via MCP or `rc projects list`) and ask the user.
 
 ## 1. Understand the status quo
 
@@ -31,25 +31,25 @@ Before touching the dashboard, gather the facts:
 - **Technology**: native iOS (Swift), native Android (Kotlin / Java), React Native, Flutter, Kotlin Multiplatform. SDK list: https://www.revenuecat.com/docs/getting-started/installation.md.
 - **App identifier**: bundle ID (iOS), package name (Android). Pull from `Info.plist` / `AndroidManifest.xml` / `app.json` / `pubspec.yaml` rather than asking.
 
-## 2. Dashboard side — RevenueCat MCP
+## 2. Dashboard side
 
-Use the RevenueCat MCP server for every tool call below.
+Use whichever surface the user has available: the RevenueCat MCP server or the `rc` CLI (see the `revenuecat-cli` skill for CLI discovery and conventions). Both cover the same operations for these steps, and each step below notes the MCP tool and the `rc` command.
 
 ### 2a. Get or create the project
-- `list-projects` — list accessible projects. If multiple, ask the user which one matches this app, or offer to create a new one.
+- List accessible projects: `list-projects` (MCP) or `rc projects list`. If multiple, ask the user which one matches this app, or offer to create a new one (`create-project` / `rc projects create`).
 - If there is no project, hand off to the `create-revenuecat-project` skill, then resume here.
 - Store the `project_id` for the rest of the steps.
 
 ### 2b. Get or create the app
-- Check which apps are already configured in the project. A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
+- Check which apps are already configured in the project (`list-apps` / `rc apps list`). A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
 - Ask the user whether their app is already set up in App Store Connect (iOS) or Google Play Console (Android). Reassure them that store-side setup can come later — the `test_store` app is enough to start integrating.
-- If the user confirms store-side setup is done, call `create-app`:
+- If the user confirms store-side setup is done, call `create-app` (or `rc apps create`):
   - **iOS**: `type: "app_store"`, `bundle_id` from Section 1.
   - **Android**: `type: "play_store"`, `package_name` from Section 1.
   - `name` derived from the identifier or asked from the user.
 
 ### 2c. Get the public API key
-- Call `list-public-api-keys` with the relevant app ID:
+- List public keys for the relevant app ID: `list-public-api-keys` (MCP) or `rc apps keys <app-id>`:
   - `app_store` / `play_store` if the store-side app exists.
   - Otherwise the `test_store` app.
 - The returned key is **public** and safe to embed in client app code. iOS keys are prefixed `appl_…`, Android keys `goog_…`, Amazon `amzn_…`.
