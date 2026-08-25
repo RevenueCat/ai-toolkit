@@ -9,7 +9,7 @@ Guide through setting up a complete RevenueCat project from scratch.
 
 ## Instructions
 
-**Important:** Use the RevenueCat MCP server for all tool calls. The MCP server may have access to multiple projects. Always use `list-projects` first to retrieve all accessible projects. If multiple projects are returned, ask the user which project to use or if they want to create a new one.
+**Important:** Use the RevenueCat MCP server or the `rc` CLI (whichever the user has available) for all operations below; both expose the same actions. Always list projects first (`list-projects` or `rc projects list`) to retrieve all accessible projects. If multiple projects are returned, ask the user which project to use or if they want to create a new one.
 
 ### Phase 1: Discovery
 
@@ -22,7 +22,7 @@ Ask targeted questions to understand the developer's needs:
 
 ### Phase 2: Create Resources
 
-Execute in this order — dependencies matter. 
+Execute in this order — dependencies matter. Each step names the MCP tool; the equivalent `rc` commands are `rc projects create`, `rc apps create`, `rc products create`, `rc entitlements create`, `rc entitlements attach`, `rc offerings create`, `rc packages create`, `rc packages attach`, and `rc apps keys`.
 
 1. Verify/Create Project
 `list-projects` - list accessible projects
