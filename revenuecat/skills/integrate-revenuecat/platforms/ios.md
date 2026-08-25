@@ -43,9 +43,54 @@ pod 'RevenueCat'
 
 Then `pod install`.
 
+### Tuist
+
+If the project contains `Project.swift`, preserve Tuist as the source of truth instead of editing the generated `.xcodeproj`:
+
+```swift
+let project = Project(
+    name: "MyApp",
+    packages: [
+        .remote(
+            url: "https://github.com/RevenueCat/purchases-ios",
+            requirement: .upToNextMajor(from: "<latest>")
+        )
+    ],
+    targets: [
+        .target(
+            name: "MyApp",
+            destinations: .iOS,
+            product: .app,
+            bundleId: "com.example.myapp",
+            dependencies: [
+                .package(product: "RevenueCat"),
+                .package(product: "RevenueCatUI"),
+            ],
+            settings: .settings(
+                configurations: [
+                    .debug(name: "Debug", settings: ["RC_PUBLIC_SDK_KEY": "test_YOUR_TEST_STORE_KEY"]),
+                    .release(name: "Release", settings: ["RC_PUBLIC_SDK_KEY": "appl_YOUR_APP_STORE_KEY"]),
+                ]
+            )
+        )
+    ]
+)
+```
+
+Merge these declarations into the existing `Project.swift` shape; do not replace unrelated targets or settings. Run `tuist generate`, inspect the resolved package version, and build the generated workspace. If the project uses `Tuist/Package.swift`, declare the remote package there and keep only `.external(name: "RevenueCat")` / `.external(name: "RevenueCatUI")` in target dependencies, matching the installed Tuist version's conventions.
+
+Expose `RC_PUBLIC_SDK_KEY` to `Info.plist` as `RevenueCatPublicSDKKey: $(RC_PUBLIC_SDK_KEY)` through the target's `infoPlist` dictionary or its checked-in plist. Do not put Test Store and App Store keys behind `#if targetEnvironment(simulator)`.
+
 ## Configure
 
-Call `Purchases.configure(withAPIKey:)` once at app launch.
+Call `Purchases.configure(withAPIKey:)` once at app launch. Select the key from the Xcode build configuration; do not decide based on simulator/device at runtime.
+
+Add a user-defined `RC_PUBLIC_SDK_KEY` build setting:
+
+- Debug/Test Store configuration: `test_YOUR_TEST_STORE_KEY`
+- Release configuration: `appl_YOUR_APP_STORE_KEY`
+
+Expose it through `Info.plist` as `RevenueCatPublicSDKKey` with value `$(RC_PUBLIC_SDK_KEY)`. Existing `.xcconfig` files are the preferred place for the build-setting values.
 
 ### SwiftUI `App`
 
@@ -56,8 +101,14 @@ import RevenueCat
 @main
 struct MyApp: App {
     init() {
-        Purchases.logLevel = .debug // remove for release
-        Purchases.configure(withAPIKey: "appl_YOUR_PUBLIC_SDK_KEY")
+        #if DEBUG
+        Purchases.logLevel = .debug
+        #endif
+        guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "RevenueCatPublicSDKKey") as? String,
+              !apiKey.isEmpty else {
+            fatalError("Missing RevenueCatPublicSDKKey build setting")
+        }
+        Purchases.configure(withAPIKey: apiKey)
     }
 
     var body: some Scene {
@@ -76,8 +127,14 @@ import RevenueCat
 class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        #if DEBUG
         Purchases.logLevel = .debug
-        Purchases.configure(withAPIKey: "appl_YOUR_PUBLIC_SDK_KEY")
+        #endif
+        guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "RevenueCatPublicSDKKey") as? String,
+              !apiKey.isEmpty else {
+            fatalError("Missing RevenueCatPublicSDKKey build setting")
+        }
+        Purchases.configure(withAPIKey: apiKey)
         return true
     }
 }
@@ -85,7 +142,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ## Notes
 
-- Use the **iOS** public SDK key: it starts with `appl_`. Find it in the RevenueCat dashboard under Project → API keys.
+- Use `test_…` for a Test Store development build and `appl_…` for an App Store release build. Never archive or submit with `test_…`.
+- Test Store requires purchases-ios 5.43.0 or newer. Verify the resolved package version rather than assuming `<latest>` resolved correctly.
 - Deployment target: async/await SDK APIs require iOS 13+. For older targets, completion handler variants exist (`getOfferings(completion:)`, `purchase(product:completion:)`).
 - For sandbox testing with a StoreKit Configuration File, attach it to the scheme (Run → Options → StoreKit Configuration). See `revenuecat-testing-setup` when available.
 
@@ -97,4 +155,4 @@ Build and run. In the Xcode console look for:
 [Purchases] - INFO: 😻‍👼 Purchases is configured
 ```
 
-A wrong API key shows up as an auth error log on the first `getOfferings` call. If you see no Purchases logs at all, `Purchases.logLevel = .debug` is missing or the configure call isn't running at launch.
+A wrong API key shows up as an auth error log on the first `getOfferings` call. If you see no Purchases logs at all, debug logging is missing or the configure call isn't running at launch. Verify a Debug build loads Test Store offerings, and inspect Release build settings to confirm the value begins with `appl_` without printing the complete key.

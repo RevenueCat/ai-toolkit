@@ -1,19 +1,19 @@
 ---
 name: integrate-revenuecat
-description: End-to-end RevenueCat integration — sets up the dashboard side via the RevenueCat MCP (project, app, public API key) and installs/configures the Purchases SDK in the app. Use when the user asks to add RevenueCat, integrate Purchases, install the RevenueCat SDK, set up a RevenueCat API key, configure Purchases on launch, or set up a brand new RevenueCat integration on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Install and configure the RevenueCat Purchases SDK in an app, including framework detection, Test Store and production public keys, build-environment separation, SDK version checks, initialization, and build/runtime verification. Use when adding RevenueCat dependencies or wiring Purchases into iOS, Android, Kotlin Multiplatform, Flutter, or React Native. Use create-revenuecat-project as the orchestrator when dashboard entities, products, paywalls, or store setup are also required.
 ---
 
 # integrate-revenuecat: end-to-end RevenueCat integration
 
-Use this skill when the user wants to add RevenueCat to a project for the first time, or to reconfigure the SDK with a public API key. The skill covers two halves:
+Use this skill when the user wants to add RevenueCat to a project for the first time, or to reconfigure the SDK with public API keys. The skill covers two halves:
 
-1. **Dashboard side** — set up the project, register the app, and obtain the public API key, all through the RevenueCat MCP server.
+1. **Dashboard side** — set up the project, register the app, and obtain the public API key, using whichever surface the user has: the `rc` CLI or the RevenueCat MCP server.
 2. **App side** — install the Purchases SDK, call `Purchases.configure(…)` at app entry, and verify the configuration banner in the logs.
 
 Walk them in order. Most integrations need both halves, even when the user asks "just install the SDK" — the SDK needs an API key from the dashboard.
 
 > If a project + app already exist and the user only wants to wire the SDK into code, jump to **Section 3** below.
-> If the user wants to bootstrap a brand new RevenueCat project (apps + products + entitlements + offerings), use the `create-revenuecat-project` skill instead, then come back here for the SDK install.
+> If the user wants a complete monetization setup—Test Store catalog, entitlements, offering, paywall, SDK, and production store—use `create-revenuecat-project` as the orchestrator. This skill owns only the app dependency/configuration stage.
 
 ## Arguments
 
@@ -31,28 +31,32 @@ Before touching the dashboard, gather the facts:
 - **Technology**: native iOS (Swift), native Android (Kotlin / Java), React Native, Flutter, Kotlin Multiplatform. SDK list: https://www.revenuecat.com/docs/getting-started/installation.md.
 - **App identifier**: bundle ID (iOS), package name (Android). Pull from `Info.plist` / `AndroidManifest.xml` / `app.json` / `pubspec.yaml` rather than asking.
 
-## 2. Dashboard side — RevenueCat MCP
+## 2. Dashboard side
 
-Use the RevenueCat MCP server for every tool call below.
+These steps work through either surface — the `rc` CLI or the RevenueCat MCP server. Use whichever the user has set up; each step lists both. Confirm your chosen surface is available before depending on it (for MCP, that the connector is authenticated); if neither is, hand control back to `create-revenuecat-project`.
 
 ### 2a. Get or create the project
-- `list-projects` — list accessible projects. If multiple, ask the user which one matches this app, or offer to create a new one.
+- List accessible projects: `rc projects list --json --no-input` or MCP `list-projects`. If multiple, ask the user which one matches this app, or offer to create one (`rc projects create` / MCP `create-project`).
 - If there is no project, hand off to the `create-revenuecat-project` skill, then resume here.
-- Store the `project_id` for the rest of the steps.
+- Capture `data.project.id` and pass `--project-id` explicitly thereafter.
 
 ### 2b. Get or create the app
-- Check which apps are already configured in the project. A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
+- Check which apps exist: `rc apps list --json --no-input` or MCP `list-apps`. A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
 - Ask the user whether their app is already set up in App Store Connect (iOS) or Google Play Console (Android). Reassure them that store-side setup can come later — the `test_store` app is enough to start integrating.
-- If the user confirms store-side setup is done, call `create-app`:
-  - **iOS**: `type: "app_store"`, `bundle_id` from Section 1.
-  - **Android**: `type: "play_store"`, `package_name` from Section 1.
+- If the user confirms store-side setup is done, create it (`rc apps create` / MCP `create-app`):
+  - **iOS**: type `app_store`, bundle ID from Section 1.
+  - **Android**: type `play_store`, package name from Section 1.
   - `name` derived from the identifier or asked from the user.
 
-### 2c. Get the public API key
-- Call `list-public-api-keys` with the relevant app ID:
-  - `app_store` / `play_store` if the store-side app exists.
-  - Otherwise the `test_store` app.
-- The returned key is **public** and safe to embed in client app code. iOS keys are prefixed `appl_…`, Android keys `goog_…`, Amazon `amzn_…`.
+### 2c. Get every required public API key
+- List public keys for the Test Store app and each production app being configured: `rc apps keys <app-id> --json --no-input` or MCP `list-public-api-keys`.
+- Classify keys by prefix and app ID:
+  - Test Store: `test_…`
+  - App Store: `appl_…`
+  - Play Store: `goog_…`
+  - Amazon: `amzn_…`
+- For a Test Store-ready development build, the `test_…` key is required even when the production app already exists.
+- For a release-ready build, the platform key is also required. Never silently substitute one for the other.
 
 > **Never use the secret API key in client code.** Secret keys are server-side only.
 
@@ -72,7 +76,10 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 
 ### 3b. Shared concepts (all platforms)
 
-- **Public SDK key, not secret key.** RevenueCat issues a separate public SDK key per store/platform. iOS apps use an `appl_…` key, Android apps use a `goog_…` key (Amazon uses `amzn_…`). Server-side secret keys must never appear in client apps.
+- **Public SDK key, not secret key.** RevenueCat issues a separate public SDK key per store. Test Store uses `test_…`; iOS uses `appl_…`; Android uses `goog_…`; Amazon uses `amzn_…`. Server-side secret keys must never appear in client apps.
+- **Select by build environment.** Development/debug builds use `test_…` when the requested test path is RevenueCat Test Store. Release builds use the platform-specific key. Prefer the project's existing build settings/flavor mechanism; do not switch based on runtime heuristics or whether the device is a simulator.
+- **Never ship a Test Store key.** Treat a release build containing `test_…` as a blocking verification failure.
+- **Check Test Store compatibility.** Require at least iOS 5.43.0, Android 9.9.0, Flutter 9.8.0, React Native 9.5.4, or KMP 2.2.2 when the development build uses Test Store.
 - **Configure once per app launch.** Call `Purchases.configure(…)` exactly once, as early as possible (app entry point). Later calls no-op or warn.
 - **Anonymous users by default.** If you don't pass an `appUserID`, RevenueCat creates a stable anonymous ID. Only pass `appUserID` if you already have an authenticated user at launch; otherwise call `logIn(…)` later (see the `revenuecat-identify-user` skill).
 - **Enable debug logging during integration.** Each platform file shows how. Turn it off for release builds.
@@ -97,6 +104,8 @@ Do not claim setup is complete until:
 1. The project **builds** (Xcode build, `./gradlew assembleDebug`, `flutter run`, `npx react-native run-ios`, or the KMP equivalent).
 2. The app launches and the RevenueCat SDK logs a configuration banner in the console / logcat / Metro output (each platform file describes the expected log line).
 3. No authentication errors appear on the first SDK network call. A wrong API key surfaces as an auth error log as soon as the app fetches offerings.
+4. A debug/Test Store build demonstrably loads `test_…`, while a release build demonstrably loads the platform key without printing either value.
+5. If Test Store readiness was requested, `getOfferings()` returns the expected Test Store packages. A successful build with empty offerings is not complete.
 
 If the user only asked to "install" without running the app, tell them what to look for in the logs when they do run it.
 
@@ -107,17 +116,13 @@ Check whether products, entitlements, and offerings are already set up in the pr
 
 ### 5b. Store-side setup
 
-**iOS (App Store Connect)**
+Each store's credentials are set up with a single guided `rc` command — no manual key downloads or Cloud Console clicking. Both are **human-run** (Apple needs 2FA; Google opens a local browser sign-in), so hand the exact command to the user in their own terminal and verify the result read-only afterward. Never collect Apple or Google credentials in chat, a model-visible prompt, a flag, or a file — they go straight from the local CLI to Apple/Google.
 
-1. **In-App Purchase Key (recommended for StoreKit 2)** — App Store Connect → Users and Access → Integrations → In-App Purchase. Generate key, download the `.p8` file. Note the Key ID and Issuer ID.
-2. **Shared Secret (legacy StoreKit 1)** — App Store Connect → App → App Information → App-Specific Shared Secret.
-3. If the user provides this information, register it on the RevenueCat side via `create-app` / `update-app`.
+**iOS (App Store Connect)** — `rc setup apple <app-store-app-id>`: signs in to App Store Connect, creates and uploads the In-App Purchase and App Store Connect API keys, and fetches the vendor number. Run `rc apps apple check <app-id>` first for a read-only preview.
 
-**Android (Google Play Console)**
+**Android (Google Play)** — `rc setup google <play-store-app-id>`: local Google sign-in, bootstraps the RevenueCat service-account credential, grants package-scoped Play access, and uploads it to RevenueCat.
 
-1. **Service account credentials** — Create a service account in Google Cloud Console. Grant "Service Account User" role. Create a JSON key. In Play Console, grant the service account access with "View financial data" permission.
-2. **Real-time Developer Notifications (RTDN)** — Set up a Cloud Pub/Sub topic. Configure in Play Console → Monetization setup.
-3. If the user provides this information, register it via `create-app` / `update-app`.
+If the user would rather not use the CLI, the same credentials can be configured manually in the RevenueCat dashboard (App → store settings) using App Store Connect / Google Play Console; the `rc setup` commands just automate that.
 
 ### 5c. Subsequent skills
 

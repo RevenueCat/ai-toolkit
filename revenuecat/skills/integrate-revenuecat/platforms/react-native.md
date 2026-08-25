@@ -34,9 +34,11 @@ export default function App() {
   useEffect(() => {
     Purchases.setLogLevel(LOG_LEVEL.DEBUG); // remove for release
 
-    const apiKey = Platform.OS === 'ios'
-      ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
-      : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
+    const apiKey = __DEV__
+      ? 'test_YOUR_TEST_STORE_KEY'
+      : Platform.OS === 'ios'
+        ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
+        : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
 
     Purchases.configure({ apiKey });
   }, []);
@@ -47,7 +49,8 @@ export default function App() {
 
 ## Notes
 
-- Two public SDK keys, one per platform. Branch on `Platform.OS`.
+- Development/Test Store uses `test_…`; release uses `appl_…` on iOS or `goog_…` on Android. Prefer the project's existing environment/configuration system over literals when one exists. Never ship `test_…`.
+- Test Store requires react-native-purchases 9.5.4 or newer. Verify the installed `package.json`/lockfile version.
 - Deployment targets: iOS 13+, Android minSdk 21.
 - `Purchases.configure` is synchronous; it kicks off async initialization internally. You can call `getOfferings()` right after without awaiting configure.
 - If running under Expo, confirm the user is on a dev client (not Expo Go) before testing. Purchase APIs will throw otherwise.
@@ -60,3 +63,5 @@ Run the app. Expect the native SDK logs:
 - Android → Android Studio logcat (or `adb logcat`) with tag `Purchases`: `ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`
 
 Metro bundler (JS) console will not show the native SDK logs; you need the platform logs.
+
+Fetch offerings in a development build and verify Test Store packages appear. Inspect the bundled release configuration to confirm the platform-key branch is selected without logging the complete key.

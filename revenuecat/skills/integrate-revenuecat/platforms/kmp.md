@@ -29,7 +29,9 @@ Add `mavenCentral()` to your project repositories if it isn't already there.
 
 ## Configure
 
-Call `Purchases.configure(…)` once per platform, as early as possible in each platform's entry point. The API key differs per store, so pass the right one on each platform.
+Call `Purchases.configure(…)` once per platform, as early as possible in each platform's entry point. Pass the key from each platform's build configuration: `test_…` for Test Store development builds, `appl_…` for iOS release, and `goog_…` for Android release.
+
+Define Android's `BuildConfig.RC_PUBLIC_SDK_KEY` by build type as shown in `platforms/android.md`. Define iOS's `RevenueCatPublicSDKKey` through Xcode build settings and `Info.plist` as shown in `platforms/ios.md`.
 
 ### Shared entry point (`commonMain`)
 
@@ -57,7 +59,7 @@ class MyApplication : Application() {
         // The purchases-kmp Android actual of PurchasesConfiguration takes a Context.
         // Pass it here before forwarding to the shared initRevenueCat, or construct
         // the PurchasesConfiguration inline on this Android-only path.
-        initRevenueCat("goog_YOUR_ANDROID_PUBLIC_SDK_KEY")
+        initRevenueCat(BuildConfig.RC_PUBLIC_SDK_KEY)
     }
 }
 ```
@@ -72,7 +74,11 @@ import shared // the KMP framework produced from your shared module
 @main
 struct iOSApp: App {
     init() {
-        MainKt.initRevenueCat(apiKey: "appl_YOUR_IOS_PUBLIC_SDK_KEY")
+        guard let apiKey = Bundle.main.object(forInfoDictionaryKey: "RevenueCatPublicSDKKey") as? String,
+              !apiKey.isEmpty else {
+            fatalError("Missing RevenueCatPublicSDKKey build setting")
+        }
+        MainKt.initRevenueCat(apiKey: apiKey)
     }
 
     var body: some Scene { WindowGroup { ContentView() } }
@@ -81,7 +87,8 @@ struct iOSApp: App {
 
 ## Notes
 
-- Two public SDK keys: `appl_…` for iOS, `goog_…` for Android. Keep them separate.
+- Use platform build types/settings to select `test_…` for development and the platform key for release. Never ship `test_…`.
+- Test Store requires purchases-kmp 2.2.2 or newer. Verify the resolved wrapper version.
 - Because the KMP SDK wraps the native SDKs, the verify logs below are the native SDK logs. See `platforms/ios.md` / `platforms/android.md` for the exact log line on each side.
 - When in doubt about the exact shape of `PurchasesConfiguration`, check the installed version's source or the [purchases-kmp README](https://github.com/RevenueCat/purchases-kmp). The skill prefers "accurate for your version" over "plausibly correct in general."
 
@@ -91,3 +98,5 @@ Run each platform target. Expect:
 
 - **iOS**: `[Purchases] - INFO: 😻‍👼 Purchases is configured` in Xcode console.
 - **Android**: `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured` in logcat.
+
+Fetch offerings on each development target and verify Test Store packages appear. Inspect iOS and Android release settings to confirm their respective platform-key prefixes without logging complete keys.

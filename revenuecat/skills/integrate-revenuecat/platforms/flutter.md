@@ -45,8 +45,6 @@ defaultConfig {
 In `lib/main.dart`, configure before `runApp` so the rest of the app can rely on the SDK being up:
 
 ```dart
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -55,9 +53,10 @@ Future<void> main() async {
 
   await Purchases.setLogLevel(LogLevel.debug); // remove for release
 
-  final apiKey = Platform.isIOS
-      ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
-      : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
+  const apiKey = String.fromEnvironment('RC_PUBLIC_SDK_KEY');
+  if (apiKey.isEmpty) {
+    throw StateError('Missing RC_PUBLIC_SDK_KEY dart-define');
+  }
 
   await Purchases.configure(PurchasesConfiguration(apiKey));
 
@@ -67,7 +66,8 @@ Future<void> main() async {
 
 ## Notes
 
-- Two public SDK keys, one per platform. Branch on `Platform.isIOS` / `Platform.isAndroid`.
+- Pass `--dart-define=RC_PUBLIC_SDK_KEY=test_...` to development/Test Store runs. Pass `appl_...` for iOS release builds and `goog_...` for Android release builds. Never ship `test_…`.
+- Test Store requires purchases_flutter 9.8.0 or newer. Verify the resolved package version.
 - `Purchases.configure` is async; `await` it before `runApp` or any code that reads offerings.
 - `purchases_flutter` supports iOS and Android only. Web, macOS, Windows, and Linux targets are not supported.
 - For a multi flavor app, load the API key from `--dart-define` or an environment wrapper rather than hard coding it.
@@ -78,3 +78,5 @@ Future<void> main() async {
 
 - iOS simulator/device → Xcode console also shows `[Purchases] - INFO: 😻‍👼 Purchases is configured`
 - Android emulator/device → `flutter logs` (or `adb logcat`) shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`
+
+Fetch offerings in the development build and verify Test Store packages appear. Inspect each release build invocation to confirm it supplies the matching platform-key prefix without printing the complete key.

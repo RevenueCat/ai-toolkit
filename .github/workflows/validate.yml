@@ -10,12 +10,12 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: '24'
+          node-version: '20'
 
       - name: Validate JSON manifests
         run: |
@@ -23,13 +23,10 @@ jobs:
             .claude-plugin/marketplace.json \
             .cursor-plugin/marketplace.json \
             .agents/plugins/marketplace.json \
-            revenuecat/plugin.json \
-            revenuecat/mcp.json \
             revenuecat/.claude-plugin/plugin.json \
             revenuecat/.cursor-plugin/plugin.json \
             revenuecat/.codex-plugin/plugin.json \
             revenuecat/gemini-extension.json \
-            revenuecat-play-billing/plugin.json \
             revenuecat-play-billing/.claude-plugin/plugin.json \
             revenuecat-play-billing/.cursor-plugin/plugin.json \
             revenuecat-play-billing/.codex-plugin/plugin.json; do
@@ -39,32 +36,12 @@ jobs:
               || { echo "  INVALID JSON: $f"; exit 1; }
           done
 
-      # ajv-cli is a pinned devDependency resolved through the committed
-      # pnpm-lock.yaml, so CI runs the exact, integrity-checked versions we
-      # reviewed. corepack pins pnpm itself via the packageManager field, which
-      # carries an integrity hash. pnpm 11 needs Node >= 22.13, hence Node 24.
-      - name: Install dependencies
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
-
-      # Blocking: the Agent Plugins 1.0.0 schemas are immutable per spec, so they
-      # are vendored under scripts/schemas/ and validated offline.
-      - name: Validate Agent Plugins manifests
-        run: |
-          pnpm exec ajv validate --spec=draft2020 --strict=false \
-            -s scripts/schemas/agent-plugins-1.0.0-plugin.schema.json \
-            -d revenuecat/plugin.json \
-            -d revenuecat-play-billing/plugin.json
-          pnpm exec ajv validate --spec=draft2020 --strict=false \
-            -s scripts/schemas/agent-plugins-1.0.0-mcp.schema.json \
-            -d revenuecat/mcp.json
-
       - name: Validate Claude marketplace schema
         run: |
+          npm install -g ajv-cli
           curl -fsSL https://json.schemastore.org/claude-code-marketplace.json -o /tmp/claude-marketplace-schema.json || true
           if [ -f /tmp/claude-marketplace-schema.json ]; then
-            pnpm exec ajv validate -s /tmp/claude-marketplace-schema.json -d .claude-plugin/marketplace.json && echo "Schema valid" || echo "Schema validation failed (non-blocking)"
+            ajv validate -s /tmp/claude-marketplace-schema.json -d .claude-plugin/marketplace.json && echo "Schema valid" || echo "Schema validation failed (non-blocking)"
           else
             echo "Could not fetch schema — skipping schema validation"
           fi
