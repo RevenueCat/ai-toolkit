@@ -1,0 +1,15 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "revenuecat",
+  "version": "2.1.0",
+  "description": "Set up RevenueCat, integrate it, and access data.",
+  "author": {
+    "name": "RevenueCat",
+    "email": "support@revenuecat.com",
+    "url": "https://www.revenuecat.com"
+  },
+  "homepage": "https://www.revenuecat.com",
+  "repository": "https://github.com/RevenueCat/ai-toolkit",
+  "license": "MIT",
+  "keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"]
+}

@@ -2,7 +2,7 @@
 
 Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Access data about your revenue, conversion funnel, and experiments. Manage your in-app purchase monetization without leaving your agent. Works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
-The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini.
+The AI toolkit is distributed as a marketplace (containing a single plugin) for Claude Code, Cursor, Codex, and Visual Studio, and as an extension for Gemini. Both plugins also ship a portable [Agent Plugins 1.0.0](https://agent-plugins.org/) manifest, so any client implementing that standard can load them.
 
 ## Plugins
 
@@ -24,13 +24,13 @@ From within Claude Code
 ```
 /plugin
 ```
-Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `RevenueCat` plugin. If you ship Android and want handbook-level Google Play depth, also select `revenuecat-play-billing`.
+Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `revenuecat` plugin. If you ship Android and want handbook-level Google Play depth, also select `revenuecat-play-billing`.
 
 Or from the command line:
 
 ```
 claude plugins marketplace add RevenueCat/ai-toolkit
-claude plugins install RevenueCat
+claude plugins install revenuecat
 claude plugins install revenuecat-play-billing
 ```
 
@@ -49,7 +49,7 @@ You can add the RevenueCat AI Toolkit to Cursor from the [Cursor Marketplace](ht
 codex plugin marketplace add RevenueCat/ai-toolkit
 ```
 
-Start Codex, then run `/plugins`, search for `RevenueCat`, and install.
+Start Codex, then run `/plugins`, search for `revenuecat`, and install.
 
 Installing the plugin does not trigger authentication automatically. If the RevenueCat MCP server shows as "Not logged in", run:
 
@@ -74,6 +74,8 @@ Installing the plugin does not trigger authentication automatically. If the Reve
 codex mcp login RevenueCat
 ```
 
+**Upgrading from v2.0.0 or earlier (Codex CLI and Desktop App):** The plugin was renamed from `RevenueCat` to `revenuecat` in v2.0.1. A previously installed `RevenueCat` plugin keeps working from Codex's local cache but no longer receives updates. To get back on the update path, open `/plugins`, uninstall `RevenueCat`, and install `revenuecat`. Your MCP server login is preserved — no need to run `codex mcp login` again.
+
 **Troubleshooting (Codex CLI and Desktop App):** If the RevenueCat MCP server disappears from Settings or the agent loses access to RevenueCat tools after restarting Codex, you are hitting a known Codex issue with reloading plugin-provided MCP servers ([openai/codex#25809](https://github.com/openai/codex/issues/25809)). As a workaround, register the MCP server globally — the plugin's skills keep working, and the server survives restarts:
 
 ```bash
@@ -88,80 +90,26 @@ codex mcp login RevenueCat
 gemini extensions install https://github.com/RevenueCat/ai-toolkit
 ```
 
-Gemini has no marketplace and supports a single extension per repository, so it installs the `RevenueCat` plugin only. The `revenuecat-play-billing` plugin is available on Claude Code, Cursor, Codex, and VS Code.
+Gemini has no marketplace and supports a single extension per repository, so it installs the `revenuecat` plugin only. The `revenuecat-play-billing` plugin is available on Claude Code, Cursor, Codex, and VS Code.
 
 
 ### Visual Studio Code
 
-Plugin marketplace support is currently in beta in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+Plugin marketplace support is currently experimental in Visual Studio Code. Refer to the [instructions](https://code.visualstudio.com/docs/copilot/customization/agent-plugins#_configure-plugin-marketplaces) for how to add this repo as a plugin marketplace, then install the plugin from the marketplace.
+
+### Agent Plugins clients
+
+Both plugins conform to [Agent Plugins 1.0.0](https://agent-plugins.org/specification): You can install them depending on the client as the `revenuecat` or `revenuecat-play-billing` plugin.
 
 
 ### Other (unsupported agentic coding environments)
 Use `npx skills`:
 
 ```
-npx skills add RevenueCat/ai-toolkit --global
+npx skills add RevenueCat/ai-toolkit
 ```
 
 Note that this will only install the skills from this repository, not the MCP server. Configure the MCP manually in your coding environment [following our instructions](https://www.revenuecat.com/docs/tools/mcp/setup).
-Omit `--global` only when you intentionally want the skills and lock file scoped to the current project.
-
-### Use an installed skill
-
-After installing or updating skills, start a new agent session or reload the
-agent so it discovers the latest skill metadata. Installation makes skills
-available; it does not execute a workflow.
-
-Agents can select a skill automatically when the request matches its
-description. To make project creation predictable across clients, name it:
-
-```text
-Use the create-revenuecat-project skill to make the app in this directory
-RevenueCat Test Store-ready end to end, then report every production-store
-stage separately.
-```
-
-Natural requests such as “Set up RevenueCat for my new iOS app” should also
-select the project-creation skill. Explicit naming is recommended for testing
-and for clients that do not reliably auto-select skills.
-
-Copy a starter prompt that matches the intended workflow:
-
-```text
-Use the create-revenuecat-project skill to inspect the Swift app in this
-directory, create my RevenueCat account if needed, and finish the Test
-Store-ready stage end to end: project, Test Store products and prices,
-entitlement, offering and packages, dashboard paywall, Purchases and
-RevenueCatUI dependencies, debug test_ key configuration, app code, build, and
-a simulated purchase that unlocks the entitlement. Ask before accepting legal
-terms and report any incomplete stage explicitly.
-
-Continue this app's RevenueCat setup with the Apple stage of the
-create-revenuecat-project skill. Verify the App Store app and bundle ID, run the
-read-only Apple check first, then give me the local interactive rc apps apple
-setup command for Apple sign-in and 2FA. Verify the missing In-App Purchase and
-App Store Connect keys are configured without asking me to paste Apple
-credentials into chat.
-
-Use the revenuecat-store-state skill to create a persisted plan for App Store
-Connect products matching this app's verified Test Store catalog, including
-subscription groups, prices, availability, and localizations. Show me the exact
-plan and wait for approval before applying that same plan ID. After apply,
-attach the Apple products to the existing RevenueCat entitlement and packages,
-configure the release appl_ key separately from debug, and report Apple sandbox
-verification separately.
-
-Use the revenuecat-status skill to audit my RevenueCat project, identify
-missing or inconsistent configuration, and give me exact recovery steps
-without changing anything first.
-```
-
-These prompts intentionally split a demo into Test Store, Apple credentials,
-and App Store catalog stages. The project-creation skill checks authentication first. When account creation
-is needed, it asks for explicit authorization before accepting RevenueCat's
-Terms, keeps marketing opt-in separate, and can direct the local macOS CLI to
-generate a password and save it in Keychain. The skill then orchestrates the
-real `rc` commands for project and catalog setup directly.
 
 ## Authentication
 

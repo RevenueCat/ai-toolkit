@@ -27,20 +27,17 @@ Call `Purchases.configure` once when the app mounts. In `App.tsx` (or `index.js`
 
 ```tsx
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import Config from 'react-native-config'; // or your .env / build-config mechanism
 
 export default function App() {
   useEffect(() => {
-    Purchases.setLogLevel(LOG_LEVEL.DEBUG); // remove for release
+    if (__DEV__) Purchases.setLogLevel(LOG_LEVEL.DEBUG); // logging only
 
-    const apiKey = __DEV__
-      ? 'test_YOUR_TEST_STORE_KEY'
-      : Platform.OS === 'ios'
-        ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
-        : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
-
-    Purchases.configure({ apiKey });
+    // Select the key by BUILD environment (per-scheme/flavor config), not a
+    // runtime check. A debug/Test Store build supplies test_…; a release build
+    // supplies appl_… (iOS) or goog_… (Android). Never ship test_… in release.
+    Purchases.configure({ apiKey: Config.REVENUECAT_API_KEY });
   }, []);
 
   return /* … your UI … */;
