@@ -41,7 +41,7 @@ List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / 
 8. **Verify the appUserID.** If `logIn(appUserID)` was called with an ID that does not match what the user expects, entitlements appear missing because they are attached to a different RC user. Print `Purchases.shared.appUserID` (iOS) / `Purchases.sharedInstance.appUserID` (Android) and confirm it matches.
 9. **Reset and retry.** Uninstall the app, re-sign into the sandbox / tester account, reinstall from the correct channel, relaunch.
 
-## 3. Dashboard inspection via the RevenueCat MCP
+## 3. Dashboard inspection via the RevenueCat MCP or the `rc` CLI
 
 Use this when steps 3, 4, or 5 above point at dashboard configuration, when the user has no working app yet, or when you need to confirm a fix landed.
 
@@ -54,7 +54,7 @@ Use this when steps 3, 4, or 5 above point at dashboard configuration, when the 
 
 ### Phase B: systematic diagnosis
 
-Work through this checklist via MCP tools:
+Work through this checklist via MCP tools or their `rc` CLI equivalents (see the `revenuecat-cli` skill). Each `list-*` tool maps to `rc <noun> list` (e.g. `list-offerings` → `rc offerings list`, `list-apps` → `rc apps list`), `list-app-public-api-keys` → `rc apps keys <app-id>`, and `get-product-store-state` → `rc products store show <app-id>`.
 
 #### Check 1: Project overview
 ```
