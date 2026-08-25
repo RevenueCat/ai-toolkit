@@ -33,7 +33,7 @@ Before touching the dashboard, gather the facts:
 
 ## 2. Dashboard side
 
-Use whichever surface the user has available: the RevenueCat MCP server or the `rc` CLI (see the `revenuecat-cli` skill for CLI discovery and conventions). Both expose the same operations, and each step below notes the MCP tool and the `rc` command.
+Use whichever surface the user has available: the RevenueCat MCP server or the `rc` CLI (see the `revenuecat-cli` skill for CLI discovery and conventions). Both cover the same operations for these steps, and each step below notes the MCP tool and the `rc` command.
 
 ### 2a. Get or create the project
 - List accessible projects: `list-projects` (MCP) or `rc projects list`. If multiple, ask the user which one matches this app, or offer to create a new one (`create-project` / `rc projects create`).

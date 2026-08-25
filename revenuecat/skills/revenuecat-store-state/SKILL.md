@@ -9,8 +9,8 @@ The RevenueCat MCP store-state tools read and write product state — status, pr
 
 The same operations are available via the `rc` CLI (see the `revenuecat-cli` skill), but the CLI uses an auditable plan/apply model instead of the MCP read-then-poll model:
 
-- `rc products store show <app-id>` reads current state (the CLI equivalent of `get-product-store-state`).
-- `rc products store plan <app-id> --file <csv|json>` computes a reviewable diff and returns a plan ID.
+- `rc products show <product-id> --store-state` reads a product's current live store state (the closest CLI equivalent of `get-product-store-state`).
+- `rc products store plan <app-id> --file <csv|json>` computes a reviewable diff and returns a plan ID; `rc products store show <plan-id>` re-displays a saved plan.
 - `rc products store apply <plan-id>` applies that plan (or `rc products store discard <plan-id>`). Apply handles the async operation internally, so there is no separate poll step.
 - `rc products prices set` sets prices; `rc products store screenshot <product-id>` uploads a review screenshot.
 

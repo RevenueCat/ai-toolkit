@@ -54,7 +54,7 @@ Use this when steps 3, 4, or 5 above point at dashboard configuration, when the 
 
 ### Phase B: systematic diagnosis
 
-Work through this checklist via MCP tools or their `rc` CLI equivalents (see the `revenuecat-cli` skill). Each `list-*` tool maps to `rc <noun> list` (e.g. `list-offerings` → `rc offerings list`, `list-apps` → `rc apps list`), `list-app-public-api-keys` → `rc apps keys <app-id>`, and `get-product-store-state` → `rc products store show <app-id>`.
+Work through this checklist via MCP tools or their `rc` CLI equivalents (see the `revenuecat-cli` skill). Each `list-*` tool maps to `rc <noun> list` (e.g. `list-offerings` → `rc offerings list`, `list-apps` → `rc apps list`), `list-app-public-api-keys` → `rc apps keys <app-id>`, and `get-product-store-state` → `rc products show <product-id> --store-state`.
 
 #### Check 1: Project overview
 ```
