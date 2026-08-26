@@ -13,7 +13,7 @@
       "displayName": "RevenueCat",
       "source": "./revenuecat",
       "description": "Set up RevenueCat, integrate it, and access data.",
-      "version": "2.1.0",
+      "version": "2.2.0",
       "category": "developer-tools",
       "author": { "name": "RevenueCat" },
       "homepage": "https://www.revenuecat.com",
