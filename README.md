@@ -13,7 +13,7 @@ This marketplace ships two plugins:
 | `RevenueCat` | The RevenueCat MCP server (project configuration and data access) plus cross-platform integration skills for iOS, Android, Kotlin Multiplatform, Flutter, and React Native. |
 | `revenuecat-play-billing` | Deep Google Play subscription lifecycle skills for the RevenueCat Android SDK — purchases, plan and price changes, payment recovery, webhooks, security. Synced from [RevenueCat/play-billing-skills](https://github.com/RevenueCat/play-billing-skills), which is the source of truth. |
 
-Most users want the `RevenueCat` plugin. Add `revenuecat-play-billing` on top if you ship Android and want handbook-level depth on Google Play billing behavior.
+Most users want the `revenuecat` plugin. Add `revenuecat-play-billing` on top if you ship Android and want handbook-level depth on Google Play billing behavior.
 
 ## Installation
 
