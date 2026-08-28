@@ -5,6 +5,15 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] – 2026-08-26
+
+### Added
+
+- **Experiment management is now generally available** — The RevenueCat MCP server's experiment tools (`create-experiment`, `update-experiment`, `start-experiment`, `pause-experiment`, `resume-experiment`, `stop-experiment`) let agents set up and manage A/B tests, alongside the existing read tools (`list-experiments`, `get-experiment`, `get-experiment-results`)
+- **revenuecat-experiments** — New skill for setting up and managing experiments: preparing control and treatment offerings (duplicating offerings, editing or creating treatment paywalls, swapping products for price tests), creating the experiment as a draft, and driving the start/pause/resume/stop lifecycle with explicit user confirmation before starting
+
+---
+
 ## [2.1.0] – 2026-08-21
 
 ### Added
@@ -135,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store-specific setup instructions (App Store Connect, Google Play Console)
 - Configuration validation and issue highlighting
 
+[2.2.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/RevenueCat/ai-toolkit/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/RevenueCat/ai-toolkit/releases/tag/v1.0.0
