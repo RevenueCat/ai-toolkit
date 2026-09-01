@@ -1,6 +1,6 @@
 ---
 name: revenuecat-store-state
-description: Use when the user wants to inspect or change the state of products in App Store Connect or Google Play Console (prices, availability, review screenshots) via the RevenueCat MCP store-state tools
+description: Use when the user wants to inspect or change the state of products in App Store Connect, Google Play Console, Web Billing, or the Test Store (prices, availability, review screenshots) via the RevenueCat MCP store-state tools
 ---
 
 # Managing product store state
