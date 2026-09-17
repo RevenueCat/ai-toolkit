@@ -35,6 +35,26 @@ claude plugins install revenuecat-play-billing
 ```
 
 
+### Claude Code Desktop App
+
+The desktop app shares the CLI's plugin installation, so either path above installs the plugin for both.
+
+**Troubleshooting:** If connecting the RevenueCat MCP server fails with
+
+```json
+{"error":"invalid_redirect_uri","error_description":"Invalid redirect URI"}
+```
+
+you are hitting [#58](https://github.com/RevenueCat/ai-toolkit/issues/58). RevenueCat's authorization server currently accepts only the terminal CLI's loopback callback (`http://localhost:<port>/callback`) and rejects the desktop app's `claude://claude.ai/mcp-auth-callback/sdk`. This is server-side — nothing in the plugin configures the redirect URI, so there is no local setting to change. Until it is fixed, use one of:
+
+- Authenticate from the Claude Code **terminal** CLI (`/mcp`), which uses the loopback callback.
+- Use the `rc` CLI, which authenticates independently of the MCP OAuth flow. Most skills document a `rc` equivalent for their MCP tools — see the `revenuecat-cli` skill.
+
+  ```bash
+  npx @revenuecat/cli auth login
+  ```
+
+
 ### Cursor
 
 You can add the RevenueCat AI Toolkit to Cursor from the [Cursor Marketplace](https://cursor.com/marketplace/revenuecat/revenuecat) or using the following command:
@@ -116,6 +136,8 @@ Note that this will only install the skills from this repository, not the MCP se
 The plugin requires authentication with your RevenueCat account via OAuth.
 
 Depending on the environment, you might get prompted to authenticate immediately, when you first use a RevenueCat tool, or manually (in Codex: `codex mcp login RevenueCat`; in Gemini: `/mcp auth revenuecat`). Authentication happens via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
+
+If the browser returns `invalid_redirect_uri` instead of a consent screen, see the [Claude Code Desktop App](#claude-code-desktop-app) troubleshooting note above.
 
 ## Example Workflows
 

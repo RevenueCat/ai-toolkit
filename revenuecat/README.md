@@ -8,6 +8,25 @@ The plugin requires authentication with your RevenueCat account via OAuth.
 
 Depending on the environment, you might get prompted to authenticate immediately, when you first use a RevenueCat tool, or manually (in Gemini: `/mcp auth revenuecat`). Authentication happens via OAuth in your browser. This grants access based on your RevenueCat account permissions and covers all your projects.
 
+### Troubleshooting: `invalid_redirect_uri`
+
+If the browser returns
+
+```json
+{"error":"invalid_redirect_uri","error_description":"Invalid redirect URI"}
+```
+
+instead of a consent screen, you are hitting [#58](https://github.com/RevenueCat/ai-toolkit/issues/58). RevenueCat's authorization server currently accepts only a loopback callback of the exact shape `http://localhost:<port>/callback`, and rejects the callbacks used by GUI clients — notably the Claude Code desktop app's `claude://claude.ai/mcp-auth-callback/sdk`. This is server-side; the plugin does not configure the redirect URI.
+
+Workarounds until it is fixed:
+
+- Authenticate from a client that uses the loopback callback — the Claude Code terminal CLI does (`/mcp`).
+- Use the `rc` CLI, which authenticates independently of the MCP OAuth flow. Most skills document a `rc` equivalent for their MCP tools — see the `revenuecat-cli` skill.
+
+  ```bash
+  npx @revenuecat/cli auth login
+  ```
+
 ## Example Workflows
 
 ### New App Setup
