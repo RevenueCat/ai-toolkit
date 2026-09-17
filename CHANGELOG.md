@@ -5,6 +5,17 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] – 2026-09-17
+
+### Added
+
+- **revenuecat-cli** now documents how to give the Paywalls AI Editor real design assets, which the
+  skill previously omitted entirely: `rc media-assets upload` (Media Gallery, returns an asset URL to
+  paste into the prompt so the editor *places* the image) and `rc fonts upload` (returns a `font_key`
+  to name explicitly in the prompt). It also spells out that `--image` on `rc paywalls generate|edit`
+  attaches a visual reference only and is never placed in the design — the distinction agents
+  routinely get wrong when a user asks for their logo in the paywall.
+
 ## [2.2.1] – 2026-09-15
 
 ### Changed
