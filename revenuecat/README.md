@@ -54,16 +54,18 @@ Claude: RevenueCat Project Status
 ```
 You: Raise the price of my annual plan to $89.99 on the App Store
 
-Claude: [reads current store state]
+Claude: [reads current store state, creates a plan, shows the diff]
         rc_annual — currently $79.99 (USD base), live in 175 territories
-        Proposed: $89.99 base price, other territories equalized by Apple
+        Plan: $89.99 base price; other subscription territories equalized from US
 
-        This changes what live customers pay. Apply?
+        Review: https://app.revenuecat.com/projects/{project_id}/product-catalog/product-editor/review-changes?plan_id={plan_id}
+
+        This changes what live customers pay. Apply this plan?
 
 You: Yes
 
-Claude: [applies the change and polls the operation]
-        Done — the new price is live in App Store Connect.
+Claude: [applies the plan and polls until it finishes]
+        Done — the new price is live in App Store Connect. Want me to submit it to Apple for review?
 ```
 
 ## MCP

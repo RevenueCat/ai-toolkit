@@ -5,6 +5,14 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.1] – 2026-09-15
+
+### Changed
+
+- **revenuecat-store-state** now uses the same plan/apply write path on MCP as the CLI: create a product store state plan, show `plan_items` diffs (and optionally the dashboard review URL), wait for explicit confirmation, then apply. Direct MCP writes (`set-product-store-state`, `create-product-prices`, `upload-product-store-state-screenshot`, `equalize-subscription-prices`) are documented as deprecated. Reads still use `get-product-store-state`.
+
+---
+
 ## [2.2.0] – 2026-08-26
 
 ### Added
@@ -144,6 +152,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store-specific setup instructions (App Store Connect, Google Play Console)
 - Configuration validation and issue highlighting
 
+[2.2.1]: https://github.com/RevenueCat/ai-toolkit/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/RevenueCat/ai-toolkit/compare/v1.0.0...v2.0.0
