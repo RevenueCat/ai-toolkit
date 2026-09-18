@@ -3,7 +3,7 @@ name: revenuecat-charts
 description:
   Use when the user asks about RevenueCat data, analytics, charts, or KPIs — querying charts with
   get-chart-options-schema and get-chart-data, interpreting subscription metrics, or sharing
-  dashboard chart links.
+  dashboard chart links. For forecasts, projections, or run-rates, use revenuecat-forecasting.
 ---
 
 # Accessing RevenueCat charts
@@ -130,8 +130,16 @@ giving advice, always use benchmark data to make sure you aren't incorrectly dia
 
 General guidelines:
 
+- Before telling the user RevenueCat has no source for a metric they named, pick the likely
+  chart(s), call `get-chart-options-schema` for options, then `get-chart-data` and check its
+  `periods` / `measures` — unfamiliar names are often one period or measure inside a chart
+  (schema alone does not list those). Missing from `get-benchmarks` means no peer percentile
+  band, not that the value can't be computed.
+- After looking: if nothing in the tools matches, or two readings would produce materially
+  different numbers, ask the user to define the metric. Do not invent a definition.
 - When using the data tools, date ranges are inclusive (start_date and end_date are included in the range). When asked for data for the "last N days", take that into account (use today as end date, start date is (N-1) days before today).
 - Provide links to RevenueCat charts (see the Dashboard URL Format section below) where it is useful. Provide specific links including filters, segments, date ranges, etc — eg. if you are asked for proceeds in the last 3 months, link to the revenue chart with custom date range of the last 3 months and the `revenue_type` selector set to `proceeds`, don't link to the plain revenue chart
+- For forecasts, projections, or run-rates, load the `revenuecat-forecasting` skill before pulling charts.
 
 ## Revenue
 
@@ -163,6 +171,9 @@ to a subscription.
   or trial within the selected conversion timeframe.
 - Use the Conversion to Paying chart to see the proportion of new customers that made a payment
   within the selected conversion timeframe.
+- Initial Conversion (started a trial or subscription) and Conversion to Paying (made a payment)
+  measure different events. Never use one as a stand-in for the other, or compare a value from one
+  against a value from the other.
 - You can then further determine if they are using free trials by looking at the New Trials chart.
 - The Trial Conversion Rate chart is a helpful chart for understanding the performance of just that
   trial conversion.
@@ -175,18 +186,67 @@ to a subscription.
 - The Churn chart will tell you the % of the active subscriber base that is lost each period. It can
   be difficult to interpret or benchmark because it is a blend of different periods.
 - When you want to understand the long term retention of different products, look at the
-  Subscription Retention chart
+  Subscription Retention chart or the Cohort Explorer chart using the `retained_subscriptions`
+  measure, which returns how many subscriptions remained active (ie. not expired) over time.
+- To understand when in their lifecycle subscriptions get cancelled (ie. auto-renewal turned off),
+  use Cohort Explorer with the `subscriptions_set_to_renew` measure.
+- The Subscription Retention chart reports each cohort's renewals period by period, as counts and
+  precomputed rates ("Month N" / "Month N rate" columns). A single period answers questions like
+  "what share renewed once": the first renewal is the period matching the plan length (Month 1 for
+  monthly plans, Year 1 for annual). Filter by `product_duration` to keep one plan length per read,
+  and by `subscription_type` (`new`) to exclude product changes and resubscriptions. Periods a
+  cohort hasn't had the full opportunity to reach are reported as incomplete — don't read them as
+  zeros.
 
 ## Reactivation
 
 - The only real way to understand Reactivation is looking at the MRR Movement chart and the
   Resubscription MRR
 
+## Investigating metric shifts
+
+When a metric change needs explaining — revenue dropped, trials fell, conversion spiked — follow
+this order before answering:
+
+1. **Quantify the shift.** Pull the chart data, confirm the magnitude and timing.
+2. **Check configuration.** Offerings, packages, products, paywalls and experiments are not visible
+   in metrics, so never infer them from a chart. If your answer names any of them, look it up in
+   this run:
+   - `list-experiments` with `status="stopped"` and `status="running"`. If an experiment stopped
+     near the shift, call `get-experiment-results` to see which variant won.
+   - `list-offerings` with `limit: 100` (the default page of 20 rarely covers a real project), then
+     `get-offering` on the `is_current` id with `expand: ["package.product"]`. An offering with
+     `paywall_id: null` has no RevenueCat paywall — load `revenuecat-paywall-design` before giving
+     paywall advice.
+   - `get-product-store-state` before saying a product is retired, unavailable, or no longer
+     selling. Report store status in plain language, never raw field names.
+   - If experiments and offerings don't explain it, `list-paywalls` for paywall changes.
+3. **Check annotations.** Look at the `annotations` field in the chart response.
+4. **Only then form a hypothesis.** Present it as a hypothesis, not a finding. An unverified guess
+   about configuration is a missing tool call, never your headline finding.
+
+Do not skip step 2. Once you have made the calls, if their results cannot explain the shift, say
+so explicitly rather than constructing a mechanism.
+
+## Populations and denominators
+
+A rate only describes the population in its denominator. Before presenting one, check that this is
+the population the question is about.
+
+- When one segment dominates the denominator, the blended rate describes that segment, not the app.
+  Re-query filtered to the population the question is about and lead with that number.
+- **Never present a rate as evidence while also calling its denominator inflated or
+  unrepresentative.** Re-query with a filter instead of caveating.
+- Report the filtered numbers yourself rather than recommending the user go look at a filtered
+  chart.
+
 ## Analytics comparisons
 
-- Compare like with like. When analyzing an acquisition cohort or segment, compare it against the
-  overall baseline using the same metric, chart, date range, conversion window, and cohort
-  definition before making a directional claim.
+- Compare like with like. Any two numbers compared against each other must come from the same
+  chart and metric, with the same conversion window and cohort definition. Use the same date range
+  too, except in deliberate period-over-period comparisons.
+- If you have a metric for one side of a comparison but not the other, query the missing side with
+  the same chart and settings before comparing. Do not substitute a value from a different chart.
 - For open-ended questions like "how are {segment} users doing?", do not stop at segment-only
   metrics. Pull the requested segment and an overall/unfiltered baseline for the key conversion or
   revenue-quality metric, then judge performance relative to that baseline. Do not evaluate a
@@ -194,6 +254,22 @@ to a subscription.
 - Do not compare revenue or conversions from a filtered new-customer cohort against total app
   revenue from all cohorts and renewals. If you cannot get a matching baseline, say so and avoid
   directional performance claims.
+- When a user is confused that two metrics diverge, say what each one counts before explaining the
+  gap.
+
+Wrong — different charts merged under one header:
+
+| Country | Conversion to paying (14d)          |
+| ------- | ----------------------------------- |
+| US      | 26.3% (this is Initial Conversion)  |
+| PL      | 2.1% (this is Conversion to Paying) |
+
+Correct — one column per metric, every value in a column from the same chart, metric, and settings:
+
+| Country | Initial conversion (14d) | Conversion to paying (14d) |
+| ------- | ------------------------ | -------------------------- |
+| US      | 26.3%                    | 9.6%                       |
+| PL      | 4.3%                     | 2.1%                       |
 
 # Chart Dashboard Links
 

@@ -1,11 +1,11 @@
 ---
 name: revenuecat-paywall
-description: Display a RevenueCat paywall inside an app using the RevenueCatUI SDK. Use when the user asks to add a paywall, show a RevenueCat paywall, present PaywallView, integrate RevenueCatUI, gate a premium screen with a paywall, launch PaywallActivity, call presentPaywall or presentPaywallIfNeeded, or show the dashboard configured paywall UI on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Display a RevenueCat paywall inside an app using the RevenueCatUI SDK. Use when the user asks to add a paywall, show a RevenueCat paywall, present PaywallView, integrate RevenueCatUI, gate a premium screen with a paywall, launch PaywallActivity, call presentPaywall or presentPaywallIfNeeded, or show the dashboard configured paywall UI on iOS, Android, Kotlin Multiplatform, Flutter, or React Native. To create, edit, evaluate, or audit the dashboard paywall itself, use revenuecat-paywall-design.
 ---
 
 # revenuecat-paywall: display a RevenueCat paywall
 
-Use this skill when the user wants to show a paywall that is built and configured in the RevenueCat dashboard, using the native RevenueCatUI components. This skill does not cover building a custom paywall from scratch. For that, use `revenuecat-purchase-flow` (when available) and `Purchases.getOfferings(…)` directly.
+Use this skill when the user wants to show a paywall that is built and configured in the RevenueCat dashboard, using the native RevenueCatUI components. This skill does not cover building a custom paywall from scratch. For that, use `revenuecat-purchase-flow` (when available) and `Purchases.getOfferings(…)` directly. To create, edit, evaluate, or audit the dashboard paywall, use `revenuecat-paywall-design`.
 
 Prerequisite: `integrate-revenuecat` has already run. `Purchases.configure(…)` must succeed before a paywall can load.
 
