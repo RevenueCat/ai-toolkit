@@ -3,7 +3,8 @@ name: revenuecat-paywall-design
 description:
   Must invoke for any request to create, edit, evaluate, understand, or improve a RevenueCat
   Paywall in the dashboard — including questions about a specific paywall or general paywall
-  design recommendations. Not for presenting a paywall in app code (use revenuecat-paywall).
+  design recommendations, and uploading images or fonts to paywall resources / the Media
+  Gallery. Not for presenting a paywall in app code (use revenuecat-paywall).
 ---
 
 # Designing and editing RevenueCat Paywalls
@@ -20,6 +21,23 @@ Via the `rc` CLI (see the `revenuecat-cli` skill): `rc paywalls generate --promp
 `rc paywalls edit --prompt "..."`, `rc paywalls rewind --session <id>`, `rc paywalls publish`,
 `rc paywalls show`. Prefer MCP below when you need screenshots or a structured `get-paywall`
 read.
+
+## Media and fonts
+
+MCP cannot upload files to the project's Media Gallery or font library. Do not open the
+RevenueCat dashboard in a browser to upload. Write or generate the file on disk, then use
+the CLI:
+
+- **Images:** `rc media-assets upload <file>` (jpg/png/webp/avif/heic/heif, up to 2 MiB).
+  `rc media-assets list` shows what is already in the gallery.
+- **Fonts:** `rc fonts upload <file>` (ttf/otf, up to 5 MiB). `rc fonts list` shows uploaded
+  fonts.
+
+Confirm flags with `rc schema media-assets upload` / `rc schema fonts upload`.
+
+`create-paywall-ai` / `edit-paywall-ai` can generate hero or background images as part of an
+edit. That is not a Media Gallery upload. If the user wants a reusable project asset, upload
+with `rc media-assets upload`.
 
 ## Evaluating a paywall
 

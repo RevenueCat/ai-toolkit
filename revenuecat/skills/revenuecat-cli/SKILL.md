@@ -1,11 +1,11 @@
 ---
 name: revenuecat-cli
-description: Drive RevenueCat from the terminal with the `rc` CLI, an alternative to the RevenueCat MCP server for humans, CI, and agents. Covers install, authentication, command discovery, and output conventions. Referenced by the other RevenueCat skills whenever they offer a CLI path.
+description: Drive RevenueCat from the terminal with the `rc` CLI, an alternative to the RevenueCat MCP server for humans, CI, and agents. Covers install, authentication, command discovery, and output conventions. Use for uploading paywall images to the Media Gallery (`rc media-assets upload`) or custom paywall fonts (`rc fonts upload`) — MCP has no upload tools for these. Referenced by the other RevenueCat skills whenever they offer a CLI path.
 ---
 
 # revenuecat-cli: driving RevenueCat from the terminal
 
-`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server (the CLI adds paywall generate/edit; the MCP server has some SDK feature-gate and experiment tools the CLI does not). Use whichever surface is available; this skill is the reference for the CLI path.
+`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server (the CLI adds paywall generate/edit and paywall image/font upload; the MCP server has some SDK feature-gate and experiment tools the CLI does not). Use whichever surface is available; this skill is the reference for the CLI path.
 
 ## Install and authenticate
 
@@ -41,6 +41,9 @@ Look up exact flags with `rc commands --schemas --json` (or `rc schema <space-se
 - **Store credentials and state**: `rc setup apple|google`, `rc products store plan|apply|sync`
 - **Data**: `rc charts list|show`, `rc customers ...`
 - **Paywalls**: `rc paywalls generate|edit|publish` (dashboard design/audit playbook: `revenuecat-paywall-design`)
+- **Paywall media and fonts**: `rc media-assets list|upload <file>`, `rc fonts list|upload <file>`. MCP cannot upload these; do not use the dashboard in a browser.
 - **Dashboard**: `rc open [section] [id] --print` (resource URLs: `revenuecat-dashboard-links`)
+
+Images: jpg/png/webp/avif/heic/heif, up to 2 MiB. Fonts: ttf/otf, up to 5 MiB. Write or generate the file on disk first, then pass that path. Confirm flags with `rc schema media-assets upload` / `rc schema fonts upload`.
 
 Prefer the specific command. Drop to `rc api <METHOD> <path>` only for endpoints not yet in the CLI surface.
