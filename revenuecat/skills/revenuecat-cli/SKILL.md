@@ -40,6 +40,7 @@ Look up exact flags with `rc commands --schemas --json` (or `rc schema <space-se
 - **Catalog**: `rc products ...`, `rc entitlements ...`, `rc offerings ...`, `rc packages ...`
 - **Store credentials and state**: `rc setup apple|google`, `rc products store plan|apply|sync`
 - **Data**: `rc charts list|show`, `rc customers ...`
-- **Paywalls**: `rc paywalls generate|edit|publish`
+- **Paywalls**: `rc paywalls generate|edit|publish` (dashboard design/audit playbook: `revenuecat-paywall-design`)
+- **Dashboard**: `rc open [section] [id] --print` (resource URLs: `revenuecat-dashboard-links`)
 
 Prefer the specific command. Drop to `rc api <METHOD> <path>` only for endpoints not yet in the CLI surface.

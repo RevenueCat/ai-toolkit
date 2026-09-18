@@ -5,6 +5,24 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] – 2026-09-18
+
+### Added
+
+- **revenuecat-paywall-design** — Create, duplicate, edit, evaluate, and audit dashboard paywalls (`create-paywall-ai` / `edit-paywall-ai` / `duplicate-paywall` / `get-paywall` / `render-paywall-screenshot`), including Apple-disallowed patterns and a CRO audit. Distinct from `revenuecat-paywall`, which is SDK presentation.
+- **revenuecat-audiences** — Filter and identify customers with audience rules, `create-audience` / `get-audience-filter-options`, and dashboard links to `all-customers` or a saved `customer_list_id`.
+- **revenuecat-billing** — Developer RevenueCat plan, MTR vs MRR, Pro $2,500 threshold, and account invoices via `get-account-billing` / `list-account-billing-invoices`.
+- **revenuecat-forecasting** — Month-by-month MRR/ARR projections, rest-of-period run-rates, and scenario forecasts on top of chart data.
+- **revenuecat-app-valuation** — Subscription-app valuation ranges grounded in chart data and `get-benchmarks`.
+- **revenuecat-dashboard-links** — Shareable dashboard URLs for offerings, products, paywalls, experiments, customers, settings, and integrations.
+
+### Changed
+
+- **revenuecat-charts** — Stronger metric interpretation: Initial Conversion vs Conversion to Paying, Cohort Explorer measures, check experiments/offerings/store state before hypothesizing a metric shift, denominator rules, and `get-benchmarks` vs a missing metric.
+- **revenuecat-paywall** and **revenuecat-experiments** now point at `revenuecat-paywall-design` for dashboard paywall work.
+
+---
+
 ## [2.2.1] – 2026-09-15
 
 ### Changed
@@ -152,6 +170,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Store-specific setup instructions (App Store Connect, Google Play Console)
 - Configuration validation and issue highlighting
 
+[2.3.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/RevenueCat/ai-toolkit/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/RevenueCat/ai-toolkit/compare/v2.0.0...v2.1.0
