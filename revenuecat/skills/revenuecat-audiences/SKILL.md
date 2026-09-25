@@ -8,8 +8,8 @@ description: >
 
 # Audience filters and dashboard links
 
-Use Audiences to filter the user's customers and to share a dashboard link to that set. The same
-filters answer "who" questions — they are not a full leaderboard sort.
+Use Audiences to filter the user's customers and to share a dashboard link to that set. Filters
+select the segment; `sort_by` / `sort_direction` on `preview-audience` order the returned sample.
 
 There is no first-class CLI command for audiences. Do not tell the user RevenueCat cannot filter
 or segment customers.
@@ -20,7 +20,8 @@ Audiences filter on the [fields](#fields) below, including:
 
 - Product and duration — `latestProduct`, `allPurchasedProductIds`, `latestPurchasedOffering`,
   entitlements, offers
-- Spend and renewals — `totalSpent`, `totalRenewals` (thresholds, not a sort)
+- Spend and renewals — `totalSpent` (filter, and `sort_by: total_spent`), `totalRenewals` (filter
+  only; there is no renewal sort)
 - Subscription state — `status`, trial, auto-renew intent, ownership
 - Store, platform, and country — `platform`, `latestStore`, `country`, `storefront`
 - Dates — first seen, purchases, renewals, expiration, trial, cancellation
@@ -31,25 +32,31 @@ Map the question onto those fields, filter, then read a sample.
 
 1. Fetch project-specific values with `get-audience-filter-options` for any field marked
    project-specific that the question uses (`project_id`, `fields`).
-2. Reuse an existing audience from `list-audiences` if one already matches. Otherwise
-   `create-audience` with the same `groups`/`conditions` rule shape as [the filter rule](#the-filter-rule).
-   Body is only `name` and `rules`. `create-audience` persists a saved audience, so get explicit
-   confirmation first.
-3. `get-audience` with `expand: ["customer_sample"]`. Sample rows include `total_spent`, status,
-   and latest product — not every filter field. Rank or name customers only from fields the
-   sample returned.
-4. Number fields like `totalRenewals` are filters, not sample columns. Filter on a high
-   threshold and report the sample; do not invent a value that was not returned.
-5. Say it is a sample of matches, not an exhaustive ranking of every customer. Filtering and a
-   `customer_sample` cannot prove a global superlative (who renewed or spent the most). After you
-   try the steps above, say that: you can show high-threshold matches, not name a unique maximum.
-6. Share the dashboard link ([constructing a link](#constructing-a-link) or
-   [linking to a saved audience](#linking-to-a-saved-audience)).
+2. Call `preview-audience` with `project_id` and `body.rules` in the [filter rule](#the-filter-rule)
+   shape (for a saved audience from `list-audiences`, pass `body.audience_uuid` instead). It is
+   read-only and saves nothing. Do not `create-audience` just to inspect a segment.
+3. To rank or name a superlative, pass `sort_by` (`status`, `latest_auto_renew_intent`,
+   `first_seen_at`, `last_seen_at`, `total_spent`) and `sort_direction` (`asc` default, or `desc`)
+   as top-level parameters, not inside `body`. `sort_by: total_spent` with `sort_direction: desc`
+   returns the highest spenders first, so the first `customer_sample` row is the top spender. The
+   sample is capped (typically 50): it is the top or bottom matches, not every customer.
+4. Answer "how many" from `stats` (`total_customers`, `active_subscriptions`, `active_trials`,
+   `total_revenue` in `currency`), never from the sample size. When `stats.is_approximate` is true,
+   give counts and revenue as approximate ("about 6,400 customers").
+5. Name customers only from fields `customer_sample` returned (`app_user_id`, `email`, `status`,
+   `total_spent`, `latest_product_name`, first/last seen). Without `sort_by` the sample is
+   unordered: say it is a sample of matches, not a ranking.
+6. `totalRenewals` is a filter only, not a `sort_by` value or a sample column. Filter on a high
+   threshold and report the matches; do not invent a renewal count or claim a unique maximum.
+7. Share the dashboard link. The `preview-audience` result for `body.rules` includes a line
+   starting "Dashboard URL for this result"; link that exact URL. Build one yourself
+   ([constructing a link](#constructing-a-link)) only when no tool result gave you a URL.
 
 ## Constructing a link
 
-Two shapes: a filtered `all-customers` link for ad-hoc exploration, and a saved-audience link
-after `create-audience`.
+Use this only when no tool result gave you a "Dashboard URL for this result" line. Two shapes: a
+filtered `all-customers` link for ad-hoc exploration, and a saved-audience link after
+`create-audience`.
 
 1. Get the project ID from `list-projects`. For dashboard URLs, **strip the `proj` prefix**.
 2. Pick fields and operators from the [field tables](#fields). Do not invent field or operator
@@ -74,8 +81,9 @@ https://app.revenuecat.com/projects/{project_id}/customer-lists/all-customers?fi
 
 ## Linking to a saved audience
 
-Link with `customer_list_id` — the field `create-audience`, `get-audience`, and `list-audiences`
-return alongside `id`:
+The `create-audience` and `get-audience` results include a "Dashboard URL for this result" line;
+link that exact URL. If you only have `list-audiences` output, link with `customer_list_id`, the
+field returned alongside `id`:
 
 ```
 https://app.revenuecat.com/projects/{project_id}/customer-lists/{customer_list_id}

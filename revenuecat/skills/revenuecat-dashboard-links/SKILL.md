@@ -11,6 +11,12 @@ description:
 Share `https://app.revenuecat.com/...` links so the user can open the page you are talking about.
 Do not invent IDs. If you do not have one, ask or omit the link.
 
+**Prefer the URL the MCP server returns.** Most RevenueCat MCP tool results about a specific
+resource (offerings, products, entitlements, paywalls, experiments, customers, audiences, apps,
+billing) include a line starting "Dashboard URL for this result". Link that exact URL. Use the
+routes below only when no result gave you one, for example with the `rc` CLI, for a page you did
+not fetch through a tool, or for charts.
+
 Via the `rc` CLI (see the `revenuecat-cli` skill): `rc open [section] [id] --print` prints a
 deep link for a coarse section (`paywalls`, `customers`, `experiments`, `charts`, `apps`,
 `overview`, `settings`, `integrations`, `catalog`, `api-keys`, `audit-logs`). Use the routes
