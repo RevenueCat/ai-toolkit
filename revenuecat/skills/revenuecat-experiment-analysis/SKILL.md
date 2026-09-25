@@ -5,6 +5,8 @@ description: Use when the user asks to analyze or understand a RevenueCat experi
 
 To analyze an experiment, follow the following steps. Make sure to execute all steps in this order, do not skip any. More details on the step below. If you already have partial information (eg. the experiment ID), you may skip that step only. Continue following all of the other steps. Within a step, issue independent calls together so they run in parallel.
 
+When the `rc` CLI is available, `rc experiments list`, `rc experiments show <id> --json`, and `rc experiments results <id> --json` can supply steps 1, 2a, and 4. Use `rc schema experiments results` to discover filters. Continue using MCP for expanded Offering/paywall details and the supporting chart data in step 3.
+
 1. Get the experiment ID
 2. Get experiment details
 3. Get supporting chart data [DO NOT SKIP]
