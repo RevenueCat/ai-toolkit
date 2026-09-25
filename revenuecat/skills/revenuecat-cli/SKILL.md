@@ -5,7 +5,7 @@ description: Drive RevenueCat from the terminal with the `rc` CLI, an alternativ
 
 # revenuecat-cli: driving RevenueCat from the terminal
 
-`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server (the CLI adds paywall generate/edit; the MCP server has some SDK feature-gate and experiment tools the CLI does not). Use whichever surface is available; this skill is the reference for the CLI path.
+`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server. It also exposes `rc experiments` and `rc targeting` for experiment and targeting-rule work; use `rc schema` to discover their config fields. The MCP server has SDK feature-gate tools the CLI does not. Use whichever surface is available; this skill is the reference for the CLI path.
 
 ## Install and authenticate
 
@@ -41,6 +41,7 @@ Look up exact flags with `rc commands --schemas --json` (or `rc schema <space-se
 - **Store credentials and state**: `rc setup apple|google`, `rc products store plan|apply|sync`
 - **Data**: `rc charts list|show`, `rc customers ...`
 - **Paywalls**: `rc paywalls generate|edit|publish` (dashboard design/audit playbook: `revenuecat-paywall-design`)
+- **Experiments and targeting**: `rc experiments list|show|results|create|duplicate|update|start|pause|resume|stop|delete`, `rc targeting list|show|create|update|delete`
 - **Dashboard**: `rc open [section] [id] --print` (resource URLs: `revenuecat-dashboard-links`)
 
 Prefer the specific command. Drop to `rc api <METHOD> <path>` only for endpoints not yet in the CLI surface.
