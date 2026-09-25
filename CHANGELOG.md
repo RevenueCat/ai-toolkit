@@ -5,6 +5,15 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] – 2026-09-25
+
+### Changed
+
+- **integrate-revenuecat** now settles how the paywall is built before any paywall code is written: RevenueCat Paywall (recommended default, created via `create-paywall-ai` / `rc paywalls generate`) or a custom paywall wired to offerings. It keeps an existing paywall screen, asks when it can, and falls back to the recommendation with a note when it cannot ask. The description also triggers on "hook up RevenueCat" and adding subscriptions or in-app purchases.
+- **revenuecat-purchase-flow** is scoped to custom (hand-coded) paywalls and points back at that choice; **revenuecat-paywall** drops a stale "(when available)" and points at the same choice.
+
+---
+
 ## [2.3.0] – 2026-09-18
 
 ### Added

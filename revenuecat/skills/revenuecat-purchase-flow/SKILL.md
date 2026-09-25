@@ -1,11 +1,13 @@
 ---
 name: revenuecat-purchase-flow
-description: Implement the RevenueCat purchase and restore flow. Use when the user asks to buy a package, purchase a subscription, fetch offerings, build paywall purchase logic, handle purchase errors, detect user cancelled, or restore previous purchases on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Implement the RevenueCat purchase and restore flow. Use when the user asks to buy a package, purchase a subscription, fetch offerings, build the purchase logic behind a custom (hand-coded) paywall, handle purchase errors, detect user cancelled, or restore previous purchases on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # revenuecat-purchase-flow: buy a package and restore purchases
 
 Use this skill when the user wants to complete the purchase side of RevenueCat: fetch offerings, call `purchase`, deal with cancellation and errors, and expose a "Restore" action. It does not cover rendering a paywall UI (that lives in `revenuecat-paywall`) or gating features (that lives in `revenuecat-entitlements-gate`).
+
+If the app has no paywall yet and the user has not asked for a custom one, settle how the paywall is built first (`integrate-revenuecat`, Section 5c). The default is a RevenueCat Paywall, which handles the purchase itself.
 
 ## 1. Detect the platform
 
