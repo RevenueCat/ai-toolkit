@@ -1,6 +1,6 @@
 ---
 name: revenuecat-cli
-description: Drive RevenueCat from the terminal with the `rc` CLI, an alternative to the RevenueCat MCP server for humans, CI, and agents. Covers install, authentication, command discovery, and output conventions. Referenced by the other RevenueCat skills whenever they offer a CLI path.
+description: Drive RevenueCat from the terminal with the `rc` CLI, an alternative to the RevenueCat MCP server for humans, CI, and agents. Covers install, authentication, command discovery, output conventions. It allows uploading images and fonts to RevenueCat paywalls, which is currently not available via MCP. Referenced by the other RevenueCat skills whenever they offer a CLI path.
 ---
 
 # revenuecat-cli: driving RevenueCat from the terminal
@@ -40,7 +40,22 @@ Look up exact flags with `rc commands --schemas --json` (or `rc schema <space-se
 - **Catalog**: `rc products ...`, `rc entitlements ...`, `rc offerings ...`, `rc packages ...`
 - **Store credentials and state**: `rc setup apple|google`, `rc products store plan|apply|sync`
 - **Data**: `rc charts list|show`, `rc customers ...`
-- **Paywalls**: `rc paywalls generate|edit|publish` (dashboard design/audit playbook: `revenuecat-paywall-design`)
+- **Paywalls**: `rc paywalls generate|edit|publish`, `rc media-assets upload|list`, `rc fonts upload|list` (dashboard design/audit playbook: `revenuecat-paywall-design`)
 - **Dashboard**: `rc open [section] [id] --print` (resource URLs: `revenuecat-dashboard-links`)
 
 Prefer the specific command. Drop to `rc api <METHOD> <path>` only for endpoints not yet in the CLI surface.
+
+## Images and fonts in RevenueCat paywalls
+
+The MCP currently supports paywall creation and edits via `create-paywall-ai` / `edit-paywall-ai` tools, but they take a prompt and context as input and do not allow referencing local images. Use the CLI to upload existing project assets (images, fonts) and make them available in your RevenueCat paywall.  
+
+- **`--image <file>` on `rc paywalls generate|edit`** attaches a *visual reference* (png/jpeg/webp). Use this to give the Paywalls AI editor a reference to recreate a paywall, and adapt style, layout, theme or mood. The attached reference is **never placed directly in the paywall**. Pass an app screenshot here whenever one exists, it has more information and is preferred over a plain text description of the style.
+- **`rc media-assets upload <file>`** puts an image in the project's Media Gallery and returns its asset URL. Paste that URL into the prompt and say where it goes (e.g. "use `https://…/hero.png` as the hero image") for the editor to actually place it verbatim in the paywall. Use it for the app's real logo, hero or feature images.
+
+Note: Do not reach for `--image` when the user wants their logo *in* the paywall. It will recreate a similar looking but wrong image. `--image` is for reference image only.
+
+`--attachment <file>` takes either kind: images attach visually like `--image`, text files (`DESIGN.md` for style and design guide).
+
+For custom fonts shipped in the codebase (`.ttf`/`.otf`), `rc fonts upload <file>` returns a `font_key` (`RCFM:…`) and registers it project-wide. The editor does not list custom fonts, so name the key explicitly in the prompt ("set headings to font_name RCFM:…"). Preview screenshots may not render CLI-referenced custom fonts, verify in the dashboard builder URL.
+
+Upload assets and fonts *before* the first `generate` turn, so the editor can design around them rather than being retrofitted afterwards.

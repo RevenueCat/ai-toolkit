@@ -5,6 +5,12 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] – 2026-09-21
+
+### Added
+
+- **revenuecat-cli** The revenuecat-cli now documents how to upload local images and fonts to use in the paywall editor. For clarification it also now spells out that `--image` on `rc paywalls generate|edit` attaches a visual reference only and is not placed in the design.
+
 ## [2.3.0] – 2026-09-18
 
 ### Added
