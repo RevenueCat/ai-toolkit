@@ -44,13 +44,13 @@ Purchases.configure(
 
 ### Step 3: trigger a purchase
 
-The first call to `Purchases.sharedInstance.awaitPurchase(...)` (or the callback variant) opens the Test Store dialog with three buttons: **Successful Purchase**, **Failed Purchase**, **Cancel**. Pick the outcome you want to test.
+The first call to `Purchases.sharedInstance.awaitPurchase(...)` (or the callback variant) opens the Test Store dialog with three buttons: **Test valid purchase**, **Test failed purchase**, **Cancel**. Pick the outcome you want to test.
 
 ### Verify
 
 1. Logcat shows the SDK configured with a `test_` key.
-2. **Successful Purchase** routes through the success path; the entitlement on the returned `CustomerInfo` is active.
-3. **Failed Purchase** and **Cancel** route through the same `PurchasesException` / `userCancelled` paths your app already handles for real Play purchases.
+2. **Test valid purchase** routes through the success path; the entitlement on the returned `CustomerInfo` is active.
+3. **Test failed purchase** throws with `PurchasesErrorCode.TestStoreSimulatedPurchaseError`, and **Cancel** throws with `userCancelled = true`. Both go through the error paths your app already handles for real Play purchases.
 
 ## Per store: which sandbox applies
 
@@ -63,11 +63,11 @@ Test Store described above works for any target store and stays as is.
 
 ## Real sandbox: Google Play license tester on Internal Testing
 
-Real sandbox testing on Google Play requires all three of: a license tester account, a signed build on the Internal Testing track, and live (not draft) products in Play Console.
+Real sandbox testing on Google Play needs an account that is a license tester and has opted in to a testing track (internal or closed) through the track's opt-in link, a build uploaded to that track, and live (not draft) products. Without the opt-in, products do not load. Accounts that are not license testers are charged real money, even on a testing track.
 
 ## Add license testers
 
-1. Google Play Console → **Setup → License testing**.
+1. Google Play Console → **Settings → License testing**.
 2. Add the Gmail accounts that will be used for testing.
 3. Set **License response** to `RESPOND_NORMALLY`. Other values simulate error conditions.
 
@@ -75,15 +75,15 @@ License testers pay a cartoon price instead of real money when they buy licensed
 
 ## Upload to the Internal Testing track
 
-This is the step most often skipped. A sideloaded debug build with a debug signing key **cannot** purchase licensed products, even for license testers.
+Play needs the app on a testing track, and each license tester must opt in through the track link, before test purchases work. After that, a license tester can also test sideloaded builds, including debug builds with debug signatures, because Google lets license testers bypass the check that blocks apps not uploaded to Google Play.
 
 1. Build a **signed** AAB (release or a dedicated test variant). The signing key must match the upload key expected by Play Console, or be uploaded under Play App Signing.
-2. Play Console → **Release → Testing → Internal testing** → create a release, upload the AAB.
+2. Play Console → **Test and release → Testing → Internal testing** → create a release, upload the AAB.
 3. Add your license tester Gmail accounts to the tester list for this track.
 4. Publish the release to the track.
-5. Share the opt-in link with testers. Each tester must click it, accept, and install the app **from the Play Store link** on their device.
+5. Share the opt-in link with testers. Each tester must click it and accept. Testers can then install the app from the Play Store link, and license testers can also run a sideloaded build.
 
-Fresh uploads take roughly 15 minutes to propagate through Play. If a tester opens the opt-in link and the Play Store says "not available in your country" or similar, wait and retry.
+After you publish to a testing track, it can take a few hours before the app is available to testers. If a tester opens the opt-in link and the Play Store says "not available in your country" or similar, wait and retry.
 
 ## Verify products are active in Play Console
 
@@ -106,7 +106,7 @@ Flavor builds with suffixed application IDs (`com.example.myapp.dev`) need their
 
 ## Run and purchase
 
-Install via the Play opt-in link (not Android Studio, not `adb install`). Sign into the device with a license tester account. Trigger the purchase. Play shows a "test card, always approves" dialog. On confirmation, the purchase flows through Play Billing into RevenueCat.
+Opt in through the Play link first. Then install from Play, or, on a license tester's device, sideload the build from Android Studio or `adb install`. Sign into the device with a license tester account. Trigger the purchase. Play shows a "test card, always approves" dialog. On confirmation, the purchase flows through Play Billing into RevenueCat.
 
 The transaction should appear on the RevenueCat dashboard **Sandbox** view within seconds.
 
@@ -128,7 +128,7 @@ Play Console offers **subscription test accounts** with configurable test clocks
 ## Verify
 
 1. `Purchases.logLevel = LogLevel.DEBUG` in the build.
-2. App is installed from the Play Internal Testing opt-in link.
+2. The license tester account has opted in to the testing track, and the app is installed from Play or sideloaded.
 3. Device is signed in with a license tester Gmail.
 4. A purchase succeeds, Play shows "test card, always approves".
 5. Logcat shows the SDK posting the purchase.

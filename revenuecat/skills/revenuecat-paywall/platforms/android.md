@@ -113,4 +113,4 @@ Run the app on a device or emulator signed into a Google sandbox tester:
 1. Trigger the code path that opens the paywall. The template configured in the dashboard renders.
 2. Tap a package and complete a test purchase. The paywall closes and either `PaywallListener.onPurchaseCompleted` fires (composable) or the result handler receives `PaywallResult.Purchased` (activity).
 3. Dismiss with the close button. `dismissRequest` (composable) or `PaywallResult.Cancelled` (activity) fires.
-4. Run `adb logcat -s Purchases` and confirm a successful transaction log line around the purchase.
+4. Run `adb logcat | grep "\[Purchases\]"` and confirm a successful transaction log line around the purchase.

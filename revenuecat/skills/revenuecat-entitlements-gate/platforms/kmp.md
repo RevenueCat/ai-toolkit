@@ -86,7 +86,7 @@ runCatching {
 
 - `Purchases.sharedInstance.delegate` holds a single reference. If you need to fan out to multiple consumers, funnel through a single repository (as shown) and expose a `StateFlow`.
 - Replace `"premium"` with the entitlement identifier configured in the RevenueCat dashboard. It is case sensitive.
-- If your installed version of `purchases-kmp` does not expose `awaitCustomerInfo` in `com.revenuecat.purchases.kmp.ktx`, prefer what the IDE autocompletes and see the `purchases-kmp` README. Some versions ship result based variants in a separate module.
+- If your installed version of `purchases-kmp` does not expose `awaitCustomerInfo` in `com.revenuecat.purchases.kmp.ktx`, prefer what the IDE autocompletes and see the [ktx package in the purchases-kmp API reference](https://revenuecat.github.io/purchases-kmp/core/com.revenuecat.purchases.kmp.ktx/). Some versions ship result based variants in a separate module.
 
 ## Verify
 

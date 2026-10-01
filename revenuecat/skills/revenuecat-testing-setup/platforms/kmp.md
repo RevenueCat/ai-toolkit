@@ -18,14 +18,14 @@ fun initRevenueCat(apiKey: String) {
 }
 ```
 
-The Test Store dialog and outcome semantics are identical to the native SDKs: **Successful Purchase**, **Failed Purchase**, **Cancel**.
+The Test Store dialog and outcome semantics come from the native SDKs. On both platforms the buttons are **Test valid purchase**, **Test failed purchase**, and **Cancel**.
 
 ## Set up each target
 
 Follow the platform files directly:
 
 - iOS target → `revenuecat-testing-setup/platforms/ios.md`. Prefer a real sandbox Apple ID when exercising RevenueCat dashboard ingestion. The StoreKit Configuration File is useful for pure UI iteration but does not hit the real sandbox pipeline.
-- Android target → `revenuecat-testing-setup/platforms/android.md`. License tester on the Internal Testing track is required.
+- Android target → `revenuecat-testing-setup/platforms/android.md`. A license tester account is required; that file covers sideloaded builds and testing tracks.
 
 ## Match API keys
 
@@ -63,7 +63,7 @@ Same as the native platforms:
 On each target:
 
 1. `Purchases.logLevel = LogLevel.DEBUG`.
-2. Native platform console shows the configure banner and the posted transaction.
+2. Native platform console shows a line containing `SDK Version - <version>` at configure, then the posted transaction.
 3. RevenueCat dashboard Sandbox view shows the transaction on the expected `appUserID`.
 4. `customerInfo` after the purchase shows the expected entitlement active.
 5. Restoring purchases on a fresh install brings the entitlement back.

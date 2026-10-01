@@ -70,7 +70,7 @@ class SettingsActivity : ComponentActivity() {
 
 ## Notes
 
-- `CustomerCenter` and `ShowCustomerCenter` require `purchases-ui` **8.x** or newer. If the installed version is older, fall back to rendering subscription state from `Purchases.sharedInstance.getCustomerInfo(…)` plus a restore button and a link to `https://play.google.com/store/account/subscriptions`.
+- `CustomerCenter` requires `purchases-ui` **8.12.0** or newer, and `ShowCustomerCenter` **8.13.0** or newer. If the installed version is older, fall back to rendering subscription state from `Purchases.sharedInstance.getCustomerInfo(…)` plus a restore button and a link to `https://play.google.com/store/account/subscriptions`.
 - Refund requests are **not** supported on Android (refunds go through Google Play). Any refund related dashboard action degrades gracefully to either hiding the option or deep linking to the Play subscriptions page.
 - When the user taps **Manage subscription** on Android, the Customer Center opens the system subscriptions screen via an `Intent`. Your app returns to the foreground afterwards.
 - The composable requires a Material 3 theme in the Compose tree. `CustomerCenterActivity` sets one up for you; if you embed `CustomerCenter` inside your own Compose host, wrap it in `MaterialTheme { … }`.
@@ -84,6 +84,6 @@ Sign into the app with a Google account that has at least one active sandbox sub
 2. Tap **Restore purchases**. The active entitlements reload. If you wired `CustomerCenterOptions.listener`, its `onRestoreCompleted` callback fires.
 3. Tap **Manage subscription**. The Google Play subscriptions screen opens in a new task.
 4. Close the Customer Center. With the composable, `onDismiss` fires. With `ShowCustomerCenter`, the `ActivityResultCallback` runs.
-5. `adb logcat -s Purchases` shows the customer info fetch and any transaction events.
+5. `adb logcat | grep "\[Purchases\]"` shows the customer info fetch and any transaction events.
 
 If the view is empty for a user who has purchases, confirm `Purchases.sharedInstance.appUserID` matches the dashboard user who owns those transactions and that the dashboard's Customer Center section is configured.

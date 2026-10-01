@@ -40,7 +40,7 @@ For Expo, use `eas.json` build profiles (`development`, `preview`, `production`)
 }
 ```
 
-Trigger a purchase. The Test Store dialog opens with **Successful Purchase**, **Failed Purchase**, **Cancel**. Pick an outcome and verify the resulting `customerInfo` and dashboard transaction.
+Trigger a purchase. The Test Store dialog opens with **Test valid purchase**, **Test failed purchase**, **Cancel**. Pick an outcome and verify the resulting `customerInfo` and dashboard transaction.
 
 `__DEV__` is `false` in release builds, so the conditional above keeps the test key out of production binaries via dead code elimination.
 
@@ -49,7 +49,7 @@ Trigger a purchase. The Test Store dialog opens with **Successful Purchase**, **
 Follow the platform files directly:
 
 - iOS → `revenuecat-testing-setup/platforms/ios.md`. Prefer a real sandbox Apple ID for RevenueCat dashboard verification.
-- Android → `revenuecat-testing-setup/platforms/android.md`. License tester on the Internal Testing track is required.
+- Android → `revenuecat-testing-setup/platforms/android.md`. Test purchases need a license tester who has opted in to an internal or closed testing track.
 
 ## Dev client is required (Expo)
 
@@ -72,8 +72,8 @@ Install the dev client and reload. Expo Go itself cannot be fixed to support pur
 
 ### Android
 
-- `eas build --profile preview` (or `cd android && ./gradlew bundleRelease`) produces a signed AAB. Upload to Play Internal Testing. Install via the tester opt-in link.
-- `npx react-native run-android` produces a debug build signed with the debug key. Play will **not** allow sandbox purchases against this signature.
+- `eas build --profile production` (or `cd android && ./gradlew bundleRelease`) produces a signed AAB. Upload to Play Internal Testing. Install via the tester opt-in link.
+- `npx react-native run-android` produces a debug build signed with the debug key. It can make sandbox purchases only for a license tester who has opted in to the testing track. Other accounts either cannot buy from it or are charged real money.
 
 ## applicationId / bundle identifier must match the dashboard
 
@@ -108,7 +108,7 @@ Stale caches let the JS side bind to an old native module and produce confusing 
 ## Verify
 
 1. `Purchases.setLogLevel(LOG_LEVEL.DEBUG);` before `configure`.
-2. You are running a dev client (not Expo Go), and the Android build is a signed AAB installed from Play Internal Testing.
+2. You are running a dev client (not Expo Go). On Android, a license tester who opted in to the testing track installed it, either from that track or as a debug build.
 3. A test purchase succeeds. The native platform console shows the SDK posting the transaction.
 4. The RevenueCat dashboard Sandbox view shows the transaction on the expected `appUserID`.
 5. `await Purchases.getCustomerInfo()` shows the expected entitlement active.

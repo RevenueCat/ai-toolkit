@@ -10,7 +10,7 @@ Use observer mode. Your existing Play Billing code keeps owning the purchase flo
 
 ### Install the SDK
 
-See `integrate-revenuecat/platforms/android.md` for dependency specifics. Target a recent 8.x or newer release.
+See `integrate-revenuecat/platforms/android.md` for dependency specifics. Target the current major release (10.x). It depends on Play Billing Library 8.3.0 and minSdk 23, so your existing Play Billing code must compile against Billing Library 8.
 
 ### Configure in observer mode
 
@@ -74,7 +74,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. App builds at the new SDK version with `Purchases.logLevel = LogLevel.DEBUG`.
-2. Logcat at launch shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`.
+2. `adb logcat | grep "\[Purchases\]"` at launch shows the `SDK Version - <version>` debug line.
 3. A sandbox purchase from a license tester on the Internal Testing track shows on the RevenueCat dashboard Sandbox view, attached to the correct appUserID.
 4. A user with an existing active subscription still has it after relaunch.
 5. Log level is dropped before the next release.
