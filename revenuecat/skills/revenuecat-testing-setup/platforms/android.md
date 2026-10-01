@@ -44,13 +44,13 @@ Purchases.configure(
 
 ### Step 3: trigger a purchase
 
-The first call to `Purchases.sharedInstance.awaitPurchase(...)` (or the callback variant) opens the Test Store dialog with three buttons: **Successful Purchase**, **Failed Purchase**, **Cancel**. Pick the outcome you want to test.
+The first call to `Purchases.sharedInstance.awaitPurchase(...)` (or the callback variant) opens the Test Store dialog with three buttons: **Test valid purchase**, **Test failed purchase**, **Cancel**. Pick the outcome you want to test.
 
 ### Verify
 
 1. Logcat shows the SDK configured with a `test_` key.
-2. **Successful Purchase** routes through the success path; the entitlement on the returned `CustomerInfo` is active.
-3. **Failed Purchase** and **Cancel** route through the same `PurchasesException` / `userCancelled` paths your app already handles for real Play purchases.
+2. **Test valid purchase** routes through the success path; the entitlement on the returned `CustomerInfo` is active.
+3. **Test failed purchase** throws with `PurchasesErrorCode.TestStoreSimulatedPurchaseError`, and **Cancel** throws with `userCancelled = true`. Both go through the error paths your app already handles for real Play purchases.
 
 ## Per store: which sandbox applies
 

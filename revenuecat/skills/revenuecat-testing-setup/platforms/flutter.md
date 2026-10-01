@@ -37,7 +37,7 @@ await Purchases.configure(PurchasesConfiguration(_apiKey()));
 
 Or use Flutter flavors: each flavor compiles its own API key constant and maps to its own RevenueCat dashboard app entry.
 
-Trigger a purchase. The Test Store dialog opens with **Successful Purchase**, **Failed Purchase**, **Cancel**. Pick an outcome and verify the resulting `CustomerInfo` and dashboard transaction.
+Trigger a purchase. The Test Store dialog opens with **Test valid purchase**, **Test failed purchase**, **Cancel**. Pick an outcome and verify the resulting `CustomerInfo` and dashboard transaction.
 
 The `kReleaseMode` branch above ensures the test key string is dead code in release builds and gets eliminated.
 

@@ -18,7 +18,7 @@ fun initRevenueCat(apiKey: String) {
 }
 ```
 
-The Test Store dialog and outcome semantics are identical to the native SDKs: **Successful Purchase**, **Failed Purchase**, **Cancel**.
+The Test Store dialog and outcome semantics come from the native SDKs. On both platforms the buttons are **Test valid purchase**, **Test failed purchase**, and **Cancel**.
 
 ## Set up each target
 

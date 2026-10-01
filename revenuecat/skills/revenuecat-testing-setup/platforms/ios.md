@@ -48,13 +48,13 @@ If you prefer Swift over Info.plist plumbing, branch in code with `#if DEBUG` an
 
 ### Step 3: trigger a purchase
 
-The first call to `Purchases.shared.purchase(package:)` opens the Test Store dialog with three buttons: **Successful Purchase**, **Failed Purchase**, **Cancel**. Pick an outcome and verify the resulting `CustomerInfo` matches the path you expected.
+The first call to `Purchases.shared.purchase(package:)` opens the Test Store dialog with three buttons: **Test valid purchase**, **Test failed purchase**, **Cancel**. Pick an outcome and verify the resulting `CustomerInfo` matches the path you expected.
 
 ### Verify
 
 1. Xcode console shows the SDK configured with a `test_` key.
-2. Picking **Successful Purchase** flips the entitlement on the returned `CustomerInfo`; the dashboard records the transaction.
-3. Picking **Failed Purchase** or **Cancel** routes through the same error / `userCancelled` paths your app already handles for the real store.
+2. Picking **Test valid purchase** flips the entitlement on the returned `CustomerInfo`; the dashboard records the transaction.
+3. Picking **Test failed purchase** or **Cancel** routes through the same error / `userCancelled` paths your app already handles for the real store.
 
 ## Option B: StoreKit Configuration File (fastest, lowest fidelity)
 

@@ -40,7 +40,7 @@ For Expo, use `eas.json` build profiles (`development`, `preview`, `production`)
 }
 ```
 
-Trigger a purchase. The Test Store dialog opens with **Successful Purchase**, **Failed Purchase**, **Cancel**. Pick an outcome and verify the resulting `customerInfo` and dashboard transaction.
+Trigger a purchase. The Test Store dialog opens with **Test valid purchase**, **Test failed purchase**, **Cancel**. Pick an outcome and verify the resulting `customerInfo` and dashboard transaction.
 
 `__DEV__` is `false` in release builds, so the conditional above keeps the test key out of production binaries via dead code elimination.
 
