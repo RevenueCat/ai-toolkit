@@ -4,7 +4,7 @@
 
 ## Install
 
-Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that tag for `<latest>` in the snippet below. The KMP tag uses a `<wrapper>+<bundled-deps>` format (e.g. `2.10.2+17.55.1`), where the part before `+` is the KMP wrapper version and the part after is the bundled `purchases-hybrid-common` version. Use the full tag string as the artifact version first; if Gradle interprets the `+` as a wildcard, fall back to the wrapper portion only (e.g. `2.10.2`). If GitHub is unreachable, ask the user for a version to pin.
+Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below (for example `3.10.1`). Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+, and `purchases-kmp-ui` needs Android API 24+ (core alone needs 23+). Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
 
 In the shared module's `build.gradle.kts`, add the UI artifact to `commonMain`:
 
@@ -23,7 +23,7 @@ kotlin {
 
 Compose Multiplatform must already be set up in the shared module (the `org.jetbrains.compose` plugin and the compose dependencies). If it is not, `Paywall` will not compile.
 
-On iOS, the UI artifact bridges through the `RevenueCatUI` framework. Make sure your Kotlin framework links against it. For setups using the Kotlin CocoaPods plugin, the pod integration handles this automatically. For pure SPM setups, follow the iOS linking section of the [purchases-kmp README](https://github.com/RevenueCat/purchases-kmp#readme).
+On iOS, the UI artifact wraps the native `RevenueCatUI` paywalls. Since 3.0.0 it needs no extra CocoaPods pod or Swift package. Coming from 2.x, remove `PurchasesHybridCommonUI` ([3.0.0 migration guide](https://github.com/RevenueCat/purchases-kmp/blob/main/migrations/3.0.0-MIGRATION.md)).
 
 ## Implement
 
@@ -83,7 +83,7 @@ Set a specific offering via the `offering` property on the builder. If left `nul
 
 - The `PaywallListener` callbacks, `PaywallOptions` surface, and the `dismissRequest` contract mirror the native Android SDK. See `purchases-android` docs for detailed semantics.
 - Do not call `Purchases.purchase(…)` from outside the paywall. The paywall runs the purchase itself and calls the listener with the result.
-- The exact group/artifact coordinates for `purchases-kmp-ui` have evolved across 1.x releases. If the IDE flags the dependency as unresolved, prefer what shows up in the [purchases-kmp README](https://github.com/RevenueCat/purchases-kmp) for your installed version over the snippet above.
+- `com.revenuecat.purchases:purchases-kmp-ui` is the current coordinate for 3.x. If the IDE flags the dependency as unresolved, check the version first, then the [Paywalls installation docs for Kotlin Multiplatform](https://www.revenuecat.com/docs/tools/paywalls/installation#kotlin-multiplatform-installation).
 - Compose Multiplatform paywalls require the Compose runtime on both targets. Desktop, web, and other non mobile targets are not supported by the paywall module.
 
 ## Verify

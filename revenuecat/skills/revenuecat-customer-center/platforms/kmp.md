@@ -4,7 +4,7 @@
 
 ## Install
 
-Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that tag for `<latest>` in the snippet below. The KMP tag uses a `<wrapper>+<bundled-deps>` format (e.g. `2.10.2+17.55.1`), where the part before `+` is the KMP wrapper version and the part after is the bundled `purchases-hybrid-common` version. Use the full tag string as the artifact version first; if Gradle interprets the `+` as a wildcard, fall back to the wrapper portion only (e.g. `2.10.2`). If GitHub is unreachable, ask the user for a version to pin.
+Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below (for example `3.10.1`). Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+, and `purchases-kmp-ui` needs Android API 24+ (core alone needs 23+). Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
 
 In the shared module's `build.gradle.kts`:
 
@@ -21,7 +21,7 @@ kotlin {
 }
 ```
 
-Compose Multiplatform must already be set up on the shared module. On iOS, the UI artifact bridges to `RevenueCatUI`; for CocoaPods-based KMP projects, the Kotlin CocoaPods plugin wires the pod automatically. For pure SPM setups, follow the iOS linking section of the [purchases-kmp README](https://github.com/RevenueCat/purchases-kmp#readme).
+Compose Multiplatform must already be set up on the shared module. On iOS, the UI artifact wraps the native `RevenueCatUI` Customer Center. Since 3.0.0 it needs no extra CocoaPods pod or Swift package. Coming from 2.x, remove `PurchasesHybridCommonUI` ([3.0.0 migration guide](https://github.com/RevenueCat/purchases-kmp/blob/main/migrations/3.0.0-MIGRATION.md)).
 
 ## Implement
 
@@ -53,7 +53,7 @@ The common API is minimal: `modifier` and a required `onDismiss` callback. Platf
 
 - Customer Center requires iOS 15+ on the iOS target. On Android, refund flows degrade to deep linking into Google Play (Apple only feature).
 - The KMP common API exposes fewer hooks than either native SDK. If your product requires `onRestoreCompleted`, `onManagementOptionSelected`, or other lifecycle callbacks, wire them through platform code directly, or upgrade to a `purchases-kmp-ui` release that exposes them in common.
-- If the IDE cannot resolve `com.revenuecat.purchases:purchases-kmp-ui`, confirm artifact coordinates against the [purchases-kmp README](https://github.com/RevenueCat/purchases-kmp) for your installed version; the module has evolved across 1.x.
+- If the IDE cannot resolve `com.revenuecat.purchases:purchases-kmp-ui`, check the version against the [purchases-kmp releases](https://github.com/RevenueCat/purchases-kmp/releases) (current releases are 3.x) and the coordinates against the [Customer Center docs for Kotlin Multiplatform](https://www.revenuecat.com/docs/tools/customer-center/customer-center-kmp).
 - Ensure `Purchases.logIn(appUserId)` has run for signed in users before opening the Customer Center, or subscriptions will show up under an anonymous ID.
 
 ## Verify
