@@ -39,7 +39,10 @@ Purchases.sharedInstance.getCustomerInfo(object : ReceiveCustomerInfoCallback {
 `Purchases.sharedInstance.updatedCustomerInfoListener` is a single listener property. Assign a lambda early (for example in the custom `Application` or a DI scoped singleton) so every screen can observe the same state.
 
 ```kotlin
+import android.util.Log
 import com.revenuecat.purchases.Purchases
+import com.revenuecat.purchases.PurchasesException
+import com.revenuecat.purchases.awaitCustomerInfo
 import com.revenuecat.purchases.interfaces.UpdatedCustomerInfoListener
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,6 +57,16 @@ object EntitlementsRepository {
                 _hasPremium.value = info.entitlements.active["premium"] != null
             }
     }
+
+    suspend fun refresh() {
+        try {
+            val info = Purchases.sharedInstance.awaitCustomerInfo()
+            _hasPremium.value = info.entitlements.active["premium"] != null
+        } catch (e: PurchasesException) {
+            // Keep the last known value. The listener updates it on the next change.
+            Log.w("EntitlementsRepository", "Could not refresh CustomerInfo: ${e.error}")
+        }
+    }
 }
 ```
 
@@ -61,11 +74,7 @@ Seed the flow once at startup so the first emission does not wait for a customer
 
 ```kotlin
 // In a coroutine scope tied to app lifetime.
-runCatching {
-    val info = Purchases.sharedInstance.awaitCustomerInfo()
-    EntitlementsRepository._hasPremium.value =
-        info.entitlements.active["premium"] != null
-}
+EntitlementsRepository.refresh()
 ```
 
 ## Compose usage

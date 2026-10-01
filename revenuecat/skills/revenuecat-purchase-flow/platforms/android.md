@@ -4,8 +4,8 @@
 
 ```kotlin
 import com.revenuecat.purchases.Purchases
+import com.revenuecat.purchases.Package
 import com.revenuecat.purchases.awaitOfferings
-import com.revenuecat.purchases.models.Package
 
 suspend fun currentPackages(): List<Package> {
     val offerings = Purchases.sharedInstance.awaitOfferings()
@@ -26,7 +26,7 @@ import com.revenuecat.purchases.PurchasesException
 import com.revenuecat.purchases.PurchasesErrorCode
 import com.revenuecat.purchases.PurchaseParams
 import com.revenuecat.purchases.awaitPurchase
-import com.revenuecat.purchases.models.Package
+import com.revenuecat.purchases.Package
 
 sealed interface PurchaseOutcome {
     data object Purchased : PurchaseOutcome

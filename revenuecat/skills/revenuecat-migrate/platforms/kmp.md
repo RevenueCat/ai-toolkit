@@ -13,20 +13,22 @@ Expected shape (check the installed version of `purchases-kmp-core`; its `expect
 ```kotlin
 import com.revenuecat.purchases.kmp.LogLevel
 import com.revenuecat.purchases.kmp.Purchases
-import com.revenuecat.purchases.kmp.PurchasesAreCompletedBy
 import com.revenuecat.purchases.kmp.PurchasesConfiguration
+import com.revenuecat.purchases.kmp.models.PurchasesAreCompletedBy
+import com.revenuecat.purchases.kmp.models.StoreKitVersion
 
 fun initRevenueCat(apiKey: String) {
     Purchases.logLevel = LogLevel.DEBUG
     Purchases.configure(
         PurchasesConfiguration.Builder(apiKey = apiKey)
-            .purchasesAreCompletedBy(PurchasesAreCompletedBy.MY_APP)
+            // Pass the StoreKit version your existing iOS purchase code uses.
+            .purchasesAreCompletedBy(PurchasesAreCompletedBy.MyApp(StoreKitVersion.STOREKIT_2))
             .build()
     )
 }
 ```
 
-If `PurchasesAreCompletedBy` or the builder method name differs in your installed version, rely on the IDE's autocomplete over this file. The KMP wrapper's type names track the native names but are occasionally renamed to `kmp`-friendly equivalents.
+In KMP, `PurchasesAreCompletedBy` is a sealed type, not an enum: use `PurchasesAreCompletedBy.MyApp(storeKitVersion)` or `PurchasesAreCompletedBy.RevenueCat`. The old `com.revenuecat.purchases.kmp.PurchasesAreCompletedBy` import is a deprecated alias for the `models` package.
 
 ### StoreKit version on iOS
 
