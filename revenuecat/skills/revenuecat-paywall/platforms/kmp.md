@@ -31,10 +31,10 @@ Shared composable:
 
 ```kotlin
 import androidx.compose.runtime.Composable
-import com.revenuecat.purchases.kmp.CustomerInfo
-import com.revenuecat.purchases.kmp.PurchasesError
+import com.revenuecat.purchases.kmp.models.CustomerInfo
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PurchasesError
 import com.revenuecat.purchases.kmp.models.StoreTransaction
-import com.revenuecat.purchases.kmp.Package
 import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallListener
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions

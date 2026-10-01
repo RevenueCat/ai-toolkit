@@ -30,7 +30,7 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
   - (b) Gated premium screen. The user taps a premium feature and the paywall opens before the screen loads.
   - (c) Conditional present on a CTA tap, such as an "Upgrade" button in settings.
 - **RevenueCatUI owns the purchase flow.** Do not call `Purchases.purchase(…)` manually alongside a RevenueCatUI paywall. The paywall calls it internally. Listen for the dismiss or purchase completed callback to react in app code.
-- **Close button is opt in on most platforms.** Pass `displayCloseButton = true` (iOS / Flutter / RN) or `setShouldDisplayDismissButton(true)` (Android / KMP) when the paywall is presented modally and the user needs a way out. Skip it when presenting behind a sheet with its own grabber, or when wrapping the paywall in a navigation controller.
+- **Close button is opt in on most platforms.** Pass `displayCloseButton = true` (iOS / Flutter / RN) or `setShouldDisplayDismissButton(true)` (Android) or `shouldDisplayDismissButton = true` (KMP) when the paywall is presented modally and the user needs a way out. Skip it when presenting behind a sheet with its own grabber, or when wrapping the paywall in a navigation controller.
 - **If the user has chosen a fully custom UI**, do not use this skill. Call `Purchases.getOfferings()` and render your own components. RevenueCatUI is only for dashboard templated paywalls.
 
 ## 3. Implementation
