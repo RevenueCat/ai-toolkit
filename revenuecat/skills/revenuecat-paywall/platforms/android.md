@@ -75,12 +75,14 @@ class MainActivity : ComponentActivity() {
 
     private val paywallLauncher = PaywallActivityLauncher(
         resultCaller = this,
-        resultHandler = PaywallResultHandler { result ->
-            when (result) {
-                is PaywallResult.Purchased -> { /* entitlement granted */ }
-                is PaywallResult.Cancelled -> { /* user dismissed */ }
-                is PaywallResult.Restored -> { /* restore succeeded */ }
-                is PaywallResult.Error -> { /* error */ }
+        resultHandler = object : PaywallResultHandler {
+            override fun onActivityResult(result: PaywallResult) {
+                when (result) {
+                    is PaywallResult.Purchased -> { /* entitlement granted */ }
+                    is PaywallResult.Cancelled -> { /* user dismissed */ }
+                    is PaywallResult.Restored -> { /* restore succeeded */ }
+                    is PaywallResult.Error -> { /* error */ }
+                }
             }
         },
     )
