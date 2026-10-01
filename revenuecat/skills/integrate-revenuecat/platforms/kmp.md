@@ -82,12 +82,14 @@ struct iOSApp: App {
 ## Notes
 
 - Two public SDK keys: `appl_…` for iOS, `goog_…` for Android. Keep them separate.
-- Because the KMP SDK wraps the native SDKs, the verify logs below are the native SDK logs. See `platforms/ios.md` / `platforms/android.md` for the exact log line on each side.
+- Because the KMP SDK wraps the native SDKs, the verify logs below are the native SDK logs.
 - When in doubt about the exact shape of `PurchasesConfiguration`, check the installed version's source or the [purchases-kmp README](https://github.com/RevenueCat/purchases-kmp). The skill prefers "accurate for your version" over "plausibly correct in general."
 
 ## Verify
 
 Run each platform target. Expect:
 
-- **iOS**: `[Purchases] - INFO: 😻‍👼 Purchases is configured` in Xcode console.
-- **Android**: `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured` in logcat.
+- **iOS**: with `LogLevel.DEBUG`, the Xcode console shows a line containing `SDK Version - <version>`.
+- **Android**: with `LogLevel.DEBUG`, `adb logcat | grep "\[Purchases\]"` shows a line containing `SDK Version - <version>`.
+
+On both targets `<version>` is the native SDK's version, not the purchases-kmp version.

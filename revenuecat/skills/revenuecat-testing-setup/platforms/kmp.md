@@ -63,7 +63,7 @@ Same as the native platforms:
 On each target:
 
 1. `Purchases.logLevel = LogLevel.DEBUG`.
-2. Native platform console shows the configure banner and the posted transaction.
+2. Native platform console shows a line containing `SDK Version - <version>` at configure, then the posted transaction.
 3. RevenueCat dashboard Sandbox view shows the transaction on the expected `appUserID`.
 4. `customerInfo` after the purchase shows the expected entitlement active.
 5. Restoring purchases on a fresh install brings the entitlement back.

@@ -71,10 +71,12 @@ class MyApplication : Application() {
 
 ## Verify
 
-Run the app. In **logcat**, filter by tag `Purchases` and look for:
+Run the app with `Purchases.logLevel = LogLevel.DEBUG` set before `configure`. The SDK logs under the tag `[Purchases] - <LEVEL>`, so filter on the text rather than an exact tag:
 
 ```
-Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured
+adb logcat | grep "\[Purchases\]"
 ```
 
-A wrong API key shows up as an auth error on the first offerings fetch. No logs at all usually means `android:name=".MyApplication"` is missing from the manifest.
+At configure time you should see debug lines containing `SDK Version - <version>` and `Package name - <your.package>`.
+
+A wrong API key shows up as an auth error on the first offerings fetch. No `[Purchases]` lines at all, with the log level at DEBUG, usually means `configure` never ran, most often because `android:name=".MyApplication"` is missing from the manifest. A custom `Purchases.logHandler` also keeps these lines out of logcat.

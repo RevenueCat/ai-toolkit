@@ -84,6 +84,6 @@ Sign into the app with a Google account that has at least one active sandbox sub
 2. Tap **Restore purchases**. The active entitlements reload. If you wired `CustomerCenterOptions.listener`, its `onRestoreCompleted` callback fires.
 3. Tap **Manage subscription**. The Google Play subscriptions screen opens in a new task.
 4. Close the Customer Center. With the composable, `onDismiss` fires. With `ShowCustomerCenter`, the `ActivityResultCallback` runs.
-5. `adb logcat -s Purchases` shows the customer info fetch and any transaction events.
+5. `adb logcat | grep "\[Purchases\]"` shows the customer info fetch and any transaction events.
 
 If the view is empty for a user who has purchases, confirm `Purchases.sharedInstance.appUserID` matches the dashboard user who owns those transactions and that the dashboard's Customer Center section is configured.

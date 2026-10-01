@@ -93,4 +93,4 @@ Run the Android target and the iOS target, each with a sandbox tester account:
 1. Trigger the composable on each platform. The dashboard configured paywall renders inside the shared Compose host.
 2. Complete a sandbox purchase. The paywall dismisses via `dismissRequest` and `PaywallListener.onPurchaseCompleted` fires with a non-null `CustomerInfo`.
 3. Dismiss without purchasing. `dismissRequest` fires with no listener call.
-4. Inspect logs on each platform (Xcode console for iOS, `adb logcat -s Purchases` for Android) to confirm the underlying native SDK ran the transaction.
+4. Inspect logs on each platform (Xcode console for iOS, `adb logcat | grep "\[Purchases\]"` for Android) to confirm the underlying native SDK ran the transaction.

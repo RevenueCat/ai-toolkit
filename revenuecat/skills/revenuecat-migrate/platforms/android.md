@@ -74,7 +74,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. App builds at the new SDK version with `Purchases.logLevel = LogLevel.DEBUG`.
-2. Logcat at launch shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`.
+2. `adb logcat | grep "\[Purchases\]"` at launch shows the `SDK Version - <version>` debug line.
 3. A sandbox purchase from a license tester on the Internal Testing track shows on the RevenueCat dashboard Sandbox view, attached to the correct appUserID.
 4. A user with an existing active subscription still has it after relaunch.
 5. Log level is dropped before the next release.

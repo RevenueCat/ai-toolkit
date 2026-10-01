@@ -11,19 +11,20 @@ import com.revenuecat.purchases.Purchases
 Purchases.logLevel = LogLevel.DEBUG
 ```
 
-Set this before `Purchases.configure(...)` in your `Application.onCreate()`. Filter logcat by the `Purchases` tag:
+Set this before `Purchases.configure(...)` in your `Application.onCreate()`. The SDK logs under the tag `[Purchases] - <LEVEL>` (for example `[Purchases] - DEBUG`), so `adb logcat -s Purchases` matches nothing. Filter on the text instead:
 
 ```
-adb logcat -s Purchases
+adb logcat | grep "\[Purchases\]"
 ```
 
-Expected configure banner:
+Expected configure lines (debug level):
 
 ```
-Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured
+SDK Version - <version>
+Package name - <your.package>
 ```
 
-If you see no `Purchases` tag output at all, `android:name=".MyApplication"` is missing from `AndroidManifest.xml` and the `Application` subclass never runs.
+If you see no `[Purchases]` lines at all with the log level at DEBUG, `configure` usually never ran: `android:name=".MyApplication"` is missing from `AndroidManifest.xml`, so the `Application` subclass never runs. A custom `Purchases.logHandler` also keeps these lines out of logcat.
 
 ## License testers and the Internal Testing track
 

@@ -21,7 +21,7 @@ import com.revenuecat.purchases.kmp.Purchases
 Purchases.logLevel = LogLevel.DEBUG
 ```
 
-This flows to both native SDKs. The log output on each target matches the native SDK output, so follow the native platform file for the expected log lines.
+This flows to both native SDKs, and each target logs what its native SDK logs. At configure time, both print a line containing `SDK Version - <version>`, where the version is the native SDK's, not the purchases-kmp version.
 
 ## API key confusion
 
@@ -56,4 +56,4 @@ If the Android actual of `PurchasesConfiguration` requires a `Context` and the s
 
 ## Verify
 
-Reproduce on the target that was failing. Confirm the log banner and the success log for the scenario. Since `purchases-kmp` delegates to the native SDK, the RevenueCat dashboard should reflect the transaction exactly as it would for a native app.
+Reproduce on the target that was failing. Confirm the `SDK Version - <version>` configure line and the success log for the scenario. Since `purchases-kmp` delegates to the native SDK, the RevenueCat dashboard should reflect the transaction exactly as it would for a native app.
