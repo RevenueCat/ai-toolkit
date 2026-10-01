@@ -21,7 +21,7 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 
 ## 2. Shared concepts (all platforms)
 
-### You cannot charge real money during development
+### Test without charging real money
 
 Each store has a dedicated testing channel. Choosing the right channel depends on what you want to test.
 
@@ -31,17 +31,17 @@ Higher fidelity exercises more of the real purchase pipeline. Lower fidelity ite
 
 - **RevenueCat Test Store (lowest fidelity, fastest iteration, deterministic).** A synthetic store hosted by RevenueCat. The SDK is configured with a `test_…` API key from the dashboard. Purchases open a Test Store dialog where you pick the outcome by hand: Successful Purchase, Failed Purchase, or Cancel. Purchases trigger entitlements, update `CustomerInfo`, and appear on the dashboard, but no Apple or Google call happens. Best for paywall iteration, integration tests, and CI smoke runs.
 - **iOS StoreKit Configuration File (low fidelity, Apple synthetic).** Xcode stubs the store locally. Purchases succeed instantly with no App Store Connect round trip. Useful when you need StoreKit specific behavior. RevenueCat transactions in this mode may or may not appear on the dashboard depending on SDK version and intended routing, so it is not a faithful dashboard test.
-- **iOS Sandbox (real sandbox Apple ID) / Android Internal Testing (license tester).** Real store backends, real RevenueCat dashboard ingestion, real receipts. Slower to iterate: build, install, wait for Play propagation or App Store Connect to register the product.
-- **TestFlight (iOS) / Closed or Open Testing (Android).** Behaves very close to production. Receipts are production style. Transactions land in the **production** RevenueCat dashboard, not the Sandbox view.
+- **iOS Sandbox (real sandbox Apple ID) / Android license tester on an internal or closed testing track.** Real store backends, real RevenueCat dashboard ingestion, real receipts. Slower to iterate: build, install, wait for Play propagation or App Store Connect to register the product.
+- **TestFlight (iOS) / any Play testing track (Android, accounts that are not license testers).** Behaves very close to production. Receipts are production style. Transactions land in the **production** RevenueCat dashboard, not the Sandbox view. On Android these are real charges.
 - **Production.** Real money. Do not use for testing.
 
-Start with the lowest fidelity that answers the question, then move up. UI and paywall iteration belongs in the fast channel. "Does my entitlement actually flip?" belongs in sandbox or internal testing.
+Start with the lowest fidelity that answers the question, then move up. UI and paywall iteration belongs in the fast channel. "Does my entitlement actually flip?" belongs in the store sandbox, which on Android means a license tester on a testing track.
 
 ### Test Store: when to reach for it before sandbox
 
 RevenueCat's Test Store is a synthetic store provider configured per project on the dashboard. It produces real RevenueCat backend records (`CustomerInfo` updates, entitlement transitions, dashboard transactions) without calling App Store or Google Play. The price of that speed is fidelity. Test Store does not simulate Ask to Buy approval flows, region specific pricing, server side receipt validation specifics, store level review or rejection paths, or full subscription renewal cadence (Test Store renews up to five times on a compressed clock).
 
-Use Test Store when you want to iterate on UI quickly, write integration tests with deterministic outcomes, or run CI checks. Move up to App Store Sandbox or Google Play Internal Testing for anything that exercises store side behavior.
+Use Test Store when you want to iterate on UI quickly, write integration tests with deterministic outcomes, or run CI checks. Move up to App Store Sandbox or a Google Play license tester on a testing track for anything that exercises store side behavior.
 
 **Setup.** In the dashboard, go to **Apps and providers** → _Test configuration_ section → **Test Store** → Create / Enable. The Test Store API key appears under **Project Settings → API keys** with a `test_` prefix. Configure the SDK with the test key in debug builds and the production key (`appl_…` / `goog_…`) in release builds. The platform files show the per platform key swap pattern.
 

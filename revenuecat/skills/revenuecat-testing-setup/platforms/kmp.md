@@ -25,7 +25,7 @@ The Test Store dialog and outcome semantics are identical to the native SDKs: **
 Follow the platform files directly:
 
 - iOS target → `revenuecat-testing-setup/platforms/ios.md`. Prefer a real sandbox Apple ID when exercising RevenueCat dashboard ingestion. The StoreKit Configuration File is useful for pure UI iteration but does not hit the real sandbox pipeline.
-- Android target → `revenuecat-testing-setup/platforms/android.md`. License tester on the Internal Testing track is required.
+- Android target → `revenuecat-testing-setup/platforms/android.md`. A license tester account is required; that file covers sideloaded builds and testing tracks.
 
 ## Match API keys
 

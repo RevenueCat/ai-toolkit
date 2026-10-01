@@ -46,7 +46,7 @@ The `kReleaseMode` branch above ensures the test key string is dead code in rele
 Follow the platform files directly:
 
 - iOS → `revenuecat-testing-setup/platforms/ios.md`. Prefer a real sandbox Apple ID for RevenueCat dashboard verification.
-- Android → `revenuecat-testing-setup/platforms/android.md`. License tester on the Internal Testing track is required.
+- Android → `revenuecat-testing-setup/platforms/android.md`. Test purchases need a license tester who has opted in to an internal or closed testing track.
 
 ## Build and install the right build
 
@@ -59,8 +59,8 @@ Flutter supports multiple ways to install a test build. Only the signed, correct
 
 ### Android
 
-- `flutter build appbundle --release` → signed AAB → upload to Play Internal Testing → install via the tester opt-in link. This is the only supported path for sandbox purchases.
-- `flutter run` produces a debug build signed with the debug key. It **will not** be able to make sandbox purchases, because Play rejects the signature.
+- `flutter build appbundle --release` → signed AAB → upload to Play Internal Testing → testers opt in through the track link and install from Play.
+- `flutter run` produces a debug build signed with the debug key. It can make sandbox purchases only for a license tester who has opted in to the testing track. Other accounts either cannot buy from it or are charged real money.
 
 ## Multi flavor apps
 
@@ -89,7 +89,7 @@ The Dart `print` output does not show native SDK logs.
 ## Verify
 
 1. `await Purchases.setLogLevel(LogLevel.debug);` before `configure`.
-2. The right build (signed AAB from Play Internal Testing on Android; development build on a sandbox device on iOS) is installed.
+2. The right build is installed: on Android, by a license tester who opted in to the testing track, either from that track or as a debug build; on iOS, a development build on a sandbox device.
 3. A test purchase succeeds. Native console shows the SDK posting the transaction.
 4. The RevenueCat dashboard Sandbox view shows the transaction on the expected `appUserID`.
 5. `await Purchases.getCustomerInfo()` shows the expected entitlement active.

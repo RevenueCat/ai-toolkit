@@ -36,7 +36,7 @@ Walk these nine items in order. Most reports are resolved by steps 1 through 5.
 List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / App Store) or `package_name` (Android / Play Store / Amazon Appstore) registered there must match the built app exactly, including capitalization. A mismatch causes offerings to come back empty because the app is not recognized.
 4. **Verify offerings in the RevenueCat project.** List the project's offerings using the `list-offerings` RevenueCat MCP tool, passing the parameter `expand=items.package.product`. The offering marked with `is_current: true` must have at least one package attached, and each package must reference a store product. An offering with zero packages returns an empty `availablePackages` list even though `getOfferings` succeeds.
 5. **Verify store products are live.** Products must be in "Ready to Submit" on App Store Connect or "Active" on Google Play Console. A product in a draft state will not be returned by the store, even in sandbox. If the SDK logs show offerings arriving from RevenueCat but products failing to resolve, this is almost always the cause. Use the `get-product-store-state` RevenueCat MCP tool to understand the state of product in App Store Connect or Google Play Console (field `store_status`). To fix or change the store state (not just read it), follow the `revenuecat-store-state` skill.
-6. **Verify the testing account.** iOS: the device must be signed into a Sandbox Apple ID under Settings → App Store → Sandbox Account (set on iOS 14+ after the first sandbox prompt). Android: the tester's Gmail must be added to Google Play Console → Setup → License testing, and the app must be installed via the Internal Testing opt-in link, not sideloaded.
+6. **Verify the testing account.** iOS: the device must be signed into a Sandbox Apple ID under Settings → App Store → Sandbox Account (set on iOS 14+ after the first sandbox prompt). Android: the tester's Gmail must be added to Google Play Console → Settings → License testing, and the tester must have opted in to a testing track (Internal Testing works) through its opt-in link. The app can then come from Play or be a sideloaded build with the same package name.
 7. **Verify the network.** Corporate VPNs, captive portals, and some DNS filters silently block the RevenueCat API or the store APIs. Try a different network before digging deeper.
 8. **Verify the appUserID.** If `logIn(appUserID)` was called with an ID that does not match what the user expects, entitlements appear missing because they are attached to a different RC user. Print `Purchases.shared.appUserID` (iOS) / `Purchases.sharedInstance.appUserID` (Android) and confirm it matches.
 9. **Reset and retry.** Uninstall the app, re-sign into the sandbox / tester account, reinstall from the correct channel, relaunch.
@@ -220,7 +220,7 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 
 ### Android
 
-- [ ] App published to at least closed testing track (internal testing won't work).
+- [ ] App uploaded to a testing track (internal or closed), and the license tester opted in through the track link. License testers can then also test sideloaded builds.
 - [ ] Test account added as licensed tester in Play Console.
 - [ ] Service account credentials (JSON) uploaded to RevenueCat with Finance permissions.
 - [ ] Subscriptions use `product_id:base_plan_id` format.

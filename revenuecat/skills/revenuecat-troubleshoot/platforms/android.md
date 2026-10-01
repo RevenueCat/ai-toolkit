@@ -32,13 +32,13 @@ This is the single most common Android gotcha.
 
 To make a test purchase on Android you need all of the following:
 
-1. The tester's Gmail is added under **Google Play Console → Setup → License testing**.
-2. The app has been uploaded as a signed AAB to an **Internal Testing** track.
-3. The tester has opted in via the Internal Testing opt-in link and installed the app **from the Play Store** (not via `adb install` or Android Studio direct install). Sideloaded builds with the same package name do not have access to licensed products.
-4. The SHA-1 certificate fingerprint of the signing key used to build the AAB matches what Play Console expects for that track. Play App Signing changes the effective key; check the upload key and app signing key in Play Console → Setup → App signing.
-5. Fresh uploads take roughly 15 minutes to propagate through Play. If you just uploaded, wait before retesting.
+1. The tester's Gmail is added under **Google Play Console → Settings → License testing**.
+2. The app has been uploaded to a testing track such as **Internal Testing**, and the tester has opted in through that track's opt-in link. Without the opt-in, products do not load.
+3. The build has the same package name as the app in Play Console. A license tester can then also use a sideloaded build, including a debug build with a debug signature, because Google lets license testers bypass the check that blocks apps not uploaded to Google Play.
+4. Any AAB you upload is signed with the upload key Play Console expects. Play App Signing re-signs what Play delivers; check the upload key and app signing key on the **Play app signing** page in Play Console.
+5. After you publish to a testing track, it can take a few hours before the app is available to testers. If you just uploaded, wait before retesting.
 
-Sideloaded debug builds with a `debug` signing key cannot buy real or sandbox Play products. This is a Play Billing constraint, not a RevenueCat one.
+Accounts that are not license testers either cannot buy or are charged real money, whether the build is sideloaded or installed from a testing track. For test purchases, add the account as a license tester. This is a Play Billing constraint, not a RevenueCat one.
 
 ## Products return empty list
 
