@@ -66,7 +66,7 @@ class MyApplication : Application() {
 
 - Use the **Google Play** public SDK key: it starts with `goog_` (Amazon Appstore keys start with `amzn_`).
 - The SDK declares `com.android.vending.BILLING` in its own manifest; you do not need to add it.
-- Minimum SDK: **21**. Confirm `minSdk` in the app module's `build.gradle(.kts)`.
+- Minimum SDK: **23**, or **24** if you use `purchases-ui` for paywalls or Customer Center. Confirm `minSdk` in the app module's `build.gradle(.kts)`.
 - Proguard/R8: the SDK ships consumer rules, no extra config needed.
 
 ## Verify
