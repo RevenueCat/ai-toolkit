@@ -1,18 +1,26 @@
 ---
 name: revenuecat-cli
-description: Drive RevenueCat from the terminal with the `rc` CLI, an alternative to the RevenueCat MCP server for humans, CI, and agents. Covers install, authentication, command discovery, and output conventions. Referenced by the other RevenueCat skills whenever they offer a CLI path.
+description: Drive RevenueCat from the terminal with the `rc` CLI, an alternative to the RevenueCat MCP server for humans, CI, and agents. Covers install, authentication, command discovery, and output conventions. Use for uploading paywall images to the Media Gallery (`rc media-assets upload`) or custom paywall fonts (`rc fonts upload`) — MCP has no upload tools for these. Referenced by the other RevenueCat skills whenever they offer a CLI path.
 ---
 
 # revenuecat-cli: driving RevenueCat from the terminal
 
-`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server (the CLI adds paywall generate/edit; the MCP server has some SDK feature-gate and experiment tools the CLI does not). Use whichever surface is available; this skill is the reference for the CLI path.
+`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server (the CLI adds paywall generate/edit and paywall image/font upload; the MCP server has some SDK feature-gate and experiment tools the CLI does not). Use whichever surface is available; this skill is the reference for the CLI path.
 
-## Install and authenticate
+## Before the first command
 
-- Run without installing: `npx @revenuecat/cli <command>` (good for CI and agent sandboxes).
-- Or install: `brew install RevenueCat/tap/rc`, or `npm install -g @revenuecat/cli`.
-- Authenticate once with `rc auth login` (browser OAuth), or set `RC_API_KEY`. Non-interactively, pass `--api-key` or set `RC_API_KEY`.
-- The CLI authenticates with a RevenueCat **secret** key (`sk_...`); that is correct because the CLI is a server-side tool. This is not the same as the **public** SDK keys (`appl_`/`goog_`/`amzn_`) you fetch for client app code. Never put a secret key in an app.
+The CLI needs a shell. Without one (for example in a chat app with only the MCP server), use MCP, or tell the user which `rc` command to run or which dashboard page to use.
+
+1. **Check it is installed:** `rc --version`. If that fails, pick one:
+   - Run without installing: `npx @revenuecat/cli <command>` everywhere `rc` appears below. Needs Node. Best for CI and agent sandboxes.
+   - Install on macOS/Linux: `brew install RevenueCat/tap/rc`.
+   - Install with npm: `npm install -g @revenuecat/cli`.
+
+   Installing changes the user's machine, so ask before running `brew` or `npm install -g`. `npx` needs no permission beyond running the command.
+2. **Check it is logged in:** `rc auth status --json`. The CLI does not share the MCP server's login. If no credential is active, ask the user to run `rc auth login` themselves: it opens a browser for OAuth. In CI, set `RC_API_KEY` or pass `--api-key`.
+3. **Check the project:** pass `--project-id <id>`, or have the user set a default with `rc projects use`.
+
+The CLI authenticates with a RevenueCat **secret** key (`sk_...`); that is correct because the CLI is a server-side tool. This is not the same as the **public** SDK keys (`appl_`/`goog_`/`amzn_`) you fetch for client app code. Never put a secret key in an app, and never ask the user to paste one into the chat.
 
 ## Discover the surface
 
@@ -41,6 +49,9 @@ Look up exact flags with `rc commands --schemas --json` (or `rc schema <space-se
 - **Store credentials and state**: `rc setup apple|google`, `rc products store plan|apply|sync`
 - **Data**: `rc charts list|show`, `rc customers ...`
 - **Paywalls**: `rc paywalls generate|edit|publish` (dashboard design/audit playbook: `revenuecat-paywall-design`)
+- **Paywall media and fonts**: `rc media-assets list|upload <file>`, `rc fonts list|upload <file>`. MCP cannot upload these; do not use the dashboard in a browser.
 - **Dashboard**: `rc open [section] [id] --print` (resource URLs: `revenuecat-dashboard-links`)
+
+Images: jpg/png/webp/avif/heic/heif, up to 2 MiB. Fonts: ttf/otf, up to 5 MiB. Write or generate the file on disk first, then pass that path. Confirm flags with `rc schema media-assets upload` / `rc schema fonts upload`.
 
 Prefer the specific command. Drop to `rc api <METHOD> <path>` only for endpoints not yet in the CLI surface.
