@@ -1,6 +1,6 @@
 ---
 name: integrate-revenuecat
-description: End-to-end RevenueCat integration — sets up the dashboard side via the RevenueCat MCP or the `rc` CLI (project, app, public API key) and installs/configures the Purchases SDK in the app. Use when the user asks to add RevenueCat, integrate Purchases, install the RevenueCat SDK, set up a RevenueCat API key, configure Purchases on launch, or set up a brand new RevenueCat integration on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: End-to-end RevenueCat integration — sets up the dashboard side via the RevenueCat MCP or the `rc` CLI (project, app, public API key) and installs/configures the Purchases SDK in the app. Use when the user asks to add RevenueCat, hook up RevenueCat, add subscriptions or in-app purchases to an app, integrate Purchases, install the RevenueCat SDK, set up a RevenueCat API key, configure Purchases on launch, or set up a brand new RevenueCat integration on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # integrate-revenuecat: end-to-end RevenueCat integration
@@ -9,6 +9,8 @@ Use this skill when the user wants to add RevenueCat to a project for the first 
 
 1. **Dashboard side** — set up the project, register the app, and obtain the public API key, through the RevenueCat MCP server or the `rc` CLI.
 2. **App side** — install the Purchases SDK, call `Purchases.configure(…)` at app entry, and verify the configuration banner in the logs.
+
+Once the SDK is configured, settle **how the paywall is built** (Section 5c) before writing any paywall code.
 
 Walk them in order. Most integrations need both halves, even when the user asks "just install the SDK" — the SDK needs an API key from the dashboard.
 
@@ -119,12 +121,30 @@ Check whether products, entitlements, and offerings are already set up in the pr
 2. **Real-time Developer Notifications (RTDN)** — Set up a Cloud Pub/Sub topic. Configure in Play Console → Monetization setup.
 3. If the user provides this information, register it via `create-app` / `update-app`.
 
-### 5c. Subsequent skills
+### 5c. Choose how the paywall is built
+
+The app still needs a paywall, and there are two ways to build one. This is a product decision, not an implementation detail, so settle it before writing any paywall code.
+
+- **RevenueCat Paywall (recommended default).** Hosted by RevenueCat and rendered by RevenueCatUI. You create it yourself: load the `revenuecat-paywall-design` skill and follow its creating workflow (`create-paywall-ai` via MCP or `rc paywalls generate` via CLI, attached to the current offering and informed by the app's codebase), then present it with `revenuecat-paywall`. The user does not have to design anything in the dashboard; they can refine it later in the paywall builder. Design, copy, and packages change without an app release, and paywall variants can be A/B tested with RevenueCat Experiments.
+- **Custom paywall in code.** The app's own UI, with packages and prices from `getOfferings()` and the purchase handled by `revenuecat-purchase-flow`. Full visual control, but every design change ships in an app release and the paywall design cannot be A/B tested. Price and offering tests still work, because packages come from the offering.
+
+Pick the path:
+
+1. **The user already said which one.** Use it.
+2. **The app has no paywall screen yet.** Recommend a RevenueCat Paywall.
+3. **The app already has a paywall or subscription screen** (a screen listing plans or prices, a subscribe or upgrade button, hardcoded prices or product IDs). The user most likely wants that screen wired to offerings. Recommend keeping it, and mention that a RevenueCat Paywall could replace it.
+
+If you can ask the user, ask one question with both options, the recommended one first, each with a one-line trade-off. If you cannot ask (for example, you are running non-interactively), do not stop: take the recommendation above, and in your summary say which path you took and how to switch to the other.
+
+Do not hand-code a paywall screen by default just because it keeps the work in code. A new RevenueCat Paywall is an unpublished draft: tell the user to review it in the paywall builder, and publish it only when they ask, because the app renders the default fallback layout until a paywall is published and attached to the offering.
+
+### 5d. Subsequent skills
 
 Common follow-ups after `integrate-revenuecat`:
 
+- `revenuecat-paywall-design` — create or edit the dashboard paywall.
 - `revenuecat-paywall` — display a dashboard-configured paywall.
-- `revenuecat-purchase-flow` — implement purchase + restore manually.
+- `revenuecat-purchase-flow` — implement purchase + restore for a custom paywall.
 - `revenuecat-entitlements-gate` — gate features behind active entitlements.
 - `revenuecat-identify-user` — wire `logIn` / `logOut` to the app's auth system.
 - `revenuecat-testing-setup` — set up a sandbox testing channel.
