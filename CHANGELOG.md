@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **revenuecat-paywall-design** and **revenuecat-cli** — Upload paywall images and fonts with `rc media-assets upload` / `rc fonts upload`. MCP has no Media Gallery or font upload tools; do not fall back to the dashboard in a browser.
+- **revenuecat-paywall-design** and **revenuecat-cli** — Upload paywall images and fonts with `rc media-assets upload` / `rc fonts upload`. MCP has no Media Gallery or font upload tools; do not fall back to the dashboard in a browser. Without a shell, the user uploads the file.
+- **revenuecat-cli** — Check that `rc` is installed (`rc --version`, else `npx @revenuecat/cli` or ask before `brew`/`npm install -g`) and logged in (`rc auth status`) before the first command. The CLI does not share the MCP server's login.
 
 ---
 

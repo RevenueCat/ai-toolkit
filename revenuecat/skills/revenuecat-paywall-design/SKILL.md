@@ -24,9 +24,10 @@ read.
 
 ## Media and fonts
 
-MCP cannot upload files to the project's Media Gallery or font library. Do not open the
-RevenueCat dashboard in a browser to upload. Write or generate the file on disk, then use
-the CLI:
+MCP cannot upload files to the project's Media Gallery or font library: the server is
+remote and cannot read the user's disk. If you have a shell, write or generate the file on
+disk, then upload it with the CLI. Run the install and login checks in the `revenuecat-cli`
+skill first. Do not drive the dashboard in a browser to upload:
 
 - **Images:** `rc media-assets upload <file>` (jpg/png/webp/avif/heic/heif, up to 2 MiB).
   `rc media-assets list` shows what is already in the gallery.
@@ -34,6 +35,9 @@ the CLI:
   fonts.
 
 Confirm flags with `rc schema media-assets upload` / `rc schema fonts upload`.
+
+Without a shell, the user uploads it themselves: give them the `rc` command to run, or have
+them upload it in the RevenueCat dashboard.
 
 `create-paywall-ai` / `edit-paywall-ai` can generate hero or background images as part of an
 edit. That is not a Media Gallery upload. If the user wants a reusable project asset, upload
