@@ -5,7 +5,9 @@ description: Use when the user asks to analyze or understand a RevenueCat experi
 
 To analyze an experiment, follow the following steps. Make sure to execute all steps in this order, do not skip any. More details on the step below. If you already have partial information (eg. the experiment ID), you may skip that step only. Continue following all of the other steps. Within a step, issue independent calls together so they run in parallel.
 
-When the `rc` CLI is available, `rc experiments list`, `rc experiments show <id> --json`, and `rc experiments results <id> --json` can supply steps 1, 2a, and 4. Use `rc schema experiments results` to discover filters. Continue using MCP for expanded Offering/paywall details and the supporting chart data in step 3.
+Before using the CLI, check `rc commands --schemas --json` for the required experiment commands; they are not included in v0.1.5. If a command is absent, use the MCP tool specified in that step. If neither is available, explain which part of the analysis cannot be completed. See the `revenuecat-cli` skill for install and authentication.
+
+When supported, `rc experiments list --project-id <project_id> --json --no-input` can supply step 1, and `rc experiments results <id> --project-id <project_id> --json --no-input` can supply step 4. Use `rc schema experiments results --json` to discover filters. `rc experiments show <id> --project-id <project_id> --json --no-input` supplies basic experiment metadata for step 2a, but does not include the expanded packages, products, or indicative prices required by that step. Fetch those details with the MCP `get-experiment` call below. Continue using MCP for paywall screenshots in step 2b and supporting chart data in step 3; the CLI calls do not replace those steps.
 
 1. Get the experiment ID
 2. Get experiment details
