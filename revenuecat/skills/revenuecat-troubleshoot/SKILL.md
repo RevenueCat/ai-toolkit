@@ -1,6 +1,6 @@
 ---
 name: revenuecat-troubleshoot
-description: Diagnose and resolve RevenueCat integration issues — inspects dashboard configuration through the RevenueCat MCP, walks the SDK debug logs, and covers code-side gotchas. Use when the user says offerings are empty, products not loading, entitlement not active after purchase, paywall won't load, transactions not appearing, customer info shows no entitlements, sandbox purchase not working, or RevenueCat is broken on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Diagnose and resolve RevenueCat integration issues — inspects dashboard configuration through the RevenueCat MCP, walks the SDK debug logs, and covers code-side gotchas. Use when the user says offerings are empty, products not loading, entitlement not active after purchase, paywall won't load, transactions not appearing, customer info shows no entitlements, sandbox purchase not working, an SDK-gated RevenueCat feature not working, or RevenueCat is broken on iOS, Android, Kotlin Multiplatform, Flutter, or React Native. Also use when asked to check or validate the store / product setup.
 ---
 
 # revenuecat-troubleshoot: diagnose RevenueCat integration problems
@@ -34,9 +34,9 @@ Walk these nine items in order. Most reports are resolved by steps 1 through 5.
 2. **Verify the API key platform matches the app.** iOS apps must use an `appl_…` public SDK key. Android apps must use `goog_…` (or `amzn_…` for Amazon). A mismatched key produces an authentication error on the first network call. On iOS this surfaces as an `INVALID_CREDENTIALS` error code. On Android it surfaces as `PurchasesErrorCode.InvalidCredentialsError`. Use the `list-app-public-api-keys` RevenueCat MCP tool to list the API keys for the project.
 3. **Verify the bundle ID / package name matches the one set up in the RevenueCat project.** 
 List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / App Store) or `package_name` (Android / Play Store / Amazon Appstore) registered there must match the built app exactly, including capitalization. A mismatch causes offerings to come back empty because the app is not recognized.
-4. **Verify offerings in the RevenueCat project.** List the project's offerings using the `list-offerings` RevenueCat MCP tool, passing the parameter `expand=items.package.product`. The offering marked with `is_current: true` must have at least one package attached, and each package must reference a store product. An offering with zero packages returns an empty `availablePackages` list even though `getOfferings` succeeds.
+4. **Verify offerings in the RevenueCat project.** List the project's offerings using the `list-offerings` RevenueCat MCP tool, passing `limit: 100` and `expand=items.package.product`. The default page of 20 can omit the current offering, and a partial page looks the same as a project with no current offering. The offering marked with `is_current: true` must have at least one package attached, and each package must reference a store product. An offering with zero packages returns an empty `availablePackages` list even though `getOfferings` succeeds.
 5. **Verify store products are live.** Products must be in "Ready to Submit" on App Store Connect or "Active" on Google Play Console. A product in a draft state will not be returned by the store, even in sandbox. If the SDK logs show offerings arriving from RevenueCat but products failing to resolve, this is almost always the cause. Use the `get-product-store-state` RevenueCat MCP tool to understand the state of product in App Store Connect or Google Play Console (field `store_status`). To fix or change the store state (not just read it), follow the `revenuecat-store-state` skill.
-6. **Verify the testing account.** iOS: the device must be signed into a Sandbox Apple ID under Settings → App Store → Sandbox Account (set on iOS 14+ after the first sandbox prompt). Android: the tester's Gmail must be added to Google Play Console → Setup → License testing, and the app must be installed via the Internal Testing opt-in link, not sideloaded.
+6. **Verify the testing account.** iOS: the device must be signed into a Sandbox Apple ID under Settings → App Store → Sandbox Account (set on iOS 14+ after the first sandbox prompt). Android: the tester's Gmail must be added to Google Play Console → Setup → License testing, and the app must be installed from a Play testing track's opt-in link, not sideloaded (see the Android checklist below for which track).
 7. **Verify the network.** Corporate VPNs, captive portals, and some DNS filters silently block the RevenueCat API or the store APIs. Try a different network before digging deeper.
 8. **Verify the appUserID.** If `logIn(appUserID)` was called with an ID that does not match what the user expects, entitlements appear missing because they are attached to a different RC user. Print `Purchases.shared.appUserID` (iOS) / `Purchases.sharedInstance.appUserID` (Android) and confirm it matches.
 9. **Reset and retry.** Uninstall the app, re-sign into the sandbox / tester account, reinstall from the correct channel, relaunch.
@@ -71,8 +71,10 @@ get-product-store-state
 - [ ] Products exist for each store item.
 - [ ] Store identifiers match App Store Connect / Play Console exactly.
 - [ ] Product types are correct (subscription vs one-time).
-- [ ] Play Store: using `product_id:base_plan_id` format.
+- [ ] Play Store: subscriptions use `product_id:base_plan_id` format; one-time products use `product_id` only.
 - [ ] Store State: `store_status.status` = `ok`.
+
+A `null` duration from `list-products` does not mean the product is misconfigured (it can simply not have been purchased yet). Judge store setup from `get-product-store-state`.
 
 #### Check 3: Entitlements
 ```
@@ -85,8 +87,8 @@ get-products-from-entitlement (for each entitlement)
 
 #### Check 4: Offerings
 ```
-list-offerings
-list-packages
+list-offerings (limit: 100)
+list-packages (for the offering with is_current: true)
 ```
 - [ ] At least one offering exists with `is_current: true`.
 - [ ] Packages contain products.
@@ -98,6 +100,12 @@ list-webhook-integrations
 ```
 - [ ] Webhook URL is correct and accessible.
 - [ ] Environment matches (production vs sandbox).
+
+#### Check 6: SDK compatibility (if an SDK-gated feature misbehaves)
+Paywall components, experiment enrollment, exposure tracking, Customer Center behavior, In-App Currencies, and offering features depend on minimum SDK versions. Load the `revenuecat-sdk-compatibility` skill before making any SDK-version claim.
+- [ ] The feature's gate was checked with `list-sdk-feature-gates`.
+- [ ] Any claim about the project's SDK adoption was checked with `list-sdk-versions`.
+- [ ] The report separates required SDK versions from versions observed in the project.
 
 ### Phase C: report and offer fixes
 
@@ -212,8 +220,10 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 
 ### iOS
 
-- [ ] Paid Applications agreement signed in App Store Connect.
+- [ ] Paid Applications agreement signed in App Store Connect, banking details complete, and the agreement not expired (check its status; changes take up to 24h to propagate).
+- [ ] Apple Developer Program membership active, with a valid payment method and auto-renew on.
 - [ ] In-App Purchase Key uploaded to RevenueCat (StoreKit 2 / SDK 5.x+).
+- [ ] App-Specific Shared Secret added to RevenueCat as well; missing either credential can stop products and offerings from loading.
 - [ ] Products show "Ready to Submit" or "Approved" status.
 - [ ] Bundle ID matches exactly in Xcode, App Store Connect, and RevenueCat.
 - [ ] New products: wait 24h for propagation.
@@ -223,7 +233,7 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 - [ ] App published to at least closed testing track (internal testing won't work).
 - [ ] Test account added as licensed tester in Play Console.
 - [ ] Service account credentials (JSON) uploaded to RevenueCat with Finance permissions.
-- [ ] Subscriptions use `product_id:base_plan_id` format.
+- [ ] Subscriptions use `product_id:base_plan_id` format; one-time products use `product_id` only.
 - [ ] New products: wait 24h for propagation.
 
 ## Reference: App Store rejection troubleshooting
