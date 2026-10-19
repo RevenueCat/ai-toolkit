@@ -55,7 +55,9 @@ Use this table to categorize `PurchasesErrorCode` values and pick the UX respons
 | `NetworkError` | Request failed due to connectivity | Prompt the user to retry. |
 | `StoreProblemError` | Google Play issue | Prompt to retry or update Play Store. |
 | `PurchaseNotAllowedError` | Device or account cannot purchase | Show an explanatory message. |
-| `IneligibleError` | User not eligible for the offer | Show the base plan instead. |
+| `ProductNotAvailableForPurchaseError` | Play reports the product unavailable for this user or region | Hide it and refetch offerings. |
+
+`IneligibleError` is App Store only: it comes from a backend promotional offer code, not from Google Play. On Android, Play simply omits ineligible offers from `subscriptionOptions`.
 
 Exception type decision:
 
