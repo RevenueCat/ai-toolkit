@@ -5,7 +5,7 @@ description: Drive RevenueCat from the terminal with the `rc` CLI, an alternativ
 
 # revenuecat-cli: driving RevenueCat from the terminal
 
-`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server (the CLI adds paywall generate/edit; the MCP server has some SDK feature-gate and experiment tools the CLI does not). Use whichever surface is available; this skill is the reference for the CLI path.
+`rc` is the official RevenueCat command line interface. It covers most of the same project, app, product, entitlement, offering, paywall, chart, and store-state operations as the RevenueCat MCP server. Builds that include `rc experiments` and `rc targeting` also support experiment and targeting-rule work; check command availability as described below before using them. The MCP server has SDK feature-gate tools the CLI does not. Use whichever surface is available; this skill is the reference for the CLI path.
 
 ## Install and authenticate
 
@@ -22,6 +22,8 @@ The CLI is self-describing. Don't guess a command or flag, ask the binary:
 - `rc commands --schemas --json` returns every command's flags, args, and examples in one call. This is the most reliable way for an agent to discover per-command detail.
 - `rc schema <command> --json` returns detail for a single command, but the command must be **space-separated tokens** (`rc schema apps create`), not the colon form from `rc commands`. `rc schema apps:create` silently returns the root schema, so when in doubt use `rc commands --schemas`.
 - `rc --help` and `rc <noun> --help` give human-readable help.
+
+Before using experiments or targeting, check `rc commands --schemas --json` for the exact command needed. These commands are on CLI main but are not included in v0.1.5. If the installed binary does not expose a command, use the corresponding MCP tools when available. If neither surface is available, explain the missing capability rather than guessing a command. For supported commands, use `rc schema` to discover their config fields.
 
 ## Output conventions
 
@@ -41,6 +43,7 @@ Look up exact flags with `rc commands --schemas --json` (or `rc schema <space-se
 - **Store credentials and state**: `rc setup apple|google`, `rc products store plan|apply|sync`
 - **Data**: `rc charts list|show`, `rc customers ...`
 - **Paywalls**: `rc paywalls generate|edit|publish` (dashboard design/audit playbook: `revenuecat-paywall-design`)
+- **Experiments and targeting**: `rc experiments list|show|results|create|duplicate|update|start|pause|resume|stop|delete`, `rc targeting list|show|create|update|delete`
 - **Dashboard**: `rc open [section] [id] --print` (resource URLs: `revenuecat-dashboard-links`)
 
 Prefer the specific command. Drop to `rc api <METHOD> <path>` only for endpoints not yet in the CLI surface.
