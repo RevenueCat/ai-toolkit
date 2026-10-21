@@ -59,7 +59,7 @@ One consequence: RevenueCat sits in the purchase verification path. After a user
 |---|---|---|
 | Product | A subscription, base plan, or one time purchase | Google Play Console |
 | Package | A Product wrapped with a type label (Monthly, Annual, Lifetime, custom). The unit your paywall displays | RevenueCat dashboard |
-| Offering | A group of Packages. One Offering is marked Current and returned by `offerings.current` | RevenueCat dashboard |
+| Offering | A group of Packages. One Offering is the Default offering and is returned by `offerings.current` | RevenueCat dashboard |
 | Entitlement | A logical access level your app checks, such as `"pro_access"`. Products are attached to Entitlements | RevenueCat dashboard |
 
 `CustomerInfo` is the runtime snapshot of the user's purchase history and active Entitlements, computed and cached by RevenueCat.
@@ -76,7 +76,7 @@ val customerInfo = Purchases.sharedInstance.awaitCustomerInfo()
 val hasPro = customerInfo.entitlements["pro_access"]?.isActive == true
 ```
 
-`isActive` already resolves the seven Play subscription states (ACTIVE, IN_GRACE_PERIOD, ON_HOLD, PAUSED, CANCELED, EXPIRED, PENDING) on the server side. You do not reimplement that logic on the client.
+`isActive` already resolves the eight Play subscription states (ACTIVE, IN_GRACE_PERIOD, ON_HOLD, PAUSED, CANCELED, EXPIRED, PENDING, PENDING_PURCHASE_CANCELED) on the server side. You do not reimplement that logic on the client.
 
 ### The singleton
 
@@ -105,7 +105,7 @@ You offload verification complexity and take on a dependency. If the RevenueCat 
 | Feature | What it does | When it kicks in |
 |---|---|---|
 | Disk cache of `CustomerInfo` | Returns the last known server state for entitlement checks | Automatic, always on |
-| Offline Entitlements | Computes entitlements on the device from local Play Store purchases | Only when you explicitly configure it |
+| Offline Entitlements | Computes subscription entitlements on the device from local Play Store purchases and the cached product to entitlement mapping | Automatic when RevenueCat's servers return errors. Not for one time purchases, and off when your app completes purchases itself |
 
 Neither is a full substitute for a reachable backend. Use both where they apply.
 
@@ -115,14 +115,14 @@ Once you have the model above, pick the next skill based on what the user actual
 
 | User goal | Next skill |
 |---|---|
-| Install the SDK, wire up Gradle, add permissions, configure the Play Console product | `rc-setup` |
-| Call `Purchases.configure`, pass an `appUserID`, set log level, attach attributes | `rc-configuring-the-sdk` |
+| Create the dashboard project, connect Play service credentials, create entitlements and offerings, get the API key | `rc-setup` |
+| Add the Gradle dependency, call `Purchases.configure`, pass an `appUserID`, set log level | `rc-configuring-the-sdk` |
 | Fetch Offerings, show a paywall, call `purchase`, handle the result | `rc-purchase-flow` |
-| Check `customerInfo.entitlements["..."]?.isActive`, gate features, listen for updates | `revenuecat/entitlements-and-customerinfo` |
-| Identify, alias, or log out a user | `revenuecat/user-identity` |
-| Handle restore purchases, cross device, promo codes | `revenuecat/restore-and-recovery` |
+| Check `customerInfo.entitlements["..."]?.isActive`, gate features, listen for updates | `rc-subscription-states` |
+| Identify, alias, or log out a user | `rc-configuring-the-sdk` (app user id strategy) and `rc-subscription-states` (logIn/logOut) |
+| Handle restore purchases, cross device, promo codes | `rc-purchase-flow` (Phase 5) |
 | Receive server side events from RevenueCat | `rc-webhooks` |
-| Debug a specific purchase, receipt, or entitlement in production | `revenuecat/debugging` |
+| Debug a specific purchase, receipt, or entitlement in production | `rc-error-handling` or `rc-testing` |
 
 If the user's goal does not match any row, stay here and keep clarifying intent before routing.
 

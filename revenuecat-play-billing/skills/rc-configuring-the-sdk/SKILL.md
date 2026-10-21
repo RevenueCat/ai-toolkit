@@ -1,6 +1,6 @@
 ---
 name: rc-configuring-the-sdk
-description: Use this skill when adding and configuring the RevenueCat Android SDK (purchases-kt/purchases) in an app. Covers the Gradle dependency, Purchases.configure with PurchasesConfiguration, initial app user id strategy, and log level.
+description: Use this skill when adding and configuring the RevenueCat Android SDK (purchases-android, artifact com.revenuecat.purchases:purchases) in an app. Covers the Gradle dependency, Purchases.configure with PurchasesConfiguration, initial app user id strategy, and log level.
 license: Apache-2.0; see LICENSE
 metadata:
   author: RevenueCat
@@ -16,7 +16,7 @@ metadata:
 
 # Configuring the RevenueCat Android SDK
 
-Use this skill to add and configure RevenueCat (`purchases-kt`) in an Android app. A single `Purchases.configure` call replaces `BillingClient` setup, connection lifecycle management, reconnection handling, and launch-time purchase queries.
+Use this skill to add and configure RevenueCat (`com.revenuecat.purchases:purchases`) in an Android app. A single `Purchases.configure` call replaces `BillingClient` setup, connection lifecycle management, reconnection handling, and launch-time purchase queries.
 
 Work through the phases in order. The [full chapter on revenuecat.com](https://www.revenuecat.com/guides/revenuecat-android-sdk/configuring-the-sdk) has the complete reference text.
 
@@ -93,6 +93,21 @@ dependencies {
 
 Replace `<latest>` with the current published version. If the project uses a Groovy `build.gradle`, use `implementation 'com.revenuecat.purchases:purchases:<latest>'`. Sync Gradle after the change.
 
+Use 10.27.1 (latest as of 2026-10-13). It requires minSdk 23 and Kotlin 1.8+, and bundles Play Billing Library 8.3.0. If Phase 1 finds an existing `purchases` dependency on 8.x or older (Play Billing Library 7 or older), upgrade it: Play stopped accepting app updates built on Play Billing Library 7 after August 31, 2026 (November 1, 2026 with an extension).
+
+The sample below reads the API key from `BuildConfig.RC_API_KEY`. AGP 8+ does not generate `BuildConfig` by default, so declare the field explicitly in the same `build.gradle.kts`, reading the key from a Gradle property (for example `RC_API_KEY=goog_...` in `~/.gradle/gradle.properties` or a CI secret) so it never lands in source:
+
+```kotlin
+android {
+    buildFeatures {
+        buildConfig = true
+    }
+    defaultConfig {
+        buildConfigField("String", "RC_API_KEY", "\"${providers.gradleProperty("RC_API_KEY").get()}\"")
+    }
+}
+```
+
 ### 3.2 Call configure at startup
 
 In your `Application` subclass:
@@ -114,18 +129,24 @@ class App : Application() {
 
 Register the class in `AndroidManifest.xml` with `android:name=".App"` on `<application>`. Keep the public Android SDK key out of source; inject it through `BuildConfig` or a secret manager.
 
+Check the `android:launchMode` of the Activity that triggers purchases. It must be `standard` (the default) or `singleTop`. Any other launch mode lets backgrounding the app (for example, to verify payment in a banking app) cancel the purchase.
+
 ### 3.3 Confirm the wiring with a minimal offerings fetch
 
 From any coroutine scope after `configure` has run:
 
 ```kotlin
 lifecycleScope.launch {
-    val offerings = Purchases.sharedInstance.awaitOfferings()
-    Log.d("RC", "current=${offerings.current?.identifier}")
+    try {
+        val offerings = Purchases.sharedInstance.awaitOfferings()
+        Log.d("RC", "current=${offerings.current?.identifier}")
+    } catch (e: PurchasesException) {
+        Log.e("RC", "${e.error.code}: ${e.error.message}")
+    }
 }
 ```
 
-A non-null `offerings.current` identifier means the API key, package name, and network path are working. If you see `null`, check the dashboard offering setup and the package name match before touching code.
+`awaitOfferings()` throws `PurchasesException` when it cannot resolve any offering: `ConfigurationError` means the dashboard has no products configured, or none of them can be fetched from Play (product IDs, package name, product not active, app not published on a closed track, test account not a license tester, wrong platform API key), and `InvalidCredentialsError` means the API key is wrong. A `null` `offerings.current` with no exception means either no Default offering is set, or none of the Default offering's products could be fetched from Play while another offering's could (check that offering's product IDs and status).
 
 ## What the SDK handles for you
 
@@ -140,9 +161,11 @@ Once configured, you do not need to:
 
 | Symptom | Likely cause |
 | --- | --- |
-| `IllegalStateException: There is no singleton instance` | Code touched `Purchases.sharedInstance` before `configure` ran. Move `configure` to `Application.onCreate`. |
-| Offerings always `null` | Package name mismatch between Play Console and dashboard, or offering not marked current. |
-| Duplicate anonymous users | `configure` called more than once per process, or an unstable id passed as `appUserID`. |
+| `kotlin.UninitializedPropertyAccessException: There is no singleton instance` | Code touched `Purchases.sharedInstance` before `configure` ran. Move `configure` to `Application.onCreate`, or guard with `Purchases.isConfigured`. |
+| `awaitOfferings()` throws `ConfigurationError` | Products are missing in the dashboard, or none can be fetched from Play (product IDs, package name, product not active, app not on a closed track, tester not licensed, wrong platform API key). |
+| `awaitOfferings()` throws `InvalidCredentialsError` | Wrong API key. |
+| `offerings.current` is `null`, no exception thrown | No Default offering set, or the Default offering's products cannot be fetched from Play. |
+| Duplicate anonymous users | App reinstalled or data cleared, or `logOut()` called, before the user logged in. Call `logIn` with a stable id after authentication. An unstable `appUserID` creates duplicate identified users. |
 | Verbose logs in production | Log level not gated on `BuildConfig.DEBUG`. |
 
 ## References
