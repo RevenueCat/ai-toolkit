@@ -31,7 +31,13 @@ fun onAdLoaded(ad: YourAdType) {
     )
 }
 
-fun onAdRevenue(ad: YourAdType, revenue: Double, currency: String) {
+// AdMob reports the paid value in different units per platform, so convert on
+// the platform side and hand the shared code micros:
+//   Android: AdValue.valueMicros is already micros. Pass it through, never multiply.
+//   iOS:     GADAdValue.value is a decimal currency amount. Multiply by 1_000_000 once.
+// Map the precision there too: Android precisionType 0 unknown, 1 estimated,
+// 2 publisher provided, 3 precise; iOS .unknown, .estimated, .publisherProvided, .precise.
+fun onAdRevenue(ad: YourAdType, revenueMicros: Long, currency: String, precision: AdRevenuePrecision) {
     adTracker.trackAdRevenue(
         AdRevenueData(
             networkName = ad.networkName,
@@ -40,13 +46,15 @@ fun onAdRevenue(ad: YourAdType, revenue: Double, currency: String) {
             placement = "home_screen",
             adUnitId = ad.adUnitId,
             impressionId = ad.impressionId,
-            revenueMicros = (revenue * 1_000_000).toLong(),
+            revenueMicros = revenueMicros,
             currency = currency,
-            precision = AdRevenuePrecision.EXACT,    // ESTIMATED, PUBLISHER_DEFINED, UNKNOWN
+            precision = precision,                   // EXACT, ESTIMATED, PUBLISHER_DEFINED, UNKNOWN
         )
     )
 }
 ```
+
+For a mediator other than AdMob, apply that mediator's units from `../mediator-callbacks.md` in the same place, on the platform side.
 
 `trackAdDisplayed(AdDisplayedData)`, `trackAdOpened(AdOpenedData)` and `trackAdFailedToLoad(AdFailedToLoadData)` take the same fields (`AdFailedToLoadData` has no `networkName` or `impressionId` and takes an optional integer `mediatorErrorCode`, the mediator's own error code). Wire all five. The mediator callback for each is in `../mediator-callbacks.md`. With AdMob, the revenue callback is `onPaidEvent` and the setting **Impression-level ad revenue** must be on and saved in the AdMob account or it never fires.
 

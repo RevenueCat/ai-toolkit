@@ -39,7 +39,7 @@ Find the ad SDK in the dependency manifest before you ask:
 | `GoogleMobileAds` (SPM/CocoaPods), `com.google.android.gms:play-services-ads`, `com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk`, `google_mobile_ads`, `react-native-google-mobile-ads`, `com.google.ads.mobile` (Unity) | Google AdMob |
 | `AppLovinSDK`, `com.applovin:applovin-sdk`, `applovin_max`, `react-native-applovin-max` | AppLovin MAX |
 | `IronSourceSDK`, `com.ironsource.sdk:mediationsdk`, `LevelPlay` | Unity LevelPlay (ironSource) |
-| `UnityAds`, `com.unity3d.ads:unity-ads` | Unity Ads |
+| `UnityAds`, `com.unity3d.ads:unity-ads` | Unity Ads. Supported only when LevelPlay mediates it; standalone Unity Ads has no per-impression revenue API |
 
 Also grep for ad load calls (`InterstitialAd`, `RewardedAd`, `BannerView`, `AdView`, `MAInterstitialAd`, `LevelPlayInterstitialAd`, `UnityAds.load`). If you find no ad SDK, or more than one, ask which mediator serves the ads. Do not pick one by guessing.
 
@@ -66,9 +66,10 @@ If you cannot ask (non-interactive run), continue with the most likely answer, l
 | Situation | Path |
 | --- | --- |
 | AdMob on iOS (Swift), Android (Kotlin), Flutter, React Native or Unity | **AdMob adapter** |
-| AppLovin MAX, LevelPlay, Unity Ads, PlayWire or any other mediator with impression-level revenue | **Manual** `AdTracker` calls |
+| AppLovin MAX, LevelPlay (including Unity Ads under LevelPlay), PlayWire or any other mediator with impression-level revenue | **Manual** `AdTracker` calls |
+| AdMob on iOS with RevenueCat installed through CocoaPods (`pod 'RevenueCat'` in the Podfile) | Move RevenueCat to SPM (`purchases-ios-spm`) first, then the **AdMob adapter**. If the app must stay on CocoaPods, **manual** calls; the adapter is SPM only |
 | AdMob on Kotlin Multiplatform, Java-only Android, or Objective-C | **Manual** `AdTracker` calls (no adapter) |
-| Mediator reports only aggregated daily revenue, no per-impression data | Not supported. Tell the user and stop. |
+| Mediator reports only aggregated daily revenue, no per-impression data (standalone Unity Ads without LevelPlay is one) | Not supported. Tell the user and stop. |
 
 The adapter is the default for AdMob apps. It wraps Google's load calls and reports every event, including revenue and the earned-reward funnel, with one call per ad. Manual calls on an AdMob app are the last resort, used only when the language rules the adapter out. Do not pick manual because it looks like less to install. Do not mix both for the same ad: an ad loaded through the adapter must not also be reported with manual calls, or events double.
 

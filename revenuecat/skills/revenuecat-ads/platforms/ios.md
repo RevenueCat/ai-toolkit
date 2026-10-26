@@ -21,7 +21,7 @@ Swift Package Manager only. Add the package and the `RevenueCatAdMob` product to
 .package(url: "https://github.com/RevenueCat/purchases-ios-admob", from: "<same version as purchases-ios>")
 ```
 
-If the app depends on RevenueCat through SPM, it must use `purchases-ios-spm`, not `purchases-ios`; the adapter declares that dependency and two different RevenueCat packages produce duplicate-package errors.
+The adapter has no podspec. If the app gets RevenueCat from CocoaPods (`pod 'RevenueCat'` in the Podfile), adding the adapter pulls a second copy of RevenueCat through SPM and the build fails with duplicate modules. Either migrate RevenueCat to SPM first (remove the pod, add `purchases-ios-spm`, tell the developer to run `pod install` and re-resolve packages) or use the manual calls below. If the app depends on RevenueCat through SPM already, it must use `purchases-ios-spm`, not `purchases-ios`; the adapter declares that dependency and two different RevenueCat packages produce duplicate-package errors.
 
 ### Replace load calls
 

@@ -2,11 +2,11 @@
 
 Wire every row. The names follow each mediator's listener API; look up the exact signature in the mediator's SDK the app already uses.
 
-| Event | `AdTracker` call | AdMob | AppLovin MAX (Android / iOS) | Unity LevelPlay (ironSource) | Unity Ads |
+| Event | `AdTracker` call | AdMob | AppLovin MAX (Android / iOS) | Unity LevelPlay (ironSource) | Unity Ads under LevelPlay |
 | --- | --- | --- | --- | --- | --- |
 | Loaded | `trackAdLoaded` | `onAdLoaded` | `onAdLoaded` / `didLoad` | `onAdLoaded` | `onUnityAdsAdLoaded` |
 | Displayed (impression) | `trackAdDisplayed` | `onAdImpression` | `onAdDisplayed` / `didDisplay` | `onAdDisplayed` | `onUnityAdsShowStart` |
-| Revenue | `trackAdRevenue` | `onPaidEvent` | `onAdRevenuePaid` / `didPayRevenueForAd` | `onImpressionSuccess` | `onImpressionSuccess` (LevelPlay mediation) |
+| Revenue | `trackAdRevenue` | `onPaidEvent` | `onAdRevenuePaid` / `didPayRevenueForAd` | `onImpressionSuccess` | `onImpressionSuccess` from LevelPlay; standalone Unity Ads has no revenue callback |
 | Opened (click) | `trackAdOpened` | `onAdClicked` | `onAdClicked` / `didClick` | `onAdClicked` | `onUnityAdsShowClick` |
 | Failed to load | `trackAdFailedToLoad` | `onAdFailedToLoad` | `onAdLoadFailed` / `didFailToLoadAd` | `onAdLoadFailed` | `onUnityAdsFailedToLoad` |
 
