@@ -13,11 +13,11 @@
 
 ### Install
 
-The adapter ships as `PurchasesAdMob.unitypackage` on each `purchases-unity` GitHub release; import the one that matches the installed core package. The docs also describe an OpenUPM scoped-registry install, but as of October 2026 the package is not listed on the registry, so use the `.unitypackage` unless `openupm add com.revenuecat.purchases-admob-unity` succeeds. The adapter references the Google plugin's `GoogleMobileAds` DLLs, so it compiles whether that plugin came from OpenUPM or a `.unitypackage`.
+The adapter ships as `PurchasesAdMob.unitypackage` on each `purchases-unity` GitHub release; import the one that matches the installed core package. You cannot import it from a non-interactive run: leave `Packages/manifest.json` alone and put the import step under **Assumptions / for the developer** in the report. The docs also describe an OpenUPM scoped-registry install, but as of October 2026 the package is not listed on the registry, so use the `.unitypackage` unless `openupm add com.revenuecat.purchases-admob-unity` succeeds. The adapter references the Google plugin's `GoogleMobileAds` DLLs, so it compiles whether that plugin came from OpenUPM or a `.unitypackage`.
 
 ### Replace load calls
 
-The Unity SDK has no shared singleton, so point the adapter at the configured `Purchases` component once. `Purchases` creates its native wrapper in its own `Start()`; with runtime setup, call `Configure` only after that has run.
+The Unity SDK has no shared singleton, so point the adapter at the configured `Purchases` component once. `Initialize` only stores the reference, so it is safe to call from another script's `Awake()` or `Start()` regardless of execution order. `Purchases` creates its native wrapper in its own `Start()`; with runtime setup, call `Configure` only after that has run, and before the first ad loads.
 
 ```csharp
 using GoogleMobileAds.Api;
@@ -38,7 +38,7 @@ RevenueCatAdMob.LoadAndTrackInterstitialAd(adUnitId, new AdRequest(), (ad, error
 _interstitial.ShowAndTrack();            // or ShowAndTrack("level_complete")
 ```
 
-`LoadAndTrackRewardedAd`, `LoadAndTrackRewardedInterstitialAd` and `LoadAndTrackAppOpenAd` follow the same shape; rewarded `ShowAndTrack` takes the reward callback. Banners and native overlay ads attach tracking to an existing object:
+`LoadAndTrackRewardedAd`, `LoadAndTrackRewardedInterstitialAd` and `LoadAndTrackAppOpenAd` follow the same shape. Rewarded `ShowAndTrack` takes the same reward callback as Google's `Show`: `_rewarded.ShowAndTrack(reward => Grant(reward.Amount));`. Banners and native overlay ads attach tracking to an existing object; `TrackBannerView` takes the ad unit ID again because `BannerView` does not expose it:
 
 ```csharp
 var banner = new BannerView(adUnitId, AdSize.Banner, AdPosition.Bottom);
@@ -94,4 +94,4 @@ Rewarded ads only: `TrackRewardedAdPromptShown(new AdRewardPromptShownData(media
 
 ## Verify
 
-The C# calls compile on every platform; the iOS 15 guard lives in the native bridge. On iOS, background and reopen the app to flush events. Check the Ads page with **Sandbox data** on.
+The C# calls compile on every platform; the iOS 15 guard lives in the native bridge. The iOS deployment target is `iOSTargetOSVersionString` in `ProjectSettings/ProjectSettings.asset`; if that file is not in the repo, flag the 15.0 floor for the developer. On iOS, background and reopen the app to flush events. Check the Ads page with **Sandbox data** on.

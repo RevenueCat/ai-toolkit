@@ -9,7 +9,7 @@ Use this skill when the user wants their ad revenue and ad impressions reported 
 
 This is a wiring task across every place the app loads or shows an ad, not a feature you build once. A half-wired integration produces charts that look plausible and are wrong: impressions without revenue, click rates above 100%, fill rates at 0%. Take the time to find every ad call site, confirm what you cannot infer, and verify with sandbox events before you report done.
 
-Prerequisite: `integrate-revenuecat` has run. `Purchases.configure(…)` must succeed before the first ad loads; the ad tracker drops events when `Purchases` is not configured.
+Prerequisite: `Purchases.configure(…)` runs before the first ad loads. The adapters drop events while `Purchases` is not configured. Reading `Purchases.shared` (iOS) or `Purchases.sharedInstance` (Android, KMP) before configure throws, so access the tracker inside the callbacks, not at construction time. If the app has no RevenueCat setup yet, run `integrate-revenuecat` first.
 
 ## 0. If the user pasted the dashboard prompt
 
@@ -19,7 +19,7 @@ The Ads page of the RevenueCat dashboard generates a prompt that starts with "Ad
 
 ### 1a. Platform
 
-Inspect the working directory and pick the **first** match, from top to bottom:
+Inspect the working directory, including subdirectories such as `shared/`, `app/` or `apps/*`, and pick the **first** match, from top to bottom:
 
 1. **React Native**: `package.json` has a `react-native-purchases` entry, or `react-native` as a dependency → `platforms/react-native.md`.
 2. **Flutter**: `pubspec.yaml` exists at the project root → `platforms/flutter.md`.
@@ -49,7 +49,7 @@ Also grep for ad load calls (`InterstitialAd`, `RewardedAd`, `BannerView`, `AdVi
 
 ### 1d. RevenueCat SDK version
 
-Read the pinned version and compare it with the floor in the platform file. If the app is below the floor, upgrade the RevenueCat SDK first and say so. The floors in the platform files are the source of truth: they were checked against each SDK's releases. Do not take them from `list-sdk-feature-gates`; its `platform-admob-adapter` gate still lists versions that predate the ads APIs. When the RevenueCat MCP server is available, `list-sdk-versions` shows which SDK versions the app's users run, which tells you how much of the install base an upgrade affects. Without it, skip this.
+Read the pinned version and compare it with the floors in the platform file; only the floors for the features you will actually call apply. If the app is below one of them, upgrade the RevenueCat SDK first and say so. The floors in the platform files are the source of truth: they were checked against each SDK's releases. Do not take them from `list-sdk-feature-gates`; its `platform-admob-adapter` gate still lists versions that predate the ads APIs. When the RevenueCat MCP server is available, `list-sdk-versions` shows which SDK versions the app's users run, which tells you how much of the install base an upgrade affects. Without it, skip this.
 
 ### 1e. Ask before guessing
 
@@ -59,7 +59,7 @@ Ask the user, in one message, only what you could not read from the project:
 - Whether **Impression-level ad revenue** is turned on **and saved** in their AdMob account, when the mediator is AdMob. The adapter reports revenue from AdMob's paid event, and AdMob does not send that event until this setting is on. "Enabled but not saved" is a real support case.
 - Which ad formats the app uses, if the code does not make it obvious. Every format needs wiring.
 
-If you cannot ask (non-interactive run), continue with the most likely answer, list every assumption in your final report, and leave a `TODO` at each place the assumption affects code.
+If you cannot ask (non-interactive run), continue with the most likely answer, list every assumption in your final report, and leave a `TODO` at each place the assumption affects code. The same applies to section 5: what you cannot build or verify goes in the report, not in a claim of success.
 
 ## 2. Choose the path
 
@@ -76,7 +76,7 @@ The adapter is the default for AdMob apps. It wraps Google's load calls and repo
 
 - **Do not change how or when ads are served.** Only add tracking. Keep the existing load callbacks, delegates and listeners working.
 - **Cover every call site and every format.** Grep for each ad class the app uses (banner, interstitial, rewarded, rewarded interstitial, app open, native) and wire each one. A format you skip shows as missing impressions against the AdMob report.
-- **Placement.** Pass a stable, descriptive placement on every call: `"home_banner"`, `"level_complete_interstitial"`, `"bonus_coins_rewarded"`. Never a timestamp, a counter, a user id or any other dynamic value. Pass it at load time, not only at show time; loads without a placement file under "Unknown placement" and make the fill rate for named placements read 0%. A show-time placement is optional: it overrides the load-time one for the displayed, opened and revenue events only. Use it when an ad is preloaded before the placement is known; give the load call a generic placement and set the real one at show time (every adapter supports this).
+- **Placement.** Pass a stable, descriptive placement on every call: `"home_banner"`, `"level_complete_interstitial"`, `"bonus_coins_rewarded"`. Derive it from the call site (the screen, the moment, the format). When the code gives no hint, use `"<screen>_<format>"` and flag it in the report. Never a timestamp, a counter, a user id or any other dynamic value. Pass it at load time, not only at show time; loads without a placement file under "Unknown placement" and make the fill rate for named placements read 0%. A show-time placement is optional: it overrides the load-time one for the displayed, opened and revenue events only. Use it when an ad is preloaded before the placement is known; give the load call a generic placement and set the real one at show time (every adapter supports this).
 - **Adapter: never reassign the ad's callback after `loadAndTrack`.** The adapter wraps the full-screen content delegate (iOS), `FullScreenContentCallback` (Android legacy), `AdEventCallback` (Android Next-Gen) or `fullScreenContentCallback` (Flutter). Assigning your own afterwards replaces the wrapper and tracking stops for that ad. Pass your callback into `loadAndTrack`, or use the tracking-safe setter named in the platform file.
 - **Manual: report the full lifecycle**, not only revenue. Wire `trackAdLoaded`, `trackAdDisplayed`, `trackAdOpened`, `trackAdRevenue` and `trackAdFailedToLoad`. Revenue-only integrations are the most common support case; they produce revenue with no impressions, so eCPM and fill rate stay empty.
 - **Manual: one impression ID per ad instance**, reused across loaded → displayed → opened → revenue for that ad. Use the ID the mediator gives you. If the mediator exposes none (AppLovin MAX's `MaxAd` has no impression ID), generate a UUID when the ad loads, store it on the ad or its holder, and reuse it for that ad's events. Failed-to-load has no impression ID.
@@ -89,7 +89,7 @@ The adapter is the default for AdMob apps. It wraps Google's load calls and repo
 
 ## 4. Implement
 
-Read the platform file that matches detection. Each one is self-contained: SDK floors, adapter install and the replacement for each ad format, callback ownership, show-time placement, the manual `AdTracker` calls, and the prompt and unverified-reward events. The mapping from each mediator's callbacks to the tracker calls is shared across platforms in `mediator-callbacks.md`.
+Read the platform file that matches detection. Each one is self-contained: SDK floors, adapter install and the replacement for each ad format, callback ownership, show-time placement, the manual `AdTracker` calls, and the prompt and unverified-reward events. On the manual path, also read `mediator-callbacks.md` for the mapping from each mediator's callbacks to the tracker calls; the adapter path does not need it.
 
 - `platforms/ios.md`
 - `platforms/android.md`
@@ -128,6 +128,7 @@ Left as is
 
 Assumptions / for the developer
   - Impression-level ad revenue is on in AdMob (could not verify; TODO in interstitial_service.dart)
+  - Not built in this run (no toolchain here). Run `flutter pub get` and a debug build before trusting the wiring.
 
 Verify: run a debug build, show an interstitial and the banner, then check Ads → Sandbox data for Loaded, Displayed, Revenue, Opened.
 ```

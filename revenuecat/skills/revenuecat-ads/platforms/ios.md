@@ -5,7 +5,7 @@
 | What | Minimum |
 | --- | --- |
 | Manual `AdTracker` calls | `purchases-ios` 5.89.0 |
-| AdMob adapter | `purchases-ios-admob` at the **same version** as `purchases-ios` (the adapter pins it exactly); iOS 15.0+; Google Mobile Ads SDK 12.x or 13.x; Swift only |
+| AdMob adapter | `purchases-ios-admob` at the **same version** as `purchases-ios` (the adapter pins it exactly; every `purchases-ios` release from 5.89.0 has a matching adapter tag); iOS 15.0+; Google Mobile Ads SDK 12.x or 13.x; Swift only |
 | Rewarded-ad prompt events | `purchases-ios` 5.92.0 |
 | `trackAdRewardEarnedUnverified` | `purchases-ios` 5.89.0 |
 
@@ -41,7 +41,20 @@ let ad = try await InterstitialAd.loadAndTrack(
 )
 ```
 
-The same shape exists on `RewardedAd`, `RewardedInterstitialAd` and `AppOpenAd`. Banners and native ads:
+The completion-handler form takes the same labels and the same `(ad, error)` closure as Google's `load`:
+
+```swift
+RewardedAd.loadAndTrack(
+    withAdUnitID: adUnitID,
+    request: Request(),
+    placement: "bonus_coins",
+    fullScreenContentDelegate: self
+) { [weak self] ad, error in
+    self?.rewardedAd = ad
+}
+```
+
+The same shape exists on `InterstitialAd`, `RewardedAd`, `RewardedInterstitialAd` and `AppOpenAd`. Banners and native ads:
 
 ```swift
 bannerView.loadAndTrack(request: Request(), placement: "home_banner")

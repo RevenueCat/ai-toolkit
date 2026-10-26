@@ -19,7 +19,9 @@ Ad tracking is not supported on web; calls are ignored there.
 npm install react-native-purchases react-native-google-mobile-ads react-native-purchases-admob
 ```
 
-Pin `react-native-purchases-admob` to the exact `react-native-purchases` version. Configure `Purchases` and call `mobileAds().initialize()` before the first ad loads.
+Pin `react-native-purchases-admob` to the exact `react-native-purchases` version. If `react-native-purchases` is newer than the latest published adapter, pin both to the newest adapter version; the adapter is released alongside the SDK. If you cannot run the package manager, edit `package.json` and tell the developer to install. Configure `Purchases` and call `mobileAds().initialize()` before the first ad loads.
+
+The adapter needs the New Architecture and iOS 15.0+. Check `newArchEnabled=true` in `android/gradle.properties`, `RCT_NEW_ARCH_ENABLED` or the equivalent in `ios/Podfile`, and `platform :ios, '15.0'` or higher in `ios/Podfile`. If the native folders are not in the checkout, flag both for the developer.
 
 ### Replace load calls
 
@@ -39,16 +41,16 @@ interstitial.load();
 await RevenueCatAdMob.showAndTrack(interstitial);           // or showAndTrack(ad, { placement: "level_complete" })
 ```
 
-`createRewardedAd` (async), `createRewardedInterstitialAd` and `createAppOpenAd` follow the same shape. Request options go in the second argument as `requestOptions`. Banners are a component, so use the hook; class components call `RevenueCatAdMob.trackingBannerAdProps` once per banner instead:
+`createRewardedAd` (async), `createRewardedInterstitialAd` and `createAppOpenAd` follow the same shape. The second argument is `{ placement?, requestOptions? }` (rewarded formats add `enableRewardVerification?`); `showAndTrack(ad, { placement?, showOptions? })` returns `Promise<void>`. Banners are a component, so use the hook. It takes every `BannerAd` prop plus `placement`, and forwards the callbacks you pass in (`onAdLoaded`, `onAdFailedToLoad`, `onPaid`, …), so move the app's existing callbacks into the hook call. Never pass them after the spread; that replaces the adapter's own listener. Class components call `RevenueCatAdMob.trackingBannerAdProps` once per banner instead:
 
 ```tsx
-const bannerProps = useTrackingBannerAdProps({ unitId, size: BannerAdSize.BANNER, placement: "home_banner" });
+const bannerProps = useTrackingBannerAdProps({ unitId, size: BannerAdSize.BANNER, placement: "home_banner", onAdLoaded: () => setLoaded(true) });
 return <BannerAd {...bannerProps} />;
 ```
 
 Native ads: `RevenueCatAdMob.trackNativeAd(nativeAd, { placement: "feed" })` once `NativeAd.createForAdRequest` resolves, then render in `NativeAdView` as usual. For a full-screen ad the app already creates itself, attach tracking before `load()` with `RevenueCatAdMob.trackAd(ad, { placement })`.
 
-The library's `useInterstitialAd` and `useRewardedAd` hooks, ad pools and multi-format requests create their own ads and cannot be tracked. Move those ads to the class API above.
+The library's `useInterstitialAd` and `useRewardedAd` hooks, ad pools and multi-format requests create their own ads and cannot be tracked. Move those ads to the class API above: create the ad in a `useEffect`, keep it in a ref, subscribe with `addAdEventListener` to `AdEventType.LOADED` (set an `isLoaded` flag), `AdEventType.CLOSED` (clear the flag and `load()` again if the hook reloaded after close) and `AdEventType.ERROR`, call `load()`, and unsubscribe in the cleanup. Show with `RevenueCatAdMob.showAndTrack(ref.current)`.
 
 ### Callbacks
 
