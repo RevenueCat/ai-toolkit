@@ -1,6 +1,6 @@
 ---
 name: rc-price-changes
-description: Use this skill when rolling out subscription price changes on Android with RevenueCat. Covers opt out decreases versus opt in increases, RevenueCat's automatic handling of the change confirmation flow, and the dashboard configuration involved.
+description: Use this skill when rolling out subscription price changes on Android with RevenueCat. Covers price decreases, opt out versus opt in increases, the in app notice required for opt out increases, RevenueCat's price increase consent webhooks, and the dashboard and Play Console configuration involved.
 license: Apache-2.0; see LICENSE
 metadata:
   author: RevenueCat
@@ -15,46 +15,47 @@ metadata:
 
 # Price Changes
 
-Use this skill when you roll out a new price for an existing subscription product on Android and want RevenueCat to manage the cohort and consent plumbing for you.
+Use this skill when you roll out a new price for an existing subscription product on Android and want RevenueCat to handle the consent outcome on the server.
 
 ## Phase 1: Understand
 
 Google Play supports two kinds of price changes for active subscribers:
 
-- Opt out changes (typically decreases, and increases within Google's opt out threshold). The new price applies automatically at the next renewal. No user action required.
-- Opt in changes (larger increases). Google shows its own in app consent dialog. If the user consents, they continue at the new price. If they decline, the subscription cancels at period end.
+- Price decreases (charged from the next payment once you end the legacy price cohort), and opt out increases (increases within Google's opt out limits), which apply at the first renewal after a 30 or 60 day notification period depending on country. No user action required.
+- Opt in changes (the default for increases, and the only path for larger increases). Google Play emails and push notifies subscribers, who accept on the Play Store subscription screen. If they do not accept before the first renewal at the new price, the subscription is canceled. Google recommends an in app notice that deep links to the Play subscription screen (`customerInfo.managementURL`).
 
-RevenueCat processes `SUBSCRIPTION_PRICE_CHANGE_UPDATED` and related RTDNs on its backend and updates `CustomerInfo` when a subscriber's cohort or consent state changes. Your app reads entitlements the same way it always does.
+With Google Real Time Developer Notifications connected to RevenueCat, RevenueCat ingests `SUBSCRIPTION_PRICE_CHANGE_UPDATED` and sends `PRICE_INCREASE_CONSENT_REQUIRED` and `PRICE_INCREASE_CONSENT_APPROVED` webhooks. If the user never accepts, the subscription is canceled (`CANCELLATION` webhook, `cancel_reason` `PRICE_INCREASE`) and the affected entitlement's `willRenew` flips to `false`. `CustomerInfo` has no cohort or consent field; your app still reads entitlements the same way it always does.
 
-For most price change scenarios, there is nothing to implement in your app or backend.
+For price decreases and opt in increases there is nothing to implement in your app or backend; an opt out increase requires the in app notice in Step 6.
 
 ## Phase 2: Plan
 
 Decide which path applies before you touch anything.
 
-| Question | Opt out | Opt in |
+| Question | Decrease or opt out increase | Opt in increase |
 | --- | --- | --- |
 | Typical trigger | Decrease, or small increase within Google's threshold | Larger increase above Google's threshold |
 | User consent | Not required | Required, prompted by Google Play UI |
 | If user declines | N/A | Subscription cancels at period end, `CANCELLATION` webhook fires |
-| New price applies | Automatically at next renewal | After user consents in Play's dialog |
+| New price applies | Decrease: next payment. Opt out increase: first renewal after the 30 or 60 day notice | After user consents in Play's dialog |
 | RTDN RevenueCat consumes | `SUBSCRIPTION_PRICE_CHANGE_UPDATED` | `SUBSCRIPTION_PRICE_CHANGE_UPDATED`, then `SUBSCRIPTION_CANCELED` if declined |
-| App code change | None required | None required |
+| App code change | For an increase: required prominent in app notice at least 30 days before the new price takes effect, on all device types (subscription name, current and new price, effective date, how to cancel). For a decrease: none | None required (in app notice recommended, with a deep link to the Play subscription screen) |
 | Paywall price source | `pkg.product.price.formatted` (new purchases only) | `pkg.product.price.formatted` (new purchases only) |
 
 Questions to answer before executing:
 
 - Is the change a decrease, a small increase, or a larger increase? That determines opt out vs opt in.
-- Do you want to notify existing subscribers in app before the change takes effect? That is optional, driven by a webhook or a Targeting rule, not a requirement.
-- Which legacy cohorts exist today? Existing subscribers keep paying their old price until Google migrates them. This is a Google Play concern, not visible in the SDK.
+- For an opt out increase, is the required in app notice already shipping? That is a Play Console certification requirement, not optional.
+- Which legacy cohorts exist today? Existing subscribers keep paying their old price until you end their legacy price cohort. This is a Google Play concern, not visible in the SDK.
 
 ## Phase 3: Execute
 
-Most of the work is in the Play Console and the RevenueCat dashboard. Your app stays the same.
+Most of the work is in the Play Console and the RevenueCat dashboard. The app changes only for an opt out increase, which requires the in app notice in Step 6.
 
 ### 1. Update the price in Play Console
 
-In Google Play Console, open the subscription, select the base plan, and edit the price. Google will prompt you to choose how existing subscribers are treated (opt out vs opt in) based on the magnitude of the change and your region.
+1. In Google Play Console, open the subscription, select the base plan, and edit the price. New purchases get the new price within a few hours.
+2. To move existing subscribers, end the legacy price cohort: base plan menu > View legacy price points (or `monetization.subscriptions.basePlans.migratePrices`). Choose opt in, or opt out if eligible and you certify its requirements.
 
 ### 2. Let RevenueCat pick up the change
 
@@ -70,26 +71,27 @@ val pkg = offerings.current?.availablePackages?.firstOrNull() ?: return
 val displayPrice = pkg.product.price.formatted
 ```
 
-Legacy cohort subscribers continue to pay their old price until Google migrates them. `pkg.product.price.formatted` is always correct for new purchases.
+Legacy cohort subscribers continue to pay their old price until you end their legacy price cohort. `pkg.product.price.formatted` is always correct for new purchases.
 
 ### 4. Observe CustomerInfo on consent resolution
 
-For opt in increases, RevenueCat updates `CustomerInfo` when the consent outcome is known. Read entitlements the usual way.
+For opt in increases, `CustomerInfo` changes only if the user does not accept: the subscription is canceled and the entitlement's `willRenew` flips to `false`. Read entitlements the usual way either way.
 
 ```kotlin
 val info = Purchases.sharedInstance.awaitCustomerInfo()
 val isPro = info.entitlements["pro"]?.isActive == true
 ```
 
-Do not build a consent dialog. Google Play shows it.
+Do not build a consent dialog; consent happens in Google Play.
 
 ### 5. Handle declines via webhook, if you care
 
 If the user declines the opt in increase, the subscription cancels at period end. RevenueCat fires a `CANCELLATION` webhook event. Treat it the same way you treat any other cancellation on the server side.
 
-### 6. Optional: notify affected users
+### 6. Notify affected users (required for opt out increases)
 
-If you want to warn subscribers about an upcoming increase before Google's dialog appears, drive an in app banner from a RevenueCat webhook event or show a specific Offering to the affected cohort with a Targeting rule. This is an enhancement, not part of the price change contract.
+- Opt out increase: ship the in app notice described in Phase 2 at least 30 days before the new price applies. Starting the opt out migration requires you to certify in Play Console that you show it; Play cannot check this, and a false certification is a policy violation.
+- Opt in increase (recommended): warn subscribers before Google's consent dialog appears. Drive an in app banner from the RevenueCat `PRICE_INCREASE_CONSENT_REQUIRED` webhook, or show a specific Offering to the affected cohort with a Targeting rule.
 
 ## References
 
