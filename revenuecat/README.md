@@ -2,6 +2,14 @@
 
 Configure RevenueCat projects, products, entitlements, and offerings directly from your AI coding assistant. Access data about your revenue, conversion funnel, and experiments. Manage your in-app purchase monetization without leaving your agent. Works with **Claude Code, Cursor, OpenAI Codex, Visual Studio Code, and Gemini CLI**.
 
+## Installation
+
+In Claude Code:
+
+```
+/plugin install revenuecat --marketplace RevenueCat/ai-toolkit
+```
+
 ## Authentication
 
 The plugin requires authentication with your RevenueCat account via OAuth.
@@ -78,6 +86,10 @@ This plugin contains the RevenueCat MCP server setup and uses it to access your 
 - [MCP Server Documentation](https://www.revenuecat.com/docs/tools/mcp/overview)
 - [Community Forum](https://community.revenuecat.com/)
 - [GitHub Issues](https://github.com/RevenueCat/ai-toolkit/issues)
+
+## Privacy
+
+The RevenueCat MCP server is covered by the [RevenueCat Privacy Policy](https://www.revenuecat.com/privacy).
 
 ## License
 

@@ -13,6 +13,8 @@
 	},
 	"homepage": "https://www.revenuecat.com",
 	"repository": "https://github.com/RevenueCat/ai-toolkit",
+	"privacyPolicyUrl": "https://www.revenuecat.com/privacy",
+	"icon": "./revenuecat/assets/icon.png",
 	"skills": ["./revenuecat/skills"],
 	"mcpServers": "./revenuecat/.mcp.json"
 }
