@@ -22,9 +22,16 @@ Most users want the `revenuecat` plugin. Add `revenuecat-play-billing` on top if
 From within Claude Code
 
 ```
-/plugin
+/plugin install revenuecat --marketplace RevenueCat/ai-toolkit
 ```
-Then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `revenuecat` plugin. If you ship Android and want handbook-level Google Play depth, also select `revenuecat-play-billing`.
+
+If you ship Android and want handbook-level Google Play depth, also install `revenuecat-play-billing`:
+
+```
+/plugin install revenuecat-play-billing --marketplace RevenueCat/ai-toolkit
+```
+
+Or browse with `/plugin`, then select `Marketplace`, `+ Add Marketplace`, enter `RevenueCat/ai-toolkit`. Then, select the `revenuecat` plugin, and optionally `revenuecat-play-billing`.
 
 Or from the command line:
 
