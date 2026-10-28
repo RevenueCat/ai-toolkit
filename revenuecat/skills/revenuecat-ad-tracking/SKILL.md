@@ -87,6 +87,7 @@ The adapter is the default for AdMob apps. It wraps Google's load calls and repo
 - **Rewarded-ad prompt events are manual on both paths.** `trackRewardedAdPromptShown` and `trackRewardedAdPromptAccepted` record the "Watch an ad to earn coins" prompt before any ad loads. Only the app knows when it shows that prompt, so no adapter emits them. They are optional and rewarded-only. Add them when the app has such a prompt. `trackAdRewardEarnedUnverified` is different: it is **manual-path only**. The adapters report the earned reward themselves when a rewarded ad is shown through them, so calling it as well doubles the event.
 - **Reward verification is a separate feature.** Verifying rewarded-ad rewards server-side and granting in-app currency or an entitlement needs AdMob server-side verification configured in the dashboard. This skill does not wire it. Point the user to <https://www.revenuecat.com/docs/ad-monetization/rewards.md>.
 - **Debug builds report sandbox events.** Events from debug builds are marked sandbox and appear under the **Sandbox data** toggle on the Ads page. Events are batched, not sent in real time; on iOS, backgrounding the app triggers a sync.
+- **AdMob test ad units report zero revenue.** A Revenue event with a `0` amount is the expected result for a test ad unit; it proves the paid handler is wired. Only production ad units carry real amounts.
 
 ## 4. Implement
 
@@ -105,7 +106,7 @@ Do not claim the integration is complete until:
 
 1. The project **builds** on the target platform.
 2. You have listed every ad call site you changed and every one you left, with a reason for each one left.
-3. A debug build has shown at least one ad of each format the app uses, and the developer has confirmed the events on the **Ads page** of the RevenueCat dashboard with **Sandbox data** toggled on. Expected per ad: **Loaded**, **Displayed**, **Revenue** and, after a tap, **Opened**. **Failed to load** only appears when no ad was available. The Ads page has no MCP tool, so the developer checks this in the browser; tell them exactly what to look for.
+3. A debug build has shown at least one ad of each format the app uses, and the developer has confirmed the events on the **Ads page** of the RevenueCat dashboard with **Sandbox data** toggled on. Expected per ad: **Loaded**, **Displayed**, **Revenue** and, after a tap, **Opened**. With test ad units, **Revenue** arrives with a zero amount; that is normal and still counts as wired. **Failed to load** only appears when no ad was available. The Ads page has no MCP tool, so the developer checks this in the browser; tell them exactly what to look for.
 
 If you cannot build in this run, or the developer cannot confirm the events now, do not claim success: say exactly that under **Assumptions / for the developer** in the report, with the command or check they need to run.
 
