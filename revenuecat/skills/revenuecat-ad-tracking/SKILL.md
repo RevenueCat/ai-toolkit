@@ -56,7 +56,7 @@ Read the pinned version and compare it with the floors in the platform file; onl
 Ask the user, in one message, only what you could not read from the project:
 
 - Which mediator serves ads, when 1b was inconclusive.
-- Whether **Impression-level ad revenue** is turned on **and saved** in their AdMob account, when the mediator is AdMob. The adapter reports revenue from AdMob's paid event, and AdMob does not send that event until this setting is on. "Enabled but not saved" is a real support case.
+- Whether **Impression-level ad revenue** is turned on **and saved** in their AdMob account, when the mediator is AdMob. Include the link <https://apps.admob.com/> so they can check it right away. The adapter reports revenue from AdMob's paid event, and AdMob does not send that event until this setting is on. "Enabled but not saved" is a real support case.
 - Which ad formats the app uses, if the code does not make it obvious. Every format needs wiring.
 
 If you cannot ask (non-interactive run), continue with the most likely answer, list every assumption in your final report, and leave a `TODO` at each place the assumption affects code. The same applies to section 5: what you cannot build or verify goes in the report, not in a claim of success.
