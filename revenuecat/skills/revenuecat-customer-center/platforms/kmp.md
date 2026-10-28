@@ -64,4 +64,4 @@ Run each platform target with a sandbox account that owns at least one active su
 2. Tap **Restore purchases** on each platform. The purchase restores and the native SDK logs the restore event.
 3. Tap the manage / cancel action. On iOS, the system manage subscriptions sheet opens. On Android, the Google Play subscriptions page opens in a new task.
 4. Close the view. `onDismiss` fires on both platforms.
-5. After restore, call `Purchases.sharedInstance.customerInfo()` from common code and confirm `entitlements.active["premium"]` exists.
+5. After restore, call `Purchases.sharedInstance.awaitCustomerInfo()` (from `com.revenuecat.purchases.kmp.ktx`) in common code and confirm `entitlements.active["premium"]` exists.
