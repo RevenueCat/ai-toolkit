@@ -1,13 +1,13 @@
 ---
 name: revenuecat-migrate
-description: Migrate to RevenueCat from raw StoreKit, Google Play Billing, or another subscription or paywall SDK; upgrade the RevenueCat SDK across a major version; or move from Placements and Offerings to Checkpoints. Use when the user says migrate to RevenueCat, switch from StoreKit or another SDK to RC, replace another paywall SDK, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, move to Checkpoints, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Migrate to RevenueCat from raw StoreKit, Google Play Billing, or another subscription or paywall SDK, or upgrade the RevenueCat SDK across a major version. Use when the user says migrate to RevenueCat, switch from StoreKit or another SDK to RC, replace another paywall SDK, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
-# revenuecat-migrate: migrate to RevenueCat, upgrade the SDK, or move to Checkpoints
+# revenuecat-migrate: migrate to RevenueCat or upgrade the SDK
 
-Use this skill when the user wants to adopt RevenueCat in an app that already ships in app purchases, upgrade the RevenueCat SDK across a major version, or move paywall presentation from Placements and Offerings to Checkpoints.
+Use this skill when the user wants to either adopt RevenueCat in an app that already ships in app purchases, or upgrade the RevenueCat SDK across a major version.
 
-These paths share some concepts but have different risks. Identify which one applies before touching code.
+These two paths share some concepts but have different risks. Identify which one applies before touching code.
 
 ## 1. Detect the platform
 
@@ -27,9 +27,8 @@ Ask the user (or infer from the codebase):
 
 - **Path A: adoption.** The app already has working in app purchases, implemented directly against StoreKit or Google Play Billing or through another subscription or paywall SDK. RevenueCat is being added on top or replacing it.
 - **Path B: version upgrade.** The app already uses RevenueCat, and the user wants to bump from one major version to the next (e.g. v4 to v5, v7 to v8).
-- **Path C: Checkpoints.** The app already uses RevenueCat, and the user wants to replace Placements, `presentPaywall` calls, or offering-driven paywalls with Checkpoints.
 
-Paths can combine (e.g. adopt RC today on the latest major version). Run them in order: A, then B, then C.
+Both paths can happen at once (e.g. adopt RC today on the latest major version). Run Path A first, then Path B if needed.
 
 ## 3. Shared concepts
 
@@ -68,16 +67,6 @@ Find the other SDK in the dependencies and check what it does in this app: purch
 - **It only shows paywalls** (RevenueCat already completes purchases). Replace its paywall calls with RevenueCat Paywalls (see `revenuecat-paywall`) and rebuild each design in the dashboard (see `revenuecat-paywall-design`). Nothing imports another tool's paywalls automatically.
 - **Existing subscribers.** The SDK only picks up subscribers who open the new app version. For the rest, follow [Importing your Historical Purchases](https://www.revenuecat.com/docs/migrating-to-revenuecat/migrating-existing-subscriptions).
 
-### Moving to Checkpoints (Path C)
-
-Checkpoints are in private beta, for native iOS (SDK 5.96.0+) and Android (10.28.1+) only. Stop and tell the user if the app is React Native, Flutter, KMP or another hybrid SDK, or uses `purchasesAreCompletedBy` set to `myApp`: neither is supported yet. Follow [Migrate from Placements and Offerings](https://www.revenuecat.com/docs/tools/targeting/checkpoints/implementation#migrate-from-placements-and-offerings) as the source of truth. In short:
-
-1. Bump the SDK (Path B first if that crosses a major version) and opt in to the beta API: `@_spi(InviteOnlyCheckpointsApi) import RevenueCat` on iOS, `@OptIn(InviteOnlyCheckpointsAPI::class)` on Android.
-2. Replace each `presentPaywall`, `presentPaywallIfNeeded`, or Placement call with `checkpoint("<id>")`. A placement identifier usually works as the checkpoint identifier.
-3. Move the code that ran after the paywall into the checkpoint continuation. It also runs, with no flow, when no rule matches.
-4. Delete `getOfferings` calls that only chose a paywall, and client-side entitlement pre-checks; the rule's audience does that now. Embedded `PaywallView` is not supported yet.
-5. Tell the user what to do in the dashboard: create the checkpoints and their rules (legacy targeting rules are not copied automatically), add a catch-all rule last if the app relied on the current offering as a fallback, and keep the legacy rules for older app versions.
-
 ### Version bumps change required fields (Path B)
 
 Major version upgrades change configuration shape, drop deprecated APIs, and shift default behavior in ways that move with each release. This skill does not duplicate the per-version diff. Read the canonical sources from the SDK repo:
@@ -107,7 +96,7 @@ Read the platform file that matches detection:
 - `platforms/flutter.md`
 - `platforms/react-native.md`
 
-Each platform file covers Paths A and B for that platform. Path C is covered above.
+Each platform file covers both migration paths for that platform.
 
 ## 5. Verify
 
@@ -116,5 +105,4 @@ Do not declare migration done until:
 1. The app builds on the new SDK version with no warnings from deprecated APIs you care about.
 2. A sandbox purchase succeeds and the transaction shows up on the RevenueCat dashboard Sandbox view with the expected appUserID.
 3. An existing subscriber from before the migration opens the app, and their entitlement state is correct. For Path A this proves the observer mode ingest worked. For Path B this proves the version bump did not drop state.
-4. For Path C, each checkpoint presents the expected flow in sandbox, and the continuation runs when no rule matches.
-5. You have removed the debug log level override before shipping.
+4. You have removed the debug log level override before shipping.
