@@ -1,6 +1,6 @@
 ---
 name: revenuecat-migrate
-description: Migrate to RevenueCat from raw StoreKit or Google Play Billing, or upgrade the RevenueCat SDK across a major version. Use when the user says migrate to RevenueCat, switch from StoreKit to RC, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Migrate to RevenueCat from raw StoreKit, Google Play Billing, or another subscription or paywall SDK, or upgrade the RevenueCat SDK across a major version. Use when the user says migrate to RevenueCat, switch from StoreKit or another SDK to RC, replace another paywall SDK, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # revenuecat-migrate: migrate to RevenueCat or upgrade the SDK
@@ -25,7 +25,7 @@ If several match (e.g. an `ios/` folder inside a Flutter project), pick the **ou
 
 Ask the user (or infer from the codebase):
 
-- **Path A: adoption.** The app already has working in app purchases implemented directly against StoreKit or Google Play Billing. RevenueCat is being added on top.
+- **Path A: adoption.** The app already has working in app purchases, implemented directly against StoreKit or Google Play Billing or through another subscription or paywall SDK. RevenueCat is being added on top or replacing it.
 - **Path B: version upgrade.** The app already uses RevenueCat, and the user wants to bump from one major version to the next (e.g. v4 to v5, v7 to v8).
 
 Both paths can happen at once (e.g. adopt RC today on the latest major version). Run Path A first, then Path B if needed.
@@ -58,6 +58,14 @@ Exactly one side must own finishing / acknowledging. Pick a side and remove the 
 If the app already has its own authentication system, call `Purchases.logIn(existingAppUserID)` once RevenueCat is configured. This attaches the prior purchase history to the right RevenueCat user on ingestion. Without this step, existing purchases get recorded against an anonymous RC user and cannot be matched to the app's actual user records later.
 
 Only skip this if the app has no notion of authenticated users.
+
+### Coming from another subscription or paywall SDK (Path A)
+
+Find the other SDK in the dependencies and check what it does in this app: purchases, paywalls, or both.
+
+- **It completes purchases.** Add RevenueCat with `purchasesAreCompletedBy` set to `myApp` while the other SDK keeps completing them. Later, remove the other SDK and the override in the same release, so exactly one side finishes transactions. Pass `Purchases.logIn` the same user ID the app gave the other SDK.
+- **It only shows paywalls** (RevenueCat already completes purchases). Replace its paywall calls with RevenueCat Paywalls (see `revenuecat-paywall`) and rebuild each design in the dashboard (see `revenuecat-paywall-design`). Nothing imports another tool's paywalls automatically.
+- **Existing subscribers.** The SDK only picks up subscribers who open the new app version. For the rest, follow [Importing your Historical Purchases](https://www.revenuecat.com/docs/migrating-to-revenuecat/migrating-existing-subscriptions).
 
 ### Version bumps change required fields (Path B)
 
