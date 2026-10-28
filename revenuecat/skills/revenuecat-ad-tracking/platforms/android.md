@@ -1,4 +1,4 @@
-# revenuecat-ads: Android (native)
+# revenuecat-ad-tracking: Android (native)
 
 ## SDK floors
 

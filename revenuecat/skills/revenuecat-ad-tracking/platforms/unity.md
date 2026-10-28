@@ -1,4 +1,4 @@
-# revenuecat-ads: Unity
+# revenuecat-ad-tracking: Unity
 
 ## SDK floors
 

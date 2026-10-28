@@ -1,4 +1,4 @@
-# revenuecat-ads: iOS (native)
+# revenuecat-ad-tracking: iOS (native)
 
 ## SDK floors
 

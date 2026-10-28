@@ -1,4 +1,4 @@
-# revenuecat-ads: Kotlin Multiplatform
+# revenuecat-ad-tracking: Kotlin Multiplatform
 
 ## SDK floors
 

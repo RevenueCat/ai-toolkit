@@ -9,6 +9,9 @@ Wire every row. The names follow each mediator's listener API; look up the exact
 | Revenue | `trackAdRevenue` | `onPaidEvent` | `onAdRevenuePaid` / `didPayRevenueForAd` | `onImpressionSuccess` | `onImpressionSuccess` from LevelPlay; standalone Unity Ads has no revenue callback |
 | Opened (click) | `trackAdOpened` | `onAdClicked` | `onAdClicked` / `didClick` | `onAdClicked` | `onUnityAdsShowClick` |
 | Failed to load | `trackAdFailedToLoad` | `onAdFailedToLoad` | `onAdLoadFailed` / `didFailToLoadAd` | `onAdLoadFailed` | `onUnityAdsFailedToLoad` |
+| Reward earned (rewarded formats only) | `trackAdRewardEarnedUnverified` | `onUserEarnedReward` | `onUserRewarded` / `didRewardUser` | `onAdRewarded` | `onUnityAdsShowComplete` with state `COMPLETED` |
+
+`trackRewardedAdPromptShown` and `trackRewardedAdPromptAccepted` have no row: no mediator emits them. Call them from the app's own "Watch an ad" prompt, before the load; see the platform file.
 
 AppLovin MAX callbacks that have no RevenueCat event: `onAdHidden`, `onAdDisplayFailed`. Leave them alone. For any other mediator, map its loaded, impression, impression-level revenue, click and load-failure callbacks the same way. The mediator must report revenue per impression; one that only provides aggregated daily reports is not supported.
 

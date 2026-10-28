@@ -1,4 +1,4 @@
-# revenuecat-ads: React Native
+# revenuecat-ad-tracking: React Native
 
 ## SDK floors
 

@@ -1,4 +1,4 @@
-# revenuecat-ads: Flutter
+# revenuecat-ad-tracking: Flutter
 
 ## SDK floors
 
