@@ -54,14 +54,33 @@ In general, to avoid clogging the context, start with defined timeframes and lar
 
 ## 2. Retrieve chart data with `get-chart-data`
 
+### Choosing dates and resolution
+
+- Relative ranges phrased in weeks, months, or quarters ("last 2 weeks", "last month") are
+  ambiguous. If today is Friday 2026-07-31, "last 2 weeks" can mean Jul 18–31 (trailing 14 days),
+  Jul 12–25 (the last two full weeks), or Jul 19–31 (last full week plus the current one). Ask which
+  the user means, offering each reading with its concrete dates. Skip the question only when the
+  dates are already pinned down: explicit dates, a range in days, wording that names full calendar
+  periods ("the previous calendar month"), or an earlier clarification.
+- Date ranges are inclusive (start_date and end_date are included in the range). "Last N days" is a
+  trailing window: end date is today, start date is N-1 days before today.
+- Every period is labeled with the first day of the calendar period containing it (week, month, or
+  quarter start), regardless of `start_date`. Weeks start on the project's configured week start day
+  (e.g. Sunday or Monday), so week labels vary per project. A range that starts or ends mid-period
+  returns partial buckets whose labels don't match the requested dates. For trailing windows, prefer
+  daily resolution — with `aggregate` when you only need totals — so the data covers exactly the
+  requested dates.
+- When presenting results, state the start and end dates you queried, never the first/last bucket
+  labels. E.g. Jul 18–31 queried weekly (Sunday start) returns buckets labeled Jul 12, 19, and 26 —
+  say "Jul 18 – Jul 31", not "Jul 12 – Jul 26".
+
 ### Calling `get-chart-data`
 
 - Always set `"realtime": true` and specify start date, end date and resolution ID.
 - Always follow the guidelines from a prior `get-chart-options-schema` for that chart.
-- Consider rate limits: don't query too many charts at once.
-- Date ranges are inclusive (start_date and end_date are included in the range). When asked for
-  data for the "last N days", take that into account (use today as end date, start date is (N-1)
-  days before today).
+- For questions spanning several projects, make one `get-chart-data` call per project and issue
+  them in parallel batches of about 10–20. Wider batches risk the API rate limit; check each batch
+  for rate-limited calls and re-issue only those. Don't fall back to one call at a time.
 - Use available `filters` to constrain the output. They are a JSON-encoded array of
   `{"name": "<filter id>", "values": ["<value id>", ...]}`.
   - Values within one entry are ORed; separate entries are ANDed. Example: App Store revenue in the
@@ -137,6 +156,8 @@ General guidelines:
   band, not that the value can't be computed.
 - After looking: if nothing in the tools matches, or two readings would produce materially
   different numbers, ask the user to define the metric. Do not invent a definition.
+- Keep fan-out deliberate on complex questions: start with high-level charts, then ask a clarifying
+  question (which product, store, or country?) rather than pulling every possible cut.
 - When using the data tools, date ranges are inclusive (start_date and end_date are included in the range). When asked for data for the "last N days", take that into account (use today as end date, start date is (N-1) days before today).
 - Provide links to RevenueCat charts (see the Dashboard URL Format section below) where it is useful. Provide specific links including filters, segments, date ranges, etc — eg. if you are asked for proceeds in the last 3 months, link to the revenue chart with custom date range of the last 3 months and the `revenue_type` selector set to `proceeds`, don't link to the plain revenue chart
 - For forecasts, projections, or run-rates, load the `revenuecat-forecasting` skill before pulling charts.
@@ -211,11 +232,15 @@ this order before answering:
 1. **Quantify the shift.** Pull the chart data, confirm the magnitude and timing.
 2. **Check configuration.** Offerings, packages, products, paywalls and experiments are not visible
    in metrics, so never infer them from a chart. If your answer names any of them, look it up in
-   this run:
+   this run. Hedging ("likely", "worth confirming") or offering ("want me to check?") does not make a
+   guess acceptable. These checks are all mandatory, not alternatives to pick from:
    - `list-experiments` with `status="stopped"` and `status="running"`. If an experiment stopped
-     near the shift, call `get-experiment-results` to see which variant won.
-   - `list-offerings` with `limit: 100` (the default page of 20 rarely covers a real project), then
-     `get-offering` on the `is_current` id with `expand: ["package.product"]`. An offering with
+     near the shift, call `get-experiment-results` yourself to see which variant won — don't tell
+     the user to check it.
+   - `list-offerings` with `limit: 100` and no `expand` (the default page of 20 rarely covers a real
+     project; never conclude there is no current offering from a partial page), then `get-offering`
+     on the `is_current` id with `expand: ["package.product"]` — on `get-offering` the values are
+     `package` and `package.product`, without the `items.` prefix `list-offerings` uses. An offering with
      `paywall_id: null` has no RevenueCat paywall — load `revenuecat-paywall-design` before giving
      paywall advice.
    - `get-product-store-state` before saying a product is retired, unavailable, or no longer
@@ -225,8 +250,13 @@ this order before answering:
 4. **Only then form a hypothesis.** Present it as a hypothesis, not a finding. An unverified guess
    about configuration is a missing tool call, never your headline finding.
 
-Do not skip step 2. Once you have made the calls, if their results cannot explain the shift, say
-so explicitly rather than constructing a mechanism.
+Do not skip step 2. If you are about to write "was pulled from the offering" or "an experiment was
+rolled out" without having called `list-experiments` or `list-offerings` in this run, stop and make
+the call first. Once you have made the calls, if their results cannot explain the shift — the range
+predates the current configuration, or nothing changed — say so explicitly rather than constructing
+a mechanism. "The data shows X happened but I cannot determine why from the available
+configuration" is a valid answer. An old date range may make the answer inconclusive; it is never a
+reason to skip the calls.
 
 ## Populations and denominators
 
@@ -234,7 +264,8 @@ A rate only describes the population in its denominator. Before presenting one, 
 the population the question is about.
 
 - When one segment dominates the denominator, the blended rate describes that segment, not the app.
-  Re-query filtered to the population the question is about and lead with that number.
+  Re-query filtered to the population the question is about and lead with that number, keeping the
+  blended rate beside it.
 - **Never present a rate as evidence while also calling its denominator inflated or
   unrepresentative.** Re-query with a filter instead of caveating.
 - Report the filtered numbers yourself rather than recommending the user go look at a filtered
@@ -247,6 +278,8 @@ the population the question is about.
   too, except in deliberate period-over-period comparisons.
 - If you have a metric for one side of a comparison but not the other, query the missing side with
   the same chart and settings before comparing. Do not substitute a value from a different chart.
+  If you cannot fetch the matching value, present each number on its own, labeled with its chart
+  and metric, and make no gap or ratio claim.
 - For open-ended questions like "how are {segment} users doing?", do not stop at segment-only
   metrics. Pull the requested segment and an overall/unfiltered baseline for the key conversion or
   revenue-quality metric, then judge performance relative to that baseline. Do not evaluate a
@@ -255,7 +288,7 @@ the population the question is about.
   revenue from all cohorts and renewals. If you cannot get a matching baseline, say so and avoid
   directional performance claims.
 - When a user is confused that two metrics diverge, say what each one counts before explaining the
-  gap.
+  gap. Two metrics only track each other if one is a subset of the other.
 
 Wrong — different charts merged under one header:
 
