@@ -57,7 +57,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. Both iOS and Android targets build at the new version with debug logging on.
-2. The native SDK configure banner appears in each target's platform console.
+2. Each target's platform console shows a line containing `SDK Version - <version>`, with the version of the native SDK that `purchases-kmp` bundles.
 3. A sandbox purchase on each target shows on the RevenueCat dashboard.
 4. An existing subscriber still has their entitlement active on each target.
 5. Log level dropped before release.

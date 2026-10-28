@@ -88,7 +88,7 @@ Purchases.sharedInstance.logOut(
 
 - Use a stable opaque identifier (UUID / hash). Do not pass an email address, phone number, or a raw integer database id.
 - `Purchases.sharedInstance.isAnonymous` is available in commonMain and is the correct guard before calling `awaitLogOut`.
-- If your installed version of `purchases-kmp` does not expose `awaitLogIn` / `awaitLogOut` in `com.revenuecat.purchases.kmp.ktx`, prefer what the IDE autocompletes and see the `purchases-kmp` README. Some versions ship `Result`-based variants in a separate module.
+- If your installed version of `purchases-kmp` does not expose `awaitLogIn` / `awaitLogOut` in `com.revenuecat.purchases.kmp.ktx`, prefer what the IDE autocompletes and see the [ktx package in the purchases-kmp API reference](https://revenuecat.github.io/purchases-kmp/core/com.revenuecat.purchases.kmp.ktx/). Some versions ship `Result`-based variants in a separate module.
 
 ## Verify
 

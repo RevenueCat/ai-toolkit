@@ -73,7 +73,7 @@ A common report: one platform works, the other returns `INVALID_CREDENTIALS`. Ca
 
 - Await `Purchases.getCustomerInfo()` after the purchase promise resolves to get the fresh state.
 - The product must be attached to an entitlement in the dashboard.
-- On Android, if your app is sideloaded instead of installed from Play Internal Testing, purchases will fail or behave inconsistently. Use `eas build --profile preview` or a signed AAB installed via the Play opt-in link.
+- On Android, a sideloaded build makes test purchases only for a license tester who has opted in to the testing track. Other accounts either cannot buy or are charged real money, even when the build comes from the track, so add test accounts as license testers.
 
 ## iOS pod install forgotten
 

@@ -21,7 +21,7 @@ import com.revenuecat.purchases.kmp.Purchases
 Purchases.logLevel = LogLevel.DEBUG
 ```
 
-This flows to both native SDKs. The log output on each target matches the native SDK output, so follow the native platform file for the expected log lines.
+This flows to both native SDKs, and each target logs what its native SDK logs. At configure time, both print a line containing `SDK Version - <version>`, where the version is the native SDK's, not the purchases-kmp version.
 
 ## API key confusion
 
@@ -34,26 +34,16 @@ Confirm the platform specific entry points pass the matching key:
 
 ## Version mismatch between KMP and native SDKs
 
-`purchases-kmp-core` tracks native SDK versions but does not always update in lockstep. If the KMP version is newer than the native CocoaPods or Maven artifact it bridges to, you can hit missing symbol errors at link time or runtime.
-
-Check the installed `purchases-kmp-core` version in your `build.gradle.kts` and cross reference the native versions it depends on. If in doubt, pin the native iOS and Android SDKs explicitly to known good versions.
+Since 3.0.0, `purchases-kmp` bundles `purchases-ios` and depends on a specific `purchases-android` version (3.10.1 uses 10.22.1). Do not add the native SDKs to the app yourself, so the versions `purchases-kmp` was built against stay in use. The exception is the Amazon Appstore: since 3.0.0 you add `purchases-store-amazon` yourself, so pin it to that same `purchases-android` version. If another dependency pulls in a different `purchases-android`, check the resolved version with `./gradlew :<module>:dependencies` on the module that applies the Android plugin (often `:composeApp` or `:androidApp`).
 
 ## iOS framework linking issues
 
-If the Kotlin framework builds but the iOS app fails to link `RevenueCat` symbols, the CocoaPods integration may not be pulling the bridge pod. Rebuild with:
+Since 3.0.0, `purchases-kmp` brings the iOS SDK itself. If linking fails after an upgrade from 2.x, remove the old `PurchasesHybridCommon` and `PurchasesHybridCommonUI` pods or Swift packages ([3.0.0 migration guide](https://github.com/RevenueCat/purchases-kmp/blob/main/migrations/3.0.0-MIGRATION.md)), and run `pod install` again if you use CocoaPods. If the project still does not compile, set `isStatic = true` on the iOS framework binaries. Then clean the Xcode build folder (Product → Clean Build Folder) before running again.
 
-```bash
-cd iosApp
-pod deintegrate
-pod install
-```
+## Android context
 
-Then clean the Xcode build folder (Product → Clean Build Folder) before running again.
-
-## Android Context missing
-
-If the Android actual of `PurchasesConfiguration` requires a `Context` and the shared code does not supply one, the app crashes at configure time. Construct the configuration on the Android side where `this` (the `Application`) is in scope, then call into shared initialization for anything that does not need `Context`.
+`PurchasesConfiguration.Builder` takes no `Context`. `purchases-kmp` gets the Android `Application` through AndroidX App Startup. If the SDK fails on Android at configure time, check that the merged manifest still contains `androidx.startup.InitializationProvider`. Apps that strip it, for example to drop WorkManager's initializer, should remove only that initializer.
 
 ## Verify
 
-Reproduce on the target that was failing. Confirm the log banner and the success log for the scenario. Since `purchases-kmp` delegates to the native SDK, the RevenueCat dashboard should reflect the transaction exactly as it would for a native app.
+Reproduce on the target that was failing. Confirm the `SDK Version - <version>` configure line and the success log for the scenario. Since `purchases-kmp` delegates to the native SDK, the RevenueCat dashboard should reflect the transaction exactly as it would for a native app.
