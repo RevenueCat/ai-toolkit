@@ -71,7 +71,7 @@ If you cannot ask (non-interactive run), continue with the most likely answer, l
 | AdMob on Kotlin Multiplatform, Java-only Android, or Objective-C | **Manual** `AdTracker` calls (no adapter) |
 | Mediator reports only aggregated daily revenue, no per-impression data (standalone Unity Ads without LevelPlay is one) | Not supported. Tell the user and stop. |
 
-The adapter is the default for AdMob apps. It wraps Google's load calls and reports every event, including revenue and the earned-reward funnel, with one call per ad. Manual calls on an AdMob app are the last resort, used only when the language rules the adapter out. Do not pick manual because it looks like less to install. Do not mix both for the same ad: an ad loaded through the adapter must not also be reported with manual calls, or events double.
+The adapter is the default for AdMob apps. It wraps Google's load calls and reports every ad event, including revenue and the earned reward, with one call per ad. The two rewarded-ad prompt events are the exception: they are manual on both paths (see section 3). Manual calls on an AdMob app are the last resort, used only when the language rules the adapter out. Do not pick manual because it looks like less to install. Do not mix both for the same ad: an ad loaded through the adapter must not also be reported with manual calls, or events double.
 
 ## 3. Rules that apply on every platform
 
