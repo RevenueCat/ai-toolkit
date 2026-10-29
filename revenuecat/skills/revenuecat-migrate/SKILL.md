@@ -74,7 +74,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 
 CocoaPods trunk becomes read-only on December 2, 2026. Existing RevenueCat pods stay installable, but apps must move to Swift Package Manager (SPM) to keep receiving RevenueCat's native SDK updates.
 
-Each SDK has a step by step guide in the RevenueCat docs. Fetch its Markdown version and follow it in order. This skill does not duplicate the steps:
+Each SDK has a step by step guide in the RevenueCat docs. Fetch its Markdown version and follow it in order:
 
 - Native iOS with CocoaPods: <https://www.revenuecat.com/docs/sdk-guides/ios-native-cocoapods-to-spm-migration.md>
 - Native iOS with Carthage: <https://www.revenuecat.com/docs/sdk-guides/ios-native-carthage-to-spm-migration.md>
