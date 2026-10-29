@@ -37,7 +37,9 @@ After changing `react-native-purchases`, the iOS Podfile, or Android Gradle file
 
 ```bash
 npx react-native start --reset-cache
-cd ios && pod install && cd ..
+cd ios && pod install && cd .. # CocoaPods projects
+# with React Native's Swift Package Manager integration instead:
+npx react-native spm
 # or for Expo:
 npx expo prebuild --clean
 ```
@@ -75,9 +77,12 @@ A common report: one platform works, the other returns `INVALID_CREDENTIALS`. Ca
 - The product must be attached to an entitlement in the dashboard.
 - On Android, a sideloaded build makes test purchases only for a license tester who has opted in to the testing track. Other accounts either cannot buy or are charged real money, even when the build comes from the track, so add test accounts as license testers.
 
-## iOS pod install forgotten
+## iOS native code not updated
 
-After bumping `react-native-purchases`, `cd ios && pod install` is required. Without it, the native code on iOS is still the old version, and strange crashes at configure time appear. Check `ios/Podfile.lock` to confirm the installed pod version matches the JS package version.
+When the iOS native code stays on the old version after a `react-native-purchases` bump, strange crashes at configure time appear.
+
+- CocoaPods projects: run `cd ios && pod install` after every bump. Check `ios/Podfile.lock` to confirm the installed pod version matches the JS package version.
+- Projects using React Native's Swift Package Manager integration: the Xcode build syncs the new version automatically. On a fresh clone or CI checkout, or if Xcode reports missing packages, run `npx react-native spm` before building.
 
 ## Verify
 

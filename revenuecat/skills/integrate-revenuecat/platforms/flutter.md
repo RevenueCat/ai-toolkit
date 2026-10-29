@@ -20,11 +20,9 @@ flutter pub get
 
 ### iOS target
 
-```bash
-cd ios && pod install && cd ..
-```
+Flutter installs the iOS native code itself on the next `flutter run` or `flutter build ios`, through Swift Package Manager or CocoaPods depending on the project. Don't run `pod install` manually.
 
-Minimum iOS deployment target is **13.0**. Update `ios/Podfile`:
+Minimum iOS deployment target is **13.0**. Set it in Xcode under the Runner target's **Minimum Deployments**. If the project has an `ios/Podfile`, update it too:
 
 ```ruby
 platform :ios, '13.0'

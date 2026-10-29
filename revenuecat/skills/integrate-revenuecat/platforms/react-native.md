@@ -9,8 +9,15 @@ The npm install commands below resolve the current latest at install time, so no
 ```bash
 npm install react-native-purchases
 # npm install react-native-purchases-ui # optional, for native paywalls
+```
+
+Then install the iOS native code. Most React Native apps use CocoaPods (an `ios/Podfile`):
+
+```bash
 cd ios && pod install && cd ..
 ```
+
+If the app uses React Native's Swift Package Manager integration (React Native 0.88+, with an `ios/*.xcodeproj/.spm-injected.json` file), skip `pod install`: the next Xcode build picks up the new package.
 
 ### Expo
 
