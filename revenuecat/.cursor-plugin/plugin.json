@@ -1,9 +1,16 @@
 {
   "name": "revenuecat",
   "description": "Configure your RevenueCat integration and access data from your RevenueCat projects.",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "license": "MIT",
-  "keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"],
+  "keywords": [
+    "revenuecat",
+    "in-app-purchases",
+    "subscriptions",
+    "monetization",
+    "iap",
+    "mcp"
+  ],
   "author": {
     "name": "RevenueCat",
     "email": "support@revenuecat.com"

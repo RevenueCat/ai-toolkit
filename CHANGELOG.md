@@ -5,6 +5,21 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/RevenueCat/ai-toolkit/compare/v2.3.1...v2.4.0) (2026-10-29)
+
+
+### Added
+
+* **revenuecat-migrate:** add CocoaPods to Swift Package Manager path ([#75](https://github.com/RevenueCat/ai-toolkit/issues/75)) ([8b8988c](https://github.com/RevenueCat/ai-toolkit/commit/8b8988ce2d1cb4addc3f30b591d15310c2d1ecba))
+
+
+### Fixed
+
+* claude marketplace validation warnings ([#71](https://github.com/RevenueCat/ai-toolkit/issues/71)) ([369f6da](https://github.com/RevenueCat/ai-toolkit/commit/369f6da07003314a02fba133047a7f089e91c4bb))
+* **skills:** Android and KMP platform file audit findings ([#67](https://github.com/RevenueCat/ai-toolkit/issues/67)) ([b87a47a](https://github.com/RevenueCat/ai-toolkit/commit/b87a47a63421fb0f03134bfb0e7918addc922313))
+* **skills:** Android and KMP snippets that do not compile ([#66](https://github.com/RevenueCat/ai-toolkit/issues/66)) ([33b2866](https://github.com/RevenueCat/ai-toolkit/commit/33b286624a97a12989ca73e25c135f4b5471a8ff))
+* **skills:** stop assuming CocoaPods for React Native and Flutter iOS installs ([#74](https://github.com/RevenueCat/ai-toolkit/issues/74)) ([ed54242](https://github.com/RevenueCat/ai-toolkit/commit/ed542429ba638bafe209a25e95a38c1cad2dd126))
+
 ## [2.3.1] – 2026-09-18
 
 ### Changed
