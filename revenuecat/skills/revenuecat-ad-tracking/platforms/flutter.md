@@ -1,13 +1,8 @@
 # revenuecat-ad-tracking: Flutter
 
-## SDK floors
+## SDK floor
 
-| What | Minimum |
-| --- | --- |
-| Manual `AdTracker` calls | `purchases_flutter` 10.10.1 |
-| AdMob adapter | `purchases_admob_flutter` 10.18.0, same version as `purchases_flutter`; `google_mobile_ads` 8.x (9.x is not supported yet); Dart 3.10+; Flutter 3.38.1+; iOS 15.0+ |
-| Rewarded-ad prompt events | `purchases_flutter` 10.15.0 |
-| `trackAdRewardEarnedUnverified` | `purchases_flutter` 10.17.0 |
+Minimum `purchases_flutter` 10.18.0, with `purchases_admob_flutter` at the same version. `google_mobile_ads` 8.x (9.x is not supported yet); Dart 3.10+; Flutter 3.38.1+; iOS 15.0+.
 
 ## Adapter (AdMob)
 

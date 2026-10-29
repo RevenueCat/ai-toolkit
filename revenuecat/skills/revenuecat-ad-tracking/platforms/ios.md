@@ -1,13 +1,8 @@
 # revenuecat-ad-tracking: iOS (native)
 
-## SDK floors
+## SDK floor
 
-| What | Minimum |
-| --- | --- |
-| Manual `AdTracker` calls | `purchases-ios` 5.89.0 |
-| AdMob adapter | `purchases-ios-admob` at the **same version** as `purchases-ios` (the adapter pins it exactly; every `purchases-ios` release from 5.89.0 has a matching adapter tag); iOS 15.0+; Google Mobile Ads SDK 12.x or 13.x; Swift only |
-| Rewarded-ad prompt events | `purchases-ios` 5.92.0 |
-| `trackAdRewardEarnedUnverified` | `purchases-ios` 5.89.0 |
+Minimum `purchases-ios` 5.95.0, with `purchases-ios-admob` at the **same version** (the adapter pins it exactly). Google Mobile Ads SDK 12.x or 13.x. The adapter is Swift only.
 
 Ad tracking needs iOS 15.0+ (tvOS 15, macOS 12, watchOS 8). On older OS versions calls are ignored with a logged warning. Objective-C apps have no adapter; use the manual calls.
 

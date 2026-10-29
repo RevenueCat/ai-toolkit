@@ -1,14 +1,8 @@
 # revenuecat-ad-tracking: Android (native)
 
-## SDK floors
+## SDK floor
 
-| What | Minimum |
-| --- | --- |
-| Manual `AdTracker` calls (Kotlin or Java) | `purchases-android` 10.19.0 |
-| Legacy AdMob adapter (`play-services-ads`) | `purchases-admob` 10.19.0, same version as `purchases`; Kotlin only |
-| Next-Gen AdMob adapter (`ads-mobile-sdk`) | `purchases-admob-next-gen` 10.23.0, same version as `purchases`; `ads-mobile-sdk` 1.3.0+; API level 24+; compileSdk 35+; Kotlin 1.9+; Kotlin only |
-| Rewarded-ad prompt events | `purchases-android` 10.24.0 |
-| `trackAdRewardEarnedUnverified` | `purchases-android` 10.19.0 |
+Minimum `purchases-android` 10.24.0, with `purchases-admob` (legacy, `play-services-ads`) or `purchases-admob-next-gen` (`ads-mobile-sdk` 1.3.0+, API 24+, compileSdk 35+) at the same version. The adapters are Kotlin only.
 
 The two adapters cannot coexist. Pick the one that matches the Google Mobile Ads SDK already in `build.gradle(.kts)`: `com.google.android.gms:play-services-ads` is legacy, `com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk` is Next-Gen. Java apps have no adapter helpers; use the manual calls.
 

@@ -1,13 +1,8 @@
 # revenuecat-ad-tracking: React Native
 
-## SDK floors
+## SDK floor
 
-| What | Minimum |
-| --- | --- |
-| Manual `AdTracker` calls | `react-native-purchases` 10.8.1 |
-| AdMob adapter | `react-native-purchases-admob` 10.15.0, **exactly** the same version as `react-native-purchases` (exact peer dependency); `react-native-google-mobile-ads` 17.x (17.0.0 needs React Native 0.76+, 17.1.0+ needs 0.86+); New Architecture; iOS 15.0+ |
-| Rewarded-ad prompt events | `react-native-purchases` 10.12.0 |
-| `trackAdRewardEarnedUnverified` | `react-native-purchases` 10.14.0 |
+Minimum `react-native-purchases` 10.15.0, with `react-native-purchases-admob` at **exactly** the same version (exact peer dependency). `react-native-google-mobile-ads` 17.x (17.0.0 needs React Native 0.76+, 17.1.0+ needs 0.86+); New Architecture; iOS 15.0+.
 
 Ad tracking is not supported on web; calls are ignored there.
 

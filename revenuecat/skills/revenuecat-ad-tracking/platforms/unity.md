@@ -1,13 +1,8 @@
 # revenuecat-ad-tracking: Unity
 
-## SDK floors
+## SDK floor
 
-| What | Minimum |
-| --- | --- |
-| Manual `AdTracker` calls | `com.revenuecat.purchases-unity` 9.9.0 |
-| AdMob adapter | `com.revenuecat.purchases-admob-unity` 9.15.0, same version as the core package; Google Mobile Ads Unity plugin (`com.google.ads.mobile`) 10.x or newer; iOS 15.0+ |
-| Rewarded-ad prompt events | `com.revenuecat.purchases-unity` 9.13.0 |
-| `TrackAdRewardEarnedUnverified` | `com.revenuecat.purchases-unity` 9.14.0 |
+Minimum `com.revenuecat.purchases-unity` 9.15.0, with `com.revenuecat.purchases-admob-unity` at the same version. Google Mobile Ads Unity plugin (`com.google.ads.mobile`) 10.x or newer; iOS 15.0+.
 
 ## Adapter (AdMob)
 

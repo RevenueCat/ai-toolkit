@@ -55,7 +55,7 @@ If the user pasted the dashboard prompt, it names the mediator; skip this step.
 
 ### 1d. RevenueCat SDK version
 
-Read the pinned version and compare it with the floors in the platform file; only the floors for the features you will actually call apply. If the app is below one of them, upgrade the RevenueCat SDK first and say so. The floors in the platform files are the source of truth: they were checked against each SDK's releases. Do not take them from `list-sdk-feature-gates`; its `platform-admob-adapter` gate still lists versions that predate the ads APIs. When the RevenueCat MCP server is available, `list-sdk-versions` shows which SDK versions the app's users run, which tells you how much of the install base an upgrade affects. Without it, skip this.
+Read the pinned RevenueCat SDK version from the manifest and compare it with the minimum in the platform file. Below it, bump to the newest release within the app's current major, taken from the package registry or the SDK's releases page, never from memory, and say so in the report. If the minimum sits in a newer major, stop and tell the user the app needs a major upgrade first (`revenuecat-migrate`). When the dashboard prompt is pasted, its minimum version wins. Do not take versions from `list-sdk-feature-gates`; its `platform-admob-adapter` gate predates the ads APIs.
 
 ### 1e. Ask before guessing
 
@@ -97,7 +97,7 @@ The adapter is the default for AdMob apps. It wraps Google's load calls and repo
 
 ## 4. Implement
 
-Read the platform file that matches detection. Each one is self-contained: SDK floors, adapter install and the replacement for each ad format, callback ownership, show-time placement, the manual `AdTracker` calls, and the prompt and unverified-reward events. On the manual path, also read `mediator-callbacks.md` for the mapping from each mediator's callbacks to the tracker calls; the adapter path does not need it.
+Read the platform file that matches detection. Each one is self-contained: the SDK minimum, adapter install and the replacement for each ad format, callback ownership, show-time placement, the manual `AdTracker` calls, and the prompt and unverified-reward events. On the manual path, also read `mediator-callbacks.md` for the mapping from each mediator's callbacks to the tracker calls; the adapter path does not need it.
 
 - `platforms/ios.md`
 - `platforms/android.md`

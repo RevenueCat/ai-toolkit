@@ -1,12 +1,8 @@
 # revenuecat-ad-tracking: Kotlin Multiplatform
 
-## SDK floors
+## SDK floor
 
-| What | Minimum |
-| --- | --- |
-| Manual `AdTracker` calls | `purchases-kmp` 3.9.0; prefer 3.10.0+, which fixes a bug in 3.9.0 that could log users out when upgrading from a version before 3.0.0 |
-| Rewarded-ad prompt events | `purchases-kmp` 3.12.0 |
-| `trackAdRewardEarnedUnverified` | `purchases-kmp` 3.15.0 |
+Minimum `purchases-kmp` 3.15.0.
 
 There is no AdMob adapter for Kotlin Multiplatform. Every mediator, AdMob included, goes through the manual calls below. Google Mobile Ads has no multiplatform artifact, so loading and showing the ad stays platform-specific: wire it behind an `expect`/`actual` pair backed by `play-services-ads` on Android and the GoogleMobileAds SDK on iOS, and call the shared tracker from each side's callbacks.
 
