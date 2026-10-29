@@ -64,7 +64,7 @@ Purchases.sharedInstance.adTracker.loadAndTrackInterstitialAd(
 
 `loadAndTrackRewardedAd`, `loadAndTrackRewardedInterstitialAd`, `loadAndTrackAppOpenAd` and `loadAndTrackNativeAd` follow the same shape. Banners: legacy `adTracker.loadAndTrackBannerAd(adView = adView, adRequest = adRequest, placement = "home_banner")`; Next-Gen `adView.loadAndTrackAd(adRequest = BannerAdRequest.Builder(adUnitId, AdSize.BANNER).build(), placement = "home_banner")`. Native on legacy: use `.forNativeAdWithTracking(adUnitId, placement) { … }` on the `AdLoader.Builder` instead of `.forNativeAd`.
 
-Show-time placement: `ad.show(activity, "level_complete")`.
+Show-time placement: `ad.show(activity, "level_complete")`. Rewarded formats take the reward listener in the same call: `ad.show(activity, "bonus_coins", onUserEarnedRewardListener)`.
 
 Next-Gen callbacks may run on a background thread; dispatch to the main thread before touching UI state.
 

@@ -57,7 +57,7 @@ bannerView.loadAndTrack(request: Request(), placement: "home_banner")
 adLoader.loadAndTrack(Request(), placement: "feed", nativeAdDelegate: self)
 ```
 
-Present full-screen ads as usual with `present(from:)`. To set the placement at show time instead, use `present(from: self, placement: "level_complete")`.
+Present full-screen ads as usual with `present(from:)`. To set the placement at show time instead, use `present(from: self, placement: "level_complete")`. Rewarded formats take the reward handler in the same call: `present(from: self, placement: "bonus_coins", userDidEarnRewardHandler: { … })`.
 
 ### Callbacks
 
@@ -73,7 +73,7 @@ let adTracker = Purchases.shared.adTracker   // Purchases must be configured fir
 func onAdLoaded(ad: YourAdType) {
     adTracker.trackAdLoaded(.init(
         networkName: ad.networkName,        // e.g. "Google Ads", optional
-        mediatorName: .appLovin,            // .adMob, .appLovin, or .init(value: "LevelPlay")
+        mediatorName: .appLovin,            // .adMob, .appLovin, or .init(rawValue: "LevelPlay")
         adFormat: .rewarded,                // .banner, .interstitial, .rewardedInterstitial, .native, .appOpen, .other
         placement: "home_screen",
         adUnitId: ad.adUnitId,

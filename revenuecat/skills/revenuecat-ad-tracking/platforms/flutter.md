@@ -66,7 +66,7 @@ void onAdLoaded(YourAdType ad) {
   Purchases.adTracker.trackAdLoaded(AdLoadedData(
     networkName: ad.networkName,            // e.g. "Google Ads", optional
     mediatorName: AdMediatorName.appLovin,  // .adMob, .appLovin, or AdMediatorName('LevelPlay')
-    adFormat: AdFormat.rewarded,            // .banner, .interstitial, .rewardedInterstitial, .native_, .appOpen, .other
+    adFormat: AdFormat.rewarded,            // .banner, .interstitial, .rewardedInterstitial, .nativeAd, .appOpen, .other
     placement: 'home_screen',
     adUnitId: ad.adUnitId,
     impressionId: ad.impressionId,
