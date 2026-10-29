@@ -1,0 +1,19 @@
+name: PR title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  conventional-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if ! grep -qE '^((feat|fix|docs|chore|ci|build|refactor|test|perf|revert|style)(\([^)]+\))?!?: .+|Revert ".+")$' <<<"$TITLE"; then
+            echo "PR title must follow Conventional Commits, e.g. 'feat(skills): add X'. Got: $TITLE"
+            exit 1
+          fi

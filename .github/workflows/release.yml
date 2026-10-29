@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  gemini-extension:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - name: Build Gemini extension archive
+        run: |
+          # Archive revenuecat/ contents, excluding dot-files and dot-directories.
+          # plugin.json and mcp.json are the portable Agent Plugins manifests and
+          # are not dot-files, so exclude them explicitly — Gemini reads
+          # gemini-extension.json and has no use for them.
+          # Run tar from inside revenuecat so '*' expands to real entries there.
+          (
+            cd revenuecat
+            tar -czf /tmp/revenuecat.tar.gz \
+              --exclude='.*' \
+              --exclude='plugin.json' \
+              --exclude='mcp.json' \
+              *
+          )
+
+      - name: Attach archive and install notes to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: |
+          gh release upload "$TAG" /tmp/revenuecat.tar.gz --clobber
+          BODY=$(gh release view "$TAG" --json body --jq .body)
+          if grep -q '^## Gemini CLI$' <<<"$BODY"; then
+            exit 0
+          fi
+          {
+            echo "$BODY"
+            cat <<NOTES
+
+          ## Gemini CLI
+
+          Install this extension with:
+
+          \`\`\`
+          gemini extensions install https://github.com/${{ github.repository }} --tag $TAG
+          \`\`\`
+
+          Or install the latest release:
+
+          \`\`\`
+          gemini extensions install https://github.com/${{ github.repository }}
+          \`\`\`
+
+          See the [README](https://github.com/${{ github.repository }}#readme) for full setup instructions.
+          NOTES
+          } > /tmp/notes.md
+          gh release edit "$TAG" --title "RevenueCat AI Toolkit $TAG" --notes-file /tmp/notes.md
