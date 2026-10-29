@@ -1,6 +1,6 @@
 ---
 name: rc-setup
-description: "Use this skill when setting up a RevenueCat project for Android: creating the app in the dashboard, uploading the Google Play service account credentials, configuring entitlements and offerings, and getting the public SDK API key for the Android app."
+description: "Use this skill when setting up a RevenueCat project for Android: creating the app in the dashboard, uploading the Google Play service account credentials, connecting Real Time Developer Notifications, configuring entitlements and offerings, and getting the public SDK API key for the Android app."
 license: Apache-2.0; see LICENSE
 metadata:
   author: RevenueCat
@@ -31,7 +31,7 @@ Confirm these items before you touch the RevenueCat dashboard. Missing any of th
 | In-app products or subscriptions | Play Console monetization | RevenueCat imports the catalog |
 | Base plans for subscriptions | Play Console subscription | Billing Library 6+ requires them |
 | Google Cloud service account JSON | Google Cloud Console | RevenueCat authenticates to the Play Developer API |
-| Financial data viewer permission | Play Console users and permissions | Service account reads subscription state |
+| Play Console account permissions | Play Console users and permissions | View app information and download bulk reports (read-only); View financial data, orders, and cancellation survey responses; Manage orders and subscriptions; Manage store presence |
 
 Ask the user:
 
@@ -67,17 +67,17 @@ RevenueCat generates a public SDK API key per platform. You will copy the Androi
 
 ### Step 2: Create a Google Cloud service account (if needed)
 
-In Google Cloud Console, on the project linked to your Play Console:
+In Google Cloud Console, in the project that will own the service account (Play Console no longer needs a linked Cloud project):
 
-1. Enable the Google Play Android Developer API.
-2. Create a service account. Skip role grants on the Cloud side.
+1. Enable the Google Play Android Developer API, the Google Play Developer Reporting API, and the Cloud Pub/Sub API.
+2. Create a service account and grant it Pub/Sub Editor and Monitoring Viewer.
 3. Create a JSON key for the service account and download it.
 
 In Play Console, under Users and permissions:
 
 1. Invite the service account email.
 2. Grant app-level access to the app.
-3. Grant the Financial data viewer permission. RevenueCat needs it to read subscription state.
+3. Grant those four account permissions.
 
 ### Step 3: Connect Google Play in RevenueCat
 
@@ -87,7 +87,15 @@ In the RevenueCat dashboard, open the Android app settings:
 2. Upload the service account JSON key file.
 3. Save.
 
-RevenueCat validates the credential by calling the Play Developer API. If validation fails, the common causes are missing API enablement, wrong project, or the service account not yet propagated in Play (allow up to 24 hours).
+RevenueCat validates the credential by calling the Play Developer API. If validation fails, the common causes are missing API enablement, wrong project, or the service account not yet propagated in Play (allow up to 36 hours; editing and saving any product description in Play Console often speeds this up).
+
+### Step 3b: Connect Real Time Developer Notifications
+
+RevenueCat strongly recommends connecting Google Real Time Developer Notifications (RTDN), and requires it for `DEFERRED` plan changes and for one time product refund and void tracking.
+
+1. In the RevenueCat Play app settings, click Connect to Google to get a Pub/Sub topic ID.
+2. In Play Console, go to Monetize > Monetization setup > Real Time Developer Notifications, paste the topic, and choose "Get all notifications for subscriptions and one-time products" (RevenueCat's guide shows it as "Subscriptions, voided purchases, and all one-time products").
+3. Send a test notification and confirm the RevenueCat dashboard shows "Last received".
 
 ### Step 4: Create entitlements
 
@@ -119,7 +127,7 @@ Under Offerings:
 
 1. Create an offering (for example, `default`).
 2. Add packages. Pick a package type (Monthly, Annual, Lifetime, or custom) and assign a product.
-3. Mark one offering as Current.
+3. Make one offering the Default offering (the SDK returns it as `offerings.current`).
 
 The Android SDK fetches `offerings.current` to show the default paywall. Swap the current offering later from the dashboard without shipping an app update.
 
@@ -139,9 +147,10 @@ Confirm the dashboard and Play Console are wired together before moving to SDK w
 | Check | How to verify | Pass signal |
 |---|---|---|
 | Service account accepted | RevenueCat app settings, Google Play section | Shows connected with a green indicator |
+| Real Time Developer Notifications connected | RevenueCat app settings, Google Play section | Shows "Last received" after a test notification |
 | Products imported | Products tab in dashboard | Play products appear with live prices |
 | Entitlement attachments | Open each product | Shows the attached entitlement |
-| Offering current | Offerings tab | One offering tagged Current |
+| Default offering | Offerings tab | One offering marked Default |
 | Package product links | Open the current offering | Each package shows a product identifier |
 | API key scope | Project settings, API keys | Android key is distinct from iOS and web keys |
 

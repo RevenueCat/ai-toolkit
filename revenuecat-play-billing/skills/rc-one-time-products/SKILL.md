@@ -24,16 +24,16 @@ Answer these before touching code.
 
 | Question | Decision |
 |---|---|
-| Is the product consumable or non consumable? | Mark consumables in the RevenueCat dashboard so the SDK calls `consumeAsync` for you. |
+| Is the product consumable or non consumable? | One time products are consumed by default. Mark lifetime or permanent unlocks as non consumable in the RevenueCat dashboard (Product catalog > Products). |
 | Do you read access through entitlements or transactions? | Prefer entitlements so access logic stays decoupled from product IDs. |
-| Do you need server notification of the purchase? | Use RevenueCat webhooks. The `INITIAL_PURCHASE` event fires for every new non subscription purchase. |
+| Do you need server notification of the purchase? | Use RevenueCat webhooks. The `NON_RENEWING_PURCHASE` event fires for every new non subscription purchase. |
 
 Do not call `BillingClient.queryProductDetailsAsync`, `acknowledgePurchase`, or `consumeAsync` yourself once RevenueCat is integrated. The SDK owns the `BillingClient` instance.
 
 ## Phase 2: Prepare
 
-- Configure the product in Google Play Console as a one time product.
-- In the RevenueCat dashboard, attach the product to an offering and package, and flag it as consumable if it should be consumed on purchase.
+- Configure the product in Google Play Console as a one time product. Keep one buy purchase option marked backwards compatible (the first one is by default). RevenueCat 10.x sells only that purchase option; rent options and one time product offers are not exposed through the SDK.
+- In the RevenueCat dashboard, attach the product to an offering and package, and mark it non consumable if it should be bought only once (consumable is the default).
 - Confirm `Purchases.configure` runs once on app start with your Android API key and the current App User ID.
 
 ## Phase 3: Execute
@@ -42,7 +42,7 @@ Fetch offerings, launch the purchase, then read the result off `CustomerInfo`.
 
 ```kotlin
 val offerings = Purchases.sharedInstance.awaitOfferings()
-val pkg = offerings.current?.availablePackages?.first() ?: return
+val pkg = offerings.current?.availablePackages?.firstOrNull() ?: return
 ```
 
 Launch the purchase with `awaitPurchase`. It suspends until the RevenueCat backend verifies the token.
@@ -73,7 +73,7 @@ try { /* awaitPurchase */ } catch (e: PurchasesTransactionException) {
     when {
         e.error.code == PurchasesErrorCode.PaymentPendingError -> showPending()
         e.userCancelled -> Unit
-        else -> showError(e.error.message)
+        else -> showError(userFacingMessage(e.error)) // log e.error.message; mapping in rc-error-handling
     }
 }
 ```
@@ -83,13 +83,13 @@ try { /* awaitPurchase */ } catch (e: PurchasesTransactionException) {
 | Success | `awaitPurchase` returns with updated `CustomerInfo` | Grant access from `entitlements` or `nonSubscriptionTransactions`. |
 | User cancel | `PurchasesTransactionException`, `userCancelled == true` | Swallow silently. |
 | Pending payment | `PurchasesTransactionException`, `PaymentPendingError` | Show a pending message. The SDK updates the entitlement later through `UpdatedCustomerInfoListener`. |
-| Other error | `PurchasesTransactionException`, other codes | Surface `e.error.message` to you. |
+| Other error | `PurchasesTransactionException`, other codes | Log `e.error.message` and show a mapped string from `userFacingMessage` (see `rc-error-handling`). |
 
 ## Phase 5: Verify
 
 - Trust `result.customerInfo` from `awaitPurchase`. Do not grant access from optimistic local state.
 - Pending purchases do not grant entitlements. Register an `UpdatedCustomerInfoListener` so you react when the payment completes.
-- For server side provisioning, subscribe to the RevenueCat `INITIAL_PURCHASE` webhook. Do not reimplement Google Play Developer API verification.
+- For server side provisioning, subscribe to the RevenueCat `NON_RENEWING_PURCHASE` webhook. With Google Play Real Time Developer Notifications connected to RevenueCat, a refund of a one time purchase arrives as `CANCELLATION`. Do not reimplement Google Play Developer API verification.
 
 ## References
 
