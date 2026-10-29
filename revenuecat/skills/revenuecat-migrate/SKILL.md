@@ -1,6 +1,6 @@
 ---
 name: revenuecat-migrate
-description: Migrate to RevenueCat from raw StoreKit or Google Play Billing, upgrade the RevenueCat SDK across a major version, or move the SDK's iOS dependency from CocoaPods to Swift Package Manager. Use when the user says migrate to RevenueCat, switch from StoreKit to RC, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, migrate from CocoaPods to SPM, move off CocoaPods, CocoaPods trunk read-only, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Migrate to RevenueCat from raw StoreKit or Google Play Billing, upgrade the RevenueCat SDK across a major version, or move the SDK's iOS dependency from CocoaPods to Swift Package Manager. Use when the user says migrate to RevenueCat, switch from StoreKit to RC, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, migrate from CocoaPods to SPM, move off CocoaPods, CocoaPods trunk read-only, move off Carthage, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # revenuecat-migrate: migrate to RevenueCat or upgrade the SDK
