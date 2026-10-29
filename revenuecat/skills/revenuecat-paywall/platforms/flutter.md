@@ -22,7 +22,7 @@ flutter pub get
 
 Flutter installs the iOS native code itself on the next `flutter run` or `flutter build ios`, through Swift Package Manager or CocoaPods depending on the project. Don't run `pod install` manually.
 
-Minimum iOS deployment target is **13.0** for `purchases_flutter`, but `purchases_ui_flutter` uses `RevenueCatUI` under the hood which needs **iOS 15**. Set it in Xcode under the Runner target's **Minimum Deployments**. If the project has an `ios/Podfile`, update it too:
+Paywalls only display on iOS **15.0** or later, so set that as the Runner target's **Minimum Deployments** in Xcode, and in `ios/Podfile` if the project has one:
 
 ```ruby
 platform :ios, '15.0'
