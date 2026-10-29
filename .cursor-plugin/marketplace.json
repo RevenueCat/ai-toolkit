@@ -1,11 +1,11 @@
 {
   "name": "revenuecat",
-  "owner": { 
-    "name": "RevenueCat", 
-    "email": "support@revenuecat.com" 
+  "owner": {
+    "name": "RevenueCat",
+    "email": "support@revenuecat.com"
   },
   "metadata": {
-    "version": "2.0.0",
+    "version": "2.4.0",
     "description": "RevenueCat plugins for Cursor."
   },
   "plugins": [

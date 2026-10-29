@@ -3,9 +3,16 @@
 	"name": "revenuecat",
 	"displayName": "RevenueCat",
 	"description": "Set up RevenueCat, integrate it, and access data.",
-	"version": "2.3.1",
+	"version": "2.4.0",
 	"license": "MIT",
-	"keywords": ["revenuecat", "in-app-purchases", "subscriptions", "monetization", "iap", "mcp"],
+	"keywords": [
+		"revenuecat",
+		"in-app-purchases",
+		"subscriptions",
+		"monetization",
+		"iap",
+		"mcp"
+	],
 	"author": {
 		"name": "RevenueCat",
 		"url": "https://www.revenuecat.com",
@@ -15,6 +22,8 @@
 	"repository": "https://github.com/RevenueCat/ai-toolkit",
 	"privacyPolicyUrl": "https://www.revenuecat.com/privacy",
 	"icon": "./revenuecat/assets/icon.png",
-	"skills": ["./revenuecat/skills"],
+	"skills": [
+		"./revenuecat/skills"
+	],
 	"mcpServers": "./revenuecat/.mcp.json"
 }
