@@ -151,7 +151,7 @@ Use this when the user reports that the Ads page looks wrong. These match the au
 | Twice as many revenue events as impressions, half at zero | `trackAdRevenue` called at impression time and again in the paid callback | Call it from the paid callback only |
 | Named placements show impressions with zero requests and 0% fill; "Unknown placement" holds the requests | Load and failed-to-load events have no placement | Pass the placement at load time too |
 | Rewards granted but no rewarded impressions or revenue | Server-side verification set up, but ads loaded with Google's plain load call instead of the adapter | Load and show rewarded ads through the adapter |
-| Nothing at all in sandbox | `Purchases` not configured before the ad loaded; events not flushed yet; or looking at production instead of the Sandbox toggle | Configure first; background and reopen the app on iOS; toggle Sandbox data |
+| Nothing at all in sandbox | Adapter path: `Purchases` was not configured when the ad loaded, so the adapter skipped the events (no log on iOS; a "Purchases is not configured" warning on the other adapters). Or events not flushed yet; or looking at production instead of the Sandbox toggle | Configure first and search the logs for that warning; background and reopen the app on iOS; toggle Sandbox data |
 | Impressions far below the AdMob report for one format | The comparison is not like for like: the AdMob report includes app versions without tracking and ad units used only in old releases; or that format's call sites were not wired | Filter the AdMob report to the app version that carries the tracking and to the ad units it uses, then compare again; if a gap remains, grep for the ad class and wire the remaining call sites |
 
 ## Reference: docs
