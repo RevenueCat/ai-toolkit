@@ -2,7 +2,7 @@
 
 ## SDK floor
 
-Minimum `purchases-android` 10.24.0, with `purchases-admob` (legacy, `play-services-ads`) or `purchases-admob-next-gen` (`ads-mobile-sdk` 1.3.0+, API 24+, compileSdk 35+) at the same version. The adapters are Kotlin only.
+Minimum `purchases-android` 10.27.0 (the first release with a public `trackAdRewardEarnedUnverified(AdRewardEarnedUnverifiedData)`), with `purchases-admob` (legacy, `play-services-ads`) or `purchases-admob-next-gen` (`ads-mobile-sdk` 1.3.0+, API 24+, compileSdk 35+) at the same version. The adapters are Kotlin only.
 
 The two adapters cannot coexist. Pick the one that matches the Google Mobile Ads SDK already in `build.gradle(.kts)`: `com.google.android.gms:play-services-ads` is legacy, `com.google.android.libraries.ads.mobile.sdk:ads-mobile-sdk` is Next-Gen. Java apps have no adapter helpers; use the manual calls.
 

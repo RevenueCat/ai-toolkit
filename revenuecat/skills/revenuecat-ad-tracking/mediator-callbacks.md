@@ -23,8 +23,22 @@ AppLovin MAX callbacks that have no RevenueCat event: `onAdHidden`, `onAdDisplay
 | --- | --- | --- |
 | `impressionId` | `responseInfo.responseId`; a banner refresh gets a new one | none on `MaxAd`; generate a UUID per load |
 | `networkName` | `responseInfo.loadedAdapterResponseInfo.adSourceName` | `ad.networkName` |
-| revenue | `adValue.valueMicros` is **already micros**, do not multiply; `adValue.currencyCode` | `ad.revenue` is a currency amount in USD, multiply by 1,000,000 |
-| precision | `adValue.precisionType`: `0` unknown, `1` estimated, `2` publisher provided, `3` precise | `ad.revenuePrecision`: `exact`, `estimated`, `publisher_defined`, `undefined` |
+| revenue | Differs per platform, see the table below | `ad.revenue` is a currency amount in USD, multiply by 1,000,000 |
+| precision | Unknown, estimated, publisher provided, precise; field names in the table below | `ad.revenuePrecision`: `exact`, `estimated`, `publisher_defined`, `undefined` |
 | error code | `loadAdError.code` | `error.code` |
+
+### AdMob paid event per platform
+
+The unit is not the same everywhere. Convert once, on the side that receives the paid event.
+
+| Platform | Revenue field | Convert to `revenueMicros` | Precision field | Currency |
+| --- | --- | --- | --- | --- |
+| Android (and KMP `androidMain`) | `adValue.valueMicros` (`Long`) | Already micros: pass it through | `adValue.precisionType`: `0` unknown, `1` estimated, `2` publisher provided, `3` precise | `adValue.currencyCode` |
+| iOS (and the Swift side of KMP) | `adValue.value` (`NSDecimalNumber`, a currency amount) | Multiply by 1,000,000 once | `adValue.precision`: `.unknown`, `.estimated`, `.publisherProvided`, `.precise` | `adValue.currencyCode` |
+| Flutter | `valueMicros` (`double`) in `onPaidEvent(ad, valueMicros, precision, currencyCode)` | Already micros: `valueMicros.round()` | `PrecisionType.unknown`, `.estimated`, `.publisherProvided`, `.precise` | `currencyCode` |
+| React Native | `AdEventType.PAID` payload: `valueMicros` (decimal string or `null`) and `value` (currency amount) | `Number(valueMicros)`; if it is `null`, `Math.round(value * 1_000_000)` | `precision`: `RevenuePrecisions.UNKNOWN`, `ESTIMATED`, `PUBLISHER_PROVIDED`, `PRECISE` | `currency` |
+| Unity | `AdValue.Value` (`long`) | Already micros: pass it through | `AdValue.Precision`: `PrecisionType.Unknown`, `Estimated`, `PublisherProvided`, `Precise` | `AdValue.CurrencyCode` |
+
+Map precise to exact, estimated to estimated, publisher provided to publisher defined, and unknown to unknown.
 
 When the app wraps the mediator behind its own interface (a KMP `expect` class, a service layer), wire the tracker at the wrapper's callbacks and check the platform implementation to confirm each one maps to the mediator event above; "shown" must come from the impression callback, not from "presented" or "opened full screen". If the implementation is not in the checkout, say so in the report.

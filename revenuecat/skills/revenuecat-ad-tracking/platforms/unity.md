@@ -8,11 +8,18 @@ Minimum `com.revenuecat.purchases-unity` 9.15.0, with `com.revenuecat.purchases-
 
 ### Install
 
-The adapter ships as `PurchasesAdMob.unitypackage` on each `purchases-unity` GitHub release; import the one that matches the installed core package. You cannot import it from a non-interactive run: leave `Packages/manifest.json` alone and put the import step under **Assumptions / for the developer** in the report. The docs also describe an OpenUPM scoped-registry install, but as of October 2026 the package is not listed on the registry, so use the `.unitypackage` unless `openupm add com.revenuecat.purchases-admob-unity` succeeds. The adapter references the Google plugin's `GoogleMobileAds` DLLs, so it compiles whether that plugin came from OpenUPM or a `.unitypackage`.
+The adapter ships as `PurchasesAdMob.unitypackage` on each `purchases-unity` GitHub release; use the one that matches the installed core package. The docs also describe an OpenUPM scoped-registry install, but as of October 2026 the package is not listed on the registry, so use the `.unitypackage` unless `openupm add com.revenuecat.purchases-admob-unity` succeeds. The adapter references the Google plugin's `GoogleMobileAds` DLLs, so it compiles whether that plugin came from OpenUPM or a `.unitypackage`.
+
+Import it yourself; it needs no editor UI:
+
+- With the Unity editor installed: `<Unity> -batchmode -nographics -projectPath <project> -importPackage <path>/PurchasesAdMob.unitypackage -quit`.
+- Without it: the file is a gzip tar of `<guid>/asset`, `<guid>/asset.meta` and `<guid>/pathname` entries. Extract it and, for each entry that has an `asset`, copy `asset` to the path in `pathname` and `asset.meta` to the same path plus `.meta`. Keep the `.meta` files; Unity links the scripts by their GUIDs.
+
+Do not add the adapter to `Packages/manifest.json`. Do edit the manifest to bump the core package when it is below the floor. The imported adapter is a copy, so tell the developer to import the matching `PurchasesAdMob.unitypackage` again after every core upgrade. Only if you cannot download or import it, put the import step under **Assumptions / for the developer** in the report and say the project does not compile until it is done.
 
 ### Replace load calls
 
-The Unity SDK has no shared singleton, so point the adapter at the configured `Purchases` component once. `Initialize` only stores the reference, so it is safe to call from another script's `Awake()` or `Start()` regardless of execution order. `Purchases` creates its native wrapper in its own `Start()`; with runtime setup, call `Configure` only after that has run, and before the first ad loads.
+The Unity SDK has no shared singleton, so point the adapter at the configured `Purchases` component once. Get that reference in code: `GetComponent<Purchases>()` when it sits on the same GameObject, otherwise `FindFirstObjectByType<Purchases>()` (`FindObjectOfType` on older Unity versions). Do not hand-edit `fileID` references in `.unity` or `.prefab` files; a reference to the wrong component loads as null, and the adapter then drops every event. `Initialize` only stores the reference, so it is safe to call from another script's `Awake()` or `Start()` regardless of execution order. `Purchases` creates its native wrapper in its own `Start()`; with runtime setup, call `Configure` only after that has run, and before the first ad loads.
 
 ```csharp
 using GoogleMobileAds.Api;
@@ -84,6 +91,8 @@ void OnPaidEvent(YourAdType ad, double revenue, string currency)
 ```
 
 `TrackAdDisplayed(AdDisplayedData)`, `TrackAdOpened(AdOpenedData)` and `TrackAdFailedToLoad(AdFailedToLoadData)` take the same fields (`AdFailedToLoadData` has no `networkName` or `impressionId` and takes an optional integer `mediatorErrorCode`, the mediator's own error code). Wire all five. The mediator callback for each is in `../mediator-callbacks.md`.
+
+The sample multiplies because AppLovin MAX reports a currency amount. AdMob's `AdValue.Value` on Unity is already micros: pass it through as `revenueMicros`. Units for each mediator and platform are in `../mediator-callbacks.md`.
 
 Rewarded ads only: `TrackRewardedAdPromptShown(new AdRewardPromptShownData(mediatorName:, adUnitId:, placement:))`, `TrackRewardedAdPromptAccepted(new AdRewardPromptAcceptedData(…))`, `TrackAdRewardEarnedUnverified(new AdRewardEarnedUnverifiedData(…))`.
 
