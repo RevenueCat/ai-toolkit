@@ -24,8 +24,9 @@ After any change to `pubspec.yaml`, the iOS Podfile, or a native dependency, run
 ```bash
 flutter clean
 flutter pub get
-cd ios && pod install && cd ..
 ```
+
+Then rebuild with `flutter run`. Flutter reinstalls the iOS native code during the build, through Swift Package Manager or CocoaPods, so a separate `pod install` isn't needed.
 
 Hot restart does **not** re-run native initialization. After changing the API key or `Purchases.configure` call, do a full stop and relaunch. Hot reload / hot restart keep the old SDK state.
 

@@ -98,7 +98,9 @@ After bumping `react-native-purchases` or changing a native build file:
 
 ```bash
 npx react-native start --reset-cache
-cd ios && pod install && cd ..
+cd ios && pod install && cd .. # CocoaPods projects
+# with React Native's Swift Package Manager integration instead:
+npx react-native spm
 # for Expo:
 npx expo prebuild --clean
 ```
