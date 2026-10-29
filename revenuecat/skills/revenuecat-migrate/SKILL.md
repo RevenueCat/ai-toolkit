@@ -79,7 +79,7 @@ Each SDK has a step by step guide in the RevenueCat docs. Fetch its Markdown ver
 - Native iOS with CocoaPods: <https://www.revenuecat.com/docs/sdk-guides/ios-native-cocoapods-to-spm-migration.md>
 - Native iOS with Carthage: <https://www.revenuecat.com/docs/sdk-guides/ios-native-carthage-to-spm-migration.md>
 - Flutter: <https://www.revenuecat.com/docs/sdk-guides/flutter-cocoapods-to-spm-migration.md>
-- React Native: <https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration.md>. Community CLI apps only. React Native's SPM integration is experimental, and Expo Prebuild projects are out of scope, so confirm with the user before migrating.
+- React Native: <https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration.md>. React Native's SPM integration is experimental, so confirm with the user before migrating. Keep Expo apps on CocoaPods: Expo's SPM support is still a preview, and common Expo libraries such as `expo-router` don't support SPM yet.
 - Capacitor: <https://www.revenuecat.com/docs/sdk-guides/capacitor-cocoapods-to-spm-migration.md>
 - Unity: <https://www.revenuecat.com/docs/sdk-guides/unity-cocoapods-to-spm-migration.md>
 - Cordova: <https://github.com/RevenueCat/cordova-plugin-purchases/blob/main/migrations/v9-MIGRATION.md#ios>
