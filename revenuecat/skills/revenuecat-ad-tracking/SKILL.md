@@ -32,7 +32,13 @@ If several match, pick the **outermost** project, the one that owns the build. I
 
 ### 1b. Mediator
 
-Find the ad SDK in the dependency manifest before you ask:
+The mediator is the ad SDK the app talks to: the one whose classes the app's own code uses to request and show ads, and the one it initializes at startup. Under mediation, the other networks' SDKs are also in the dependency manifest, pulled in through the mediator's adapter packages, but the app never calls them. Treat those as networks, not mediators, even when the same company also sells a mediator.
+
+Find it in this order:
+
+1. Read the app's ad code. The SDK that owns the load and show calls is the mediator.
+2. Confirm against the dependency manifest with the table below. A dependency the app code never calls, or that arrives only as another mediator's adapter package, is a network.
+3. Ask only when the app calls two ad SDKs directly, or when a dependency from the table has no code that uses it. Say what you found. Do not guess.
 
 | Dependency | Mediator |
 | --- | --- |
@@ -41,7 +47,7 @@ Find the ad SDK in the dependency manifest before you ask:
 | `IronSourceSDK`, `com.ironsource.sdk:mediationsdk`, `LevelPlay` | Unity LevelPlay (ironSource) |
 | `UnityAds`, `com.unity3d.ads:unity-ads` | Unity Ads. Supported only when LevelPlay mediates it; standalone Unity Ads has no per-impression revenue API |
 
-Also grep for ad load calls (`InterstitialAd`, `RewardedAd`, `BannerView`, `AdView`, `MAInterstitialAd`, `LevelPlayInterstitialAd`, `UnityAds.load`). If you find no ad SDK, or more than one, ask which mediator serves the ads. Do not pick one by guessing.
+If the user pasted the dashboard prompt, it names the mediator; skip this step.
 
 ### 1c. Android only: Google Mobile Ads generation
 
