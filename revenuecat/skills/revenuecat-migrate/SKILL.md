@@ -1,13 +1,13 @@
 ---
 name: revenuecat-migrate
-description: Migrate to RevenueCat from raw StoreKit or Google Play Billing, or upgrade the RevenueCat SDK across a major version. Use when the user says migrate to RevenueCat, switch from StoreKit to RC, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
+description: Migrate to RevenueCat from raw StoreKit or Google Play Billing, upgrade the RevenueCat SDK across a major version, or move the SDK's iOS dependency from CocoaPods/Carthage to Swift Package Manager. Use when the user says migrate to RevenueCat, switch from StoreKit to RC, upgrade RevenueCat SDK, from v4 to v5, observer mode, RevenueCat major version upgrade, migrate from CocoaPods to SPM, move off CocoaPods, CocoaPods trunk read-only, move off Carthage, or already have in app purchases and want to add RevenueCat on iOS, Android, Kotlin Multiplatform, Flutter, or React Native.
 ---
 
 # revenuecat-migrate: migrate to RevenueCat or upgrade the SDK
 
-Use this skill when the user wants to either adopt RevenueCat in an app that already ships in app purchases, or upgrade the RevenueCat SDK across a major version.
+Use this skill when the user wants to adopt RevenueCat in an app that already ships in app purchases, upgrade the RevenueCat SDK across a major version, or move the SDK's iOS dependency from CocoaPods/Carthage to Swift Package Manager.
 
-These two paths share some concepts but have different risks. Identify which one applies before touching code.
+These paths share some concepts but have different risks. Identify which one applies before touching code.
 
 ## 1. Detect the platform
 
@@ -27,8 +27,9 @@ Ask the user (or infer from the codebase):
 
 - **Path A: adoption.** The app already has working in app purchases implemented directly against StoreKit or Google Play Billing. RevenueCat is being added on top.
 - **Path B: version upgrade.** The app already uses RevenueCat, and the user wants to bump from one major version to the next (e.g. v4 to v5, v7 to v8).
+- **Path C: CocoaPods/Carthage to Swift Package Manager.** The app installs RevenueCat on iOS through CocoaPods or Carthage: its `Podfile.lock` lists `RevenueCat` or `PurchasesHybridCommon`, or its `Cartfile` lists `RevenueCat/purchases-ios`.
 
-Both paths can happen at once (e.g. adopt RC today on the latest major version). Run Path A first, then Path B if needed.
+Paths A and B can happen at once (e.g. adopt RC today on the latest major version). Run Path A first, then Path B if needed. Keep Path C in its own change.
 
 ## 3. Shared concepts
 
@@ -69,6 +70,26 @@ Major version upgrades change configuration shape, drop deprecated APIs, and shi
 
 Treat the SDK repo's docs as authoritative. Any version-specific diff written here would drift out of date. The platform file under `platforms/` for your target lists the exact repo to consult.
 
+### CocoaPods/Carthage to Swift Package Manager (Path C)
+
+CocoaPods trunk becomes read-only on December 2, 2026. Existing RevenueCat pods stay installable, but apps must move to Swift Package Manager (SPM) to keep receiving RevenueCat's native SDK updates.
+
+Each SDK has a step by step guide in the RevenueCat docs. Fetch its Markdown version and follow it in order:
+
+- Native iOS with CocoaPods: <https://www.revenuecat.com/docs/sdk-guides/ios-native-cocoapods-to-spm-migration.md>
+- Native iOS with Carthage: <https://www.revenuecat.com/docs/sdk-guides/ios-native-carthage-to-spm-migration.md>
+- Flutter: <https://www.revenuecat.com/docs/sdk-guides/flutter-cocoapods-to-spm-migration.md>
+- React Native: <https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration.md>. React Native's SPM integration is experimental, so confirm with the user before migrating. Keep Expo apps on CocoaPods: Expo's SPM support is still a preview, and common Expo libraries such as `expo-router` don't support SPM yet.
+- Capacitor: <https://www.revenuecat.com/docs/sdk-guides/capacitor-cocoapods-to-spm-migration.md>
+- Unity: <https://www.revenuecat.com/docs/sdk-guides/unity-cocoapods-to-spm-migration.md>
+- Cordova: <https://github.com/RevenueCat/cordova-plugin-purchases/blob/main/migrations/v9-MIGRATION.md#ios>
+
+Capacitor, Unity, and Cordova have no platform file in this skill; their guide is the whole procedure. The index at <https://www.revenuecat.com/docs/sdk-guides/spm-migration-guides-index.md> lists every guide.
+
+- Check the guide's prerequisites before changing anything. If the project doesn't meet them, stop and tell the user what to upgrade first.
+- Some guides start by raising the SDK to a minimum version. If that crosses a major version, apply Path B for that bump as part of the step.
+- Only RevenueCat has to leave CocoaPods. Leave unrelated pods alone unless the guide says otherwise.
+
 ### Plan then migrate
 
 Work in this order on every platform:
@@ -88,7 +109,7 @@ Read the platform file that matches detection:
 - `platforms/flutter.md`
 - `platforms/react-native.md`
 
-Each platform file covers both migration paths for that platform.
+Each platform file covers Paths A and B for that platform. For Path C, follow the docs guide linked above.
 
 ## 5. Verify
 
@@ -97,4 +118,5 @@ Do not declare migration done until:
 1. The app builds on the new SDK version with no warnings from deprecated APIs you care about.
 2. A sandbox purchase succeeds and the transaction shows up on the RevenueCat dashboard Sandbox view with the expected appUserID.
 3. An existing subscriber from before the migration opens the app, and their entitlement state is correct. For Path A this proves the observer mode ingest worked. For Path B this proves the version bump did not drop state.
-4. You have removed the debug log level override before shipping.
+4. For Path C, the guide's verification steps pass, and `Podfile.lock` (if one remains) no longer lists `RevenueCat` or `PurchasesHybridCommon`.
+5. You have removed the debug log level override before shipping.
