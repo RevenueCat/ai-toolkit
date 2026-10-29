@@ -27,7 +27,7 @@ Ask the user (or infer from the codebase):
 
 - **Path A: adoption.** The app already has working in app purchases implemented directly against StoreKit or Google Play Billing. RevenueCat is being added on top.
 - **Path B: version upgrade.** The app already uses RevenueCat, and the user wants to bump from one major version to the next (e.g. v4 to v5, v7 to v8).
-- **Path C: CocoaPods to Swift Package Manager.** The app installs RevenueCat on iOS through CocoaPods or Carthage: its `Podfile.lock` lists `RevenueCat` or `PurchasesHybridCommon`, or its `Cartfile` lists `RevenueCat/purchases-ios`.
+- **Path C: CocoaPods/Carthage to Swift Package Manager.** The app installs RevenueCat on iOS through CocoaPods or Carthage: its `Podfile.lock` lists `RevenueCat` or `PurchasesHybridCommon`, or its `Cartfile` lists `RevenueCat/purchases-ios`.
 
 Paths A and B can happen at once (e.g. adopt RC today on the latest major version). Run Path A first, then Path B if needed. Keep Path C in its own change.
 
@@ -70,7 +70,7 @@ Major version upgrades change configuration shape, drop deprecated APIs, and shi
 
 Treat the SDK repo's docs as authoritative. Any version-specific diff written here would drift out of date. The platform file under `platforms/` for your target lists the exact repo to consult.
 
-### CocoaPods to Swift Package Manager (Path C)
+### CocoaPods/Carthage to Swift Package Manager (Path C)
 
 CocoaPods trunk becomes read-only on December 2, 2026. Existing RevenueCat pods stay installable, but apps must move to Swift Package Manager (SPM) to keep receiving RevenueCat's native SDK updates.
 
