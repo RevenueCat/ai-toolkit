@@ -9,7 +9,7 @@ Use this skill when the user wants their ad revenue and ad impressions reported 
 
 This is a wiring task across every place the app loads or shows an ad, not a feature you build once. A half-wired integration produces charts that look plausible and are wrong: impressions without revenue, click rates above 100%, fill rates at 0%. Take the time to find every ad call site, confirm what you cannot infer, and verify with sandbox events before you report done.
 
-Prerequisite: `Purchases.configure(…)` runs before the first ad event is tracked. The rewarded-ad prompt events fire before any ad loads, so configure before showing the prompt too. The adapters drop events while `Purchases` is not configured. Reading `Purchases.shared` (iOS) or `Purchases.sharedInstance` (Android, KMP) before configure throws, so access the tracker inside the callbacks, not at construction time. If the app has no RevenueCat setup yet, run `integrate-revenuecat` first.
+Prerequisite: `Purchases.configure(…)` runs before the first ad event is tracked. The rewarded-ad prompt events fire before any ad loads, so configure before showing the prompt too. Before configure, the manual path crashes on iOS, Android and KMP (`Purchases.shared` / `Purchases.sharedInstance` throw) and rejects the call on Flutter and React Native. The legacy Android adapter throws too, because `loadAndTrack` is reached through `Purchases.sharedInstance.adTracker`. The other adapters check `Purchases.isConfigured` and skip the event: silently on iOS, with a logged warning on Android Next-Gen, Flutter, React Native and Unity. Access the tracker inside the callbacks, not at construction time. If the app has no RevenueCat setup yet, run `integrate-revenuecat` first.
 
 ## 0. If the user pasted the dashboard prompt
 
