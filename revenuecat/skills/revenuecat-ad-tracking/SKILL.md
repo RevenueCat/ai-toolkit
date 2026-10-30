@@ -13,7 +13,7 @@ Prerequisite: `Purchases.configure(…)` runs before the first ad event is track
 
 ## 0. If the user pasted the dashboard prompt
 
-The Ads page of the RevenueCat dashboard generates a prompt that starts with "Add RevenueCat ad tracking to this … app." and has **Context**, **Task** and **Verify** sections. It states the platform, the mediator, the integration path (adapter or manual), the minimum SDK version and, for Android, the Google Mobile Ads generation. Treat it as the source of truth: do not re-ask what it answers. Still read the matching platform file before you edit code, because the prompt lists the steps and the platform file has the API shapes and the pitfalls. If the request only resembles the prompt's first line and has no **Context** section, it is a normal request: run section 1 in full.
+The Ads page of the RevenueCat dashboard generates a prompt that starts with "Add RevenueCat ad tracking to this … app." and has **Context**, **Task** and **Verify** sections. It states the platform, the mediator, the integration path (adapter or manual), the minimum SDK version and, for Android, the Google Mobile Ads generation. Treat it as the source of truth: do not re-ask what it answers. The prompt has no integration steps of its own; it points back to this skill. Follow the remaining sections and read the matching platform file before you edit code. If the request only resembles the prompt's first line and has no **Context** section, it is a normal request: run section 1 in full.
 
 ## 1. Gather the facts before writing code
 
