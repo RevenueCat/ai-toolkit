@@ -5,6 +5,13 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0](https://github.com/RevenueCat/ai-toolkit/compare/v2.4.0...v2.5.0) (2026-10-30)
+
+
+### Added
+
+* **skills:** add an ads integration skill ([#72](https://github.com/RevenueCat/ai-toolkit/issues/72)) ([955f625](https://github.com/RevenueCat/ai-toolkit/commit/955f625bf7276c3b9d152dc9de829cfc5854d05c))
+
 ## [2.4.0](https://github.com/RevenueCat/ai-toolkit/compare/v2.3.1...v2.4.0) (2026-10-29)
 
 
