@@ -12,10 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Set up Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+
+      - name: Get pnpm store directory
+        run: echo "STORE_PATH=$(pnpm store path --silent)" >> "$GITHUB_ENV"
+
+      - name: Cache pnpm store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          node-version: '24'
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
 
       - name: Validate JSON manifests
         run: |
@@ -41,12 +48,9 @@ jobs:
 
       # ajv-cli is a pinned devDependency resolved through the committed
       # pnpm-lock.yaml, so CI runs the exact, integrity-checked versions we
-      # reviewed. corepack pins pnpm itself via the packageManager field, which
-      # carries an integrity hash. pnpm 11 needs Node >= 22.13, hence Node 24.
+      # reviewed.
       - name: Install dependencies
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       # Blocking: the Agent Plugins 1.0.0 schemas are immutable per spec, so they
       # are vendored under scripts/schemas/ and validated offline.

@@ -1,0 +1,6 @@
+[settings]
+idiomatic_version_file_enable_tools = ["node", "pnpm"]
+minimum_release_age = "3d"
+minimum_release_age_excludes = [
+  "node", # can be removed after 2026-10-31, needed for the first lithium release
+]
