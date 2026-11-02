@@ -36,7 +36,7 @@ Before writing any backend code, confirm these facts about your deployment:
 - You know which `app_user_id` your SDK uses (the same identifier your auth system uses).
 - You have decided whether the backend needs real time state (REST API) or event driven state (webhooks).
 
-If your app only gates features inside the client, you may not need a backend component at all. RevenueCat verifies `CustomerInfo` server side before it reaches the SDK, and `EntitlementVerificationMode.INFORMATIONAL` or `.ENFORCED` adds signature verification on the client. Serve premium content from a server only when you can verify entitlement on the server.
+If your app only gates features inside the client, you may not need a backend component at all. RevenueCat verifies `CustomerInfo` server side before it reaches the SDK, and Trusted Entitlements (`EntitlementVerificationMode.INFORMATIONAL`, on by default since SDK 8.11.0) adds a response signature check you can read from `EntitlementInfos.verification`; it never blocks access by itself. Serve premium content from a server only when you can verify entitlement on the server.
 
 ## Phase 2: Plan
 
@@ -63,7 +63,7 @@ What your backend does not own:
 - Google Play Developer API credentials.
 - Receipt verification code.
 - `linkedPurchaseToken` chain traversal.
-- Subscription state computation across the seven subscription states.
+- Subscription state computation across the eight subscription states.
 
 ## Phase 3: Execute
 
@@ -72,10 +72,9 @@ What your backend does not own:
 ```http
 GET https://api.revenuecat.com/v1/subscribers/{app_user_id}
 Authorization: Bearer sk_...
-X-Platform: android
 ```
 
-The response body is the same `CustomerInfo` structure the Android SDK returns. Use it in a server side endpoint that gates premium API responses.
+The response body is the raw subscriber JSON that the SDK parses into `CustomerInfo`. It has no `isActive` flag: treat entitlement `<id>` as active when `subscriber.entitlements.<id>.expires_date` is null (lifetime) or later than `request_date`. This endpoint creates the customer if the ID is unknown, so only query IDs your app has configured the SDK with.
 
 ### Grant a promotional entitlement
 
@@ -84,17 +83,16 @@ POST https://api.revenuecat.com/v1/subscribers/{app_user_id}/entitlements/{entit
 Authorization: Bearer sk_...
 Content-Type: application/json
 
-{"duration": "monthly"}
+{"end_time_ms": <now + grant length, Unix ms>}
 ```
 
-Valid `duration` values include `daily`, `three_day`, `weekly`, `monthly`, `two_month`, `three_month`, `six_month`, `yearly`, `lifetime`. Use this for support workflows, never from the client.
+Pass `end_time_ms` (Unix ms expiry), computed from the current time (for example now plus 30 days). The older `duration` field (`daily` through `lifetime`, including `two_week`) still works but is deprecated. Use this for support workflows, never from the client.
 
 ### Example: Kotlin Ktor call from your server
 
 ```kotlin
 val response = client.get("https://api.revenuecat.com/v1/subscribers/$appUserId") {
     header("Authorization", "Bearer ${System.getenv("RC_SECRET_KEY")}")
-    header("X-Platform", "android")
 }
 ```
 
@@ -109,27 +107,14 @@ Never ship the secret key in the Android APK, in a BuildConfig field, or in any 
 
 ### Webhook receiver outline
 
-```kotlin
-post("/revenuecat/webhook") {
-    val auth = call.request.header("Authorization")
-    require(auth == "Bearer ${System.getenv("RC_WEBHOOK_SECRET")}")
-    val event = call.receive<RevenueCatEvent>()
-    when (event.type) {
-        "INITIAL_PURCHASE", "RENEWAL" -> grantAccess(event.appUserId, event.entitlements)
-        "CANCELLATION", "EXPIRATION" -> scheduleRevocation(event.appUserId)
-    }
-    call.respond(HttpStatusCode.OK)
-}
-```
-
-Verify the authorization header you configured in the RevenueCat dashboard. Respond 2xx fast; RevenueCat retries on non 2xx responses.
+Authenticating the request, deduplicating by `event.id`, and dispatching per event type, including why every event re-reads the customer, is covered in [rc-webhooks](../rc-webhooks/). Point your webhook endpoint at that handler; this skill's job is the REST API and the decision to consume RevenueCat state instead of validating receipts yourself.
 
 ### What not to build
 
 - Do not build a Google Play receipt verification endpoint. RevenueCat already did.
 - Do not pass purchase tokens from the Android client to your server for manual verification. The SDK handles the round trip.
 - Do not query Google Play Developer API from your backend unless you are building a custom integration that bypasses the SDK.
-- Do not mirror the seven subscription state machine in your DB. Consume `CustomerInfo.entitlements.active` or webhook events instead.
+- Do not mirror the eight state subscription state machine in your DB. Consume the entitlement expiry dates from the REST API, or webhook events, instead.
 
 ## References
 

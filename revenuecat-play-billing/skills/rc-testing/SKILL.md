@@ -1,6 +1,6 @@
 ---
 name: rc-testing
-description: Use this skill when testing a RevenueCat Android integration. Covers the RevenueCat Test Store (test_ API key prefix, in dialog Success/Fail/Cancel choice), mockk based unit testing with an interface wrapper around Purchases, and a GitHub Actions CI pattern. Avoids Google Play sandbox for day to day test iteration.
+description: Use this skill when testing a RevenueCat Android integration. Covers the RevenueCat Test Store (test_ API key prefix, in dialog choice of Test valid purchase, Test failed purchase, or Cancel), mockk based unit testing with an interface wrapper around Purchases, and a GitHub Actions CI pattern. Avoids Google Play sandbox for day to day test iteration.
 license: Apache-2.0; see LICENSE
 metadata:
   author: RevenueCat
@@ -48,7 +48,8 @@ Pick the test path per scenario. The Test Store is the default; fall back to Goo
 | Success, failure, cancel paths | Test Store |
 | Unit tests of ViewModels | mockk against `BillingService` |
 | CI on every push | Test Store + unit tests |
-| Subscription renewal cycles | Google Play Sandbox |
+| Subscription renewal cycles (up to 5 accelerated renewals) | Test Store |
+| Grace period, account hold | Google Play Sandbox |
 | Pending purchase (parental approval) | Google Play Sandbox |
 | Full end-to-end payment | Google Play Sandbox |
 
@@ -67,23 +68,40 @@ In the RevenueCat dashboard, open your app, go to **Apps & providers**, then **C
 ```kotlin
 // build.gradle.kts
 android {
+    buildFeatures {
+        buildConfig = true
+    }
     buildTypes {
         debug {
             buildConfigField("String", "RC_API_KEY", "\"test_YOUR_KEY\"")
         }
         release {
-            buildConfigField("String", "RC_API_KEY", "\"goog_YOUR_KEY\"")
+            buildConfigField("String", "RC_API_KEY", "\"${providers.gradleProperty("RC_API_KEY").get()}\"")
         }
     }
 }
 ```
 
-For CI, read from env so the key never lands in git:
+AGP 8.0+ does not generate `BuildConfig` by default; `buildFeatures { buildConfig = true }` is required or the fields above fail to build.
+
+For CI, read the debug key from env so it never lands in git. Change only the `debug` field from Step 2. The `release` field reads the same `RC_API_KEY` Gradle property as configuring-the-sdk, so pass it in CI (`-PRC_API_KEY=...` or `ORG_GRADLE_PROJECT_RC_API_KEY`). Never put the `test_` key in `defaultConfig`, or it ships in release builds too:
 
 ```kotlin
 // build.gradle.kts
 val testKey = System.getenv("RC_TEST_STORE_KEY") ?: "test_placeholder"
-buildConfigField("String", "RC_API_KEY", "\"$testKey\"")
+android {
+    buildFeatures {
+        buildConfig = true
+    }
+    buildTypes {
+        debug {
+            buildConfigField("String", "RC_API_KEY", "\"$testKey\"")
+        }
+        release {
+            buildConfigField("String", "RC_API_KEY", "\"${providers.gradleProperty("RC_API_KEY").get()}\"")
+        }
+    }
+}
 ```
 
 ### Step 3: Configure Purchases with the build config key
@@ -102,7 +120,7 @@ class MyApplication : Application() {
 
 ### Step 4: Trigger the Test Store dialog
 
-Run the app in debug and call `awaitPurchase()` from your paywall. A dialog appears with Success, Fail, and Cancel options. Each choice resolves the same way production would: Success returns a `PurchaseResult` with active entitlements, Fail throws `PurchasesTransactionException` with a payment error, Cancel throws with `userCancelled = true`. Walk every branch of your error handling to verify UI states.
+Run the app in debug and call `awaitPurchase()` from your paywall. A "Test Store Purchase" dialog appears with Test valid purchase, Test failed purchase, and Cancel. Each choice resolves the same way production would: Test valid purchase returns a `PurchaseResult` with active entitlements, Test failed purchase throws `PurchasesTransactionException` with `error.code == PurchasesErrorCode.TestStoreSimulatedPurchaseError` and `userCancelled == false`, and Cancel throws with `userCancelled = true`. Walk every branch of your error handling to verify UI states.
 
 ### Step 5: Wrap Purchases in a BillingService
 

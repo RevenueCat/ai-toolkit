@@ -25,16 +25,16 @@ The mapping from Google Play to RevenueCat:
 
 | Google Play | RevenueCat |
 |---|---|
-| Subscription (product ID) | `StoreProduct` |
-| Base Plan | `SubscriptionOption` (base plan) |
-| Offer | `SubscriptionOption` (offer) |
+| Subscription + Base Plan (`subId:basePlanId`) | `StoreProduct` (one per base plan) |
+| Base Plan without offer | `SubscriptionOption` with `isBasePlan == true` |
+| Offer on that base plan | `SubscriptionOption` (offer) |
 | Group of base plans grouped in dashboard | `Package` inside an `Offering` |
 
 Key types you will touch:
 
 - `Offering`: a dashboard configured group of `Package` objects. `offerings.current` is the one you show by default.
 - `Package`: a purchasable slot (monthly, annual, weekly, custom). Exposes a `product: StoreProduct`.
-- `StoreProduct`: the Google Play subscription product. Has `subscriptionOptions: List<SubscriptionOption>?` and a `defaultOption`.
+- `StoreProduct`: one base plan of a Google Play subscription (`id` is `subId:basePlanId`). Its `subscriptionOptions` hold that base plan and its offers, plus a `defaultOption`.
 - `SubscriptionOption`: either a base plan or an offer. Has `pricingPhases`, `tags`, and an `id`.
 - `PricingPhase`: one billing segment (intro trial, intro price, or recurring). Has `billingPeriod`, `price`, `offerPaymentMode`, and `recurrenceMode`.
 
@@ -46,7 +46,7 @@ Before you write code, map your paywall to the object model. Answer these three 
 
 ### 2.1 Which Offering drives the paywall?
 
-- Default paywall: use `offerings.current`. This is the Offering marked current in the dashboard and is the standard choice.
+- Default paywall: use `offerings.current`. This is the Default offering set in the dashboard and is the standard choice.
 - Experiment or segment specific paywall: fetch `offerings.all["experiment-a"]`. You keep the dashboard in charge of which products appear, so no app update ships when the catalog changes.
 
 ### 2.2 Which Packages do you show?
