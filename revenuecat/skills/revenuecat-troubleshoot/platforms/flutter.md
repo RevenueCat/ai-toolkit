@@ -40,7 +40,7 @@ final apiKey = Platform.isIOS
     : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
 ```
 
-A common report: the Android build works but iOS shows "invalid credentials". Cause: `Platform.isIOS` returned false because the check ran on a macOS desktop target, not iOS. `purchases_flutter` does not support macOS, Windows, Linux, or Web, so always confirm the test is running on an iOS or Android device.
+A common report: the Android build works but iOS shows "invalid credentials". Cause: `Platform.isIOS` returned false because the check ran on a macOS desktop target, not iOS. `purchases_flutter` also runs on macOS and web, so a two way `Platform.isIOS` check sends the Android key to a macOS build. Confirm the test is running on an iOS or Android device. A macOS build takes an App Store `appl_` key (the iOS key if the app uses universal purchase), and on web check `kIsWeb` first, because `dart:io` `Platform` throws there.
 
 ## Offerings come back empty
 

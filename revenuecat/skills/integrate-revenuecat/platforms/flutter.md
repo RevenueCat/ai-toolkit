@@ -69,7 +69,7 @@ Future<void> main() async {
 
 - Two public SDK keys, one per platform. Branch on `Platform.isIOS` / `Platform.isAndroid`.
 - `Purchases.configure` is async; `await` it before `runApp` or any code that reads offerings.
-- `purchases_flutter` supports iOS and Android only. Web, macOS, Windows, and Linux targets are not supported.
+- `purchases_flutter` also supports macOS and web (web since 9.0.0, with the public API key of a RevenueCat web config for RevenueCat Billing, Stripe Billing, or Paddle Billing). This file covers iOS and Android. Windows and Linux are not supported.
 - For a multi flavor app, load the API key from `--dart-define` or an environment wrapper rather than hard coding it.
 
 ## Verify

@@ -77,7 +77,7 @@ For a one off check with less ceremony, `FutureBuilder<CustomerInfo>(future: Pur
 
 - Always call `removeCustomerInfoUpdateListener` when the owning object is disposed. Registered listeners leak otherwise.
 - Replace `'premium'` with the entitlement identifier configured in the RevenueCat dashboard. It is case sensitive.
-- `purchases_flutter` targets iOS and Android only. On other platforms the calls throw; guard with `Platform.isIOS || Platform.isAndroid` if your app has additional targets.
+- `purchases_flutter` supports iOS, Android, macOS, and web. On web the customer info listener does not fire after a purchase, so re-read with `Purchases.getCustomerInfo()` there. It has no Windows or Linux implementation, so the calls throw a `MissingPluginException` there; skip them on those targets if your app has them.
 
 ## Verify
 
