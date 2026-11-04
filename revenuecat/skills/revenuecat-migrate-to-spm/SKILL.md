@@ -11,12 +11,12 @@ CocoaPods trunk becomes read-only on December 2, 2026. Existing RevenueCat pods 
 
 ## 1. Confirm the migration applies
 
-RevenueCat likely comes from CocoaPods or Carthage when any of these is true:
+The app installs RevenueCat through CocoaPods or Carthage when either is true:
 
-- `Podfile.lock` or `Podfile` lists `RevenueCat` or `PurchasesHybridCommon`.
-- `Cartfile` lists `RevenueCat/purchases-ios`.
+- Its `Podfile.lock` or `Podfile` lists `RevenueCat` or `PurchasesHybridCommon`. Look in `ios/` for Flutter and React Native, `ios/App/` for Capacitor, `platforms/ios/` for Cordova, and the exported Xcode project for Unity.
+- Its `Cartfile` lists `RevenueCat/purchases-ios`.
 
-If none is true, tell the user RevenueCat doesn't appear to come from CocoaPods or Carthage, and ask before continuing.
+If neither is true, RevenueCat doesn't come from CocoaPods or Carthage. Tell the user and stop.
 
 ## 2. Pick the guide
 
