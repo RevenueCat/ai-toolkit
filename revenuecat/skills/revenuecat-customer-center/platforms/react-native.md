@@ -28,7 +28,7 @@ npx expo install react-native-purchases-ui
 
 `react-native-purchases-ui` links native code. Expo Go does not have it, so the package switches to a Preview API Mode there and never shows the Customer Center: `<RevenueCatUI.CustomerCenterView />` renders a placeholder, `presentCustomerCenter()` opens nothing, and `presentCustomerCenter({ callbacks })` throws a `TypeError` (react-native-purchases-ui 11.0.0), so do not call it there. Use a **development build**: `npx expo install expo-dev-client`, then `eas build --profile development` or a local `npx expo run:ios` / `npx expo run:android`.
 
-Deployment targets: iOS 15+, Android minSdk 24 (Compose requirement on the native side).
+Deployment targets: iOS 15+, Android minSdk 24 (the native purchases-ui module declares minSdk 24).
 
 ## Implement
 

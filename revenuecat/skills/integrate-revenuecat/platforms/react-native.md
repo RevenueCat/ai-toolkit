@@ -55,7 +55,7 @@ export default function App() {
 ## Notes
 
 - Two public SDK keys, one per platform. Branch on `Platform.OS`.
-- Deployment targets: iOS 13+, Android minSdk 21.
+- Floors: `react-native-purchases` 11.x needs React Native 0.80+ (Expo SDK 54+); 10.x needs 0.73+. The SDK itself needs iOS 13+ and, since 10.0.0, Android minSdk 23 (24 with `react-native-purchases-ui`). React Native 0.76 and later already require iOS 15.1 and minSdk 24.
 - `Purchases.configure` is synchronous; it kicks off async initialization internally. You can call `getOfferings()` right after without awaiting configure.
 - If running under Expo, confirm the user is on a development build (not Expo Go) before testing store purchases. In Expo Go a platform key makes `configure` throw, so use a Test Store key there, and purchases are simulated (see Expo above).
 

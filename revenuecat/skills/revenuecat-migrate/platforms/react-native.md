@@ -60,6 +60,7 @@ In observer mode:
 
 - iOS: your StoreKit code must continue to finish transactions.
 - Android: your Play Billing code must continue to acknowledge purchases within 3 days.
+- Android: `react-native-purchases` 11.x puts Play Billing Library 9.1.0 on the app's classpath, so the purchase library you keep (for example `react-native-iap`) must support Play Billing Library 9. Versions that use APIs it removed, such as `SkuDetails`, fail at build time or at runtime.
 
 ### Tie existing users
 
