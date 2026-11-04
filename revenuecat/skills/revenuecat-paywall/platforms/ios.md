@@ -99,6 +99,7 @@ ContentView()
 
 ```swift
 import UIKit
+import RevenueCat
 import RevenueCatUI
 
 final class SettingsViewController: UIViewController {

@@ -6,7 +6,7 @@
 import RevenueCat
 
 func currentPackages() async throws -> [Package] {
-    let offerings = try await Purchases.shared.getOfferings()
+    let offerings = try await Purchases.shared.offerings()
     guard let current = offerings.current else { return [] }
     return current.availablePackages
 }
@@ -19,6 +19,7 @@ func currentPackages() async throws -> [Package] {
 `Purchases.shared.purchase(package:)` returns `PurchaseResultData` (a tuple of `transaction`, `customerInfo`, `userCancelled`). User cancellation is also surfaced as a thrown `ErrorCode.purchaseCancelledError`. Handle both to be safe.
 
 ```swift
+import Foundation
 import RevenueCat
 
 enum PurchaseOutcome {

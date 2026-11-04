@@ -94,7 +94,7 @@ Attach modifiers to the `CustomerCenterView` to react to specific flows:
 - `.onCustomerCenterFeedbackSurveyCompleted { optionId in … }`
 - `.onCustomerCenterManagementOptionSelected { action in … }`
 - `.onCustomerCenterCustomActionSelected { actionId, purchaseId in … }`
-- `.onCustomerCenterPromotionalOfferSucceeded { … }`
+- `.onCustomerCenterPromotionalOfferSucceeded { customerInfo, transaction, offerId in … }`
 
 All are optional.
 
