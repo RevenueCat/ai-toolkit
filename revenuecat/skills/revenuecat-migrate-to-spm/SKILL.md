@@ -46,7 +46,7 @@ Fetch the guide's Markdown version and follow it in order.
 Do not declare the migration done until:
 
 1. The guide's verification steps pass.
-2. `Podfile.lock` (if one remains) no longer lists `RevenueCat` or `PurchasesHybridCommon`, and `Cartfile` (if one remains) no longer lists `RevenueCat/purchases-ios`.
+2. `Podfile.lock` and `Podfile` (if they remain) no longer list `RevenueCat` or `PurchasesHybridCommon`, and `Cartfile` (if one remains) no longer lists `RevenueCat/purchases-ios`.
 3. The app builds.
 
 Then ask the user to run their usual purchase flow in a sandbox build before shipping.
