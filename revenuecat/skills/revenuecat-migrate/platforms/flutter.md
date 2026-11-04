@@ -57,7 +57,7 @@ Call this after your app's authentication completes.
 
 ### Cutover to full RevenueCat mode (optional, later)
 
-Remove the `purchasesAreCompletedBy` assignment. Default is `PurchasesAreCompletedByRevenueCat`. Replace your purchase code with `Purchases.purchasePackage(...)` or `Purchases.purchaseStoreProduct(...)`. Remove your own transaction finishing / acknowledgement code at the same time.
+Remove the `purchasesAreCompletedBy` assignment. Default is `PurchasesAreCompletedByRevenueCat`. Replace your purchase code with `Purchases.purchase(PurchaseParams.package(...))` or `Purchases.purchase(PurchaseParams.storeProduct(...))`. Remove your own transaction finishing / acknowledgement code at the same time.
 
 ## Path B: upgrade `purchases_flutter` across a major version
 

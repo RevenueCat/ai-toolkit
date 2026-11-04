@@ -113,7 +113,7 @@ To target a specific offering, pass it via the `offering:` parameter (both metho
 ## Notes
 
 - `purchases_ui_flutter` supports **iOS and Android only**. Web, macOS, Windows, and Linux targets are not supported.
-- Do not call `Purchases.purchasePackage(…)` inside the widget callbacks or around the imperative method. The paywall runs the purchase itself.
+- Do not call `Purchases.purchase(…)` inside the widget callbacks or around the imperative method. The paywall runs the purchase itself.
 - `displayCloseButton: true` only affects original template paywalls. V2 Paywalls render their own close affordance.
 - `presentPaywall` returns a `PaywallResult` enum. `notPresented` only appears for `presentPaywallIfNeeded` when the entitlement is already active.
 - `PaywallView` is a `StatelessWidget` that hosts a native platform view. Do not wrap it in a container that constrains its height to zero; it needs to fill available space.
