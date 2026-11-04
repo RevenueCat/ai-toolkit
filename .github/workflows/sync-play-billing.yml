@@ -40,10 +40,11 @@ jobs:
         with:
           branch: sync/play-billing-skills
           delete-branch: true
-          # fix, not chore: release-please only releases fix and feat commits, and
-          # installed plugins keep their cached copy until the version changes.
-          commit-message: "fix(play-billing): sync skills from play-billing-skills"
-          title: "fix(play-billing): sync skills from play-billing-skills"
+          # sync, not chore: release-please only releases types with a visible
+          # changelog section (see release-please-config.json), and installed
+          # plugins keep their cached copy until the version changes.
+          commit-message: "sync(play-billing): update from play-billing-skills"
+          title: "sync(play-billing): update from play-billing-skills"
           body: |
             Automated sync of the `revenuecat/` collection from
             [RevenueCat/play-billing-skills](https://github.com/RevenueCat/play-billing-skills)

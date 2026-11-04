@@ -7,6 +7,7 @@
     { "type": "perf", "section": "Changed" },
     { "type": "revert", "section": "Changed" },
     { "type": "docs", "section": "Documentation" },
+    { "type": "sync", "section": "Synced" },
     { "type": "chore", "hidden": true },
     { "type": "ci", "hidden": true },
     { "type": "build", "hidden": true },
