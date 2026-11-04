@@ -12,6 +12,8 @@ Use observer mode. Your existing purchase code (whether Dart based or native via
 
 Add `purchases_flutter` to `pubspec.yaml` and run `flutter pub get`. See `integrate-revenuecat/platforms/flutter.md` for the setup details.
 
+`purchases_flutter` 11.x puts Play Billing Library 9.1.0 on the Android classpath, so the billing plugin your existing code uses must support Billing Library 9. For `in_app_purchase`, the first `in_app_purchase_android` built on Billing Library 9 is 0.5.5, which needs Flutter 3.44 or newer.
+
 ### Configure in observer mode
 
 ```dart

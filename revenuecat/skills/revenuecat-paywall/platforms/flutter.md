@@ -28,7 +28,7 @@ Minimum iOS deployment target is **15.0** (required by `RevenueCatUI`). Set it i
 platform :ios, '15.0'
 ```
 
-Android minimum SDK is **21**. `purchases_ui_flutter` uses Jetpack Compose on Android; the Flutter embedding wraps that for you.
+Android minimum SDK is **24**. `purchases_ui_flutter` uses Jetpack Compose on Android; the Flutter embedding wraps that for you.
 
 ## Implement
 

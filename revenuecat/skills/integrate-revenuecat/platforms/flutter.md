@@ -30,13 +30,15 @@ platform :ios, '13.0'
 
 ### Android target
 
-Minimum SDK is **21**. In `android/app/build.gradle`:
+Minimum SDK is **23**, or **24** with `purchases_ui_flutter`. Flutter 3.35 and newer set `flutter.minSdkVersion` to 24, so a project that keeps `minSdk = flutter.minSdkVersion` needs no change. Otherwise, in `android/app/build.gradle` (or `build.gradle.kts`, with `minSdk = 23`):
 
 ```groovy
 defaultConfig {
-    minSdk 21
+    minSdk 23
 }
 ```
+
+Android also needs Kotlin 2.1.0 or newer (the `org.jetbrains.kotlin.android` plugin version in `android/settings.gradle.kts` or `android/settings.gradle`; older projects set `ext.kotlin_version` in `android/build.gradle`) and `compileSdk` 35 or higher, which Flutter 3.27 and newer set by default.
 
 ## Configure
 
