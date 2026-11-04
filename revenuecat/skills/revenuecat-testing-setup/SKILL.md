@@ -32,7 +32,8 @@ Higher fidelity exercises more of the real purchase pipeline. Lower fidelity ite
 - **RevenueCat Test Store (lowest fidelity, fastest iteration, deterministic).** A synthetic store hosted by RevenueCat. The SDK is configured with a `test_…` API key from the dashboard. Purchases open a Test Store dialog where you pick the outcome by hand: Test valid purchase, Test failed purchase, or Cancel. Purchases trigger entitlements, update `CustomerInfo`, and appear on the dashboard, but no Apple or Google call happens. Best for paywall iteration, integration tests, and CI smoke runs.
 - **iOS StoreKit Configuration File (low fidelity, Apple synthetic).** Xcode stubs the store locally. Purchases succeed instantly with no App Store Connect round trip. Useful when you need StoreKit specific behavior. RevenueCat transactions in this mode may or may not appear on the dashboard depending on SDK version and intended routing, so it is not a faithful dashboard test.
 - **iOS Sandbox (real sandbox Apple ID) / Android license tester on an internal or closed testing track.** Real store backends, real RevenueCat dashboard ingestion, real receipts. Slower to iterate: build, install, wait for Play propagation or App Store Connect to register the product.
-- **TestFlight (iOS) / any Play testing track (Android, accounts that are not license testers).** Behaves very close to production. Receipts are production style. Transactions land in the **production** RevenueCat dashboard, not the Sandbox view. On Android these are real charges.
+- **TestFlight (iOS).** Testers use their real Apple Account, but purchases run in Apple's sandbox and are not charged. RevenueCat records them as sandbox data, so they appear in the dashboard's **Sandbox** view.
+- **Any Play testing track (Android, accounts that are not license testers).** Behaves like production. These are real charges, and the transactions land in the **production** RevenueCat dashboard.
 - **Production.** Real money. Do not use for testing.
 
 Start with the lowest fidelity that answers the question, then move up. UI and paywall iteration belongs in the fast channel. "Does my entitlement actually flip?" belongs in the store sandbox, which on Android means a license tester on a testing track.
@@ -55,7 +56,7 @@ The RevenueCat dashboard has a toggle between **Sandbox** and **Production** vie
 
 Subscription renewals run on accelerated test clocks in sandbox. This lets you exercise renewal logic in minutes instead of weeks.
 
-- iOS sandbox renewal cadence (per Apple's documentation): daily → every 3 minutes, weekly → every 3 minutes, monthly → every 5 minutes, 2 months → every 10 minutes, 3 months → every 15 minutes, 6 months → every 30 minutes, yearly → every hour. Subscriptions auto-renew a maximum of 6 times then expire.
+- iOS sandbox renewal cadence at the default rate (per Apple's documentation): weekly → every 3 minutes, monthly → every 5 minutes, 2 months → every 10 minutes, 3 months → every 15 minutes, 6 months → every 30 minutes, yearly → every hour. Subscriptions auto-renew up to 12 times, then stop renewing.
 - Android sandbox renewal cadence is documented in Google Play Console → Subscriptions testing. License tester subscriptions renew on the same accelerated clock.
 
 ### Use a fresh test user for first purchase flows
