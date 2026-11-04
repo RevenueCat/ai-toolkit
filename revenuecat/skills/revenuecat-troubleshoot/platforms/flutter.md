@@ -10,12 +10,12 @@ import 'package:purchases_flutter/purchases_flutter.dart';
 await Purchases.setLogLevel(LogLevel.debug);
 ```
 
-Do this before `Purchases.configure(...)`. The native SDK banner appears on the platform console (Xcode for iOS, logcat for Android), **not** the Flutter console. To see it:
+Do this before `Purchases.configure(...)`. The native SDK logs go to the platform console (Xcode for iOS, logcat for Android). At configure time both native SDKs log a debug line containing `SDK Version - <version>`, with the native SDK's version, not the `purchases_flutter` version. To see them:
 
 - iOS → Xcode → Window → Devices and Simulators → pick device → Open Console, or run `flutter run` while Xcode is attached.
-- Android → `flutter logs` or `adb logcat -s Purchases`.
+- Android → `adb logcat | grep "\[Purchases\]"`. The SDK logs under the tag `[Purchases] - <LEVEL>`, so `adb logcat -s Purchases` matches nothing, and `flutter logs` only keeps Flutter's own tags.
 
-If you only see Dart `print` output and no native SDK logs, the platform consoles are not attached. That is the most frequent "I have no logs" situation on Flutter.
+If you only see Dart `print` output and no native SDK logs, the platform consoles are not attached. That is the most frequent "I have no logs" situation on Flutter. If the app calls `Purchases.setLogHandler`, the native lines go to that Dart handler instead of the platform console.
 
 ## Clean before blaming the SDK
 

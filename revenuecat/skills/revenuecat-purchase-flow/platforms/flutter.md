@@ -117,4 +117,4 @@ Expose this from a visible "Restore purchases" button on the paywall and/or sett
 1. A sandbox purchase flips the "premium" entitlement to active and the listener notifies the UI.
 2. Cancelling the native sheet returns `Cancelled` and no error dialog appears.
 3. On a fresh install signed into the same store account, "Restore purchases" re-grants access.
-4. `flutter logs` (or `adb logcat` / Xcode console) shows the `Purchases` SDK logs through the transaction.
+4. `adb logcat | grep "\[Purchases\]"` (Android) or the Xcode console (iOS) shows the `Purchases` SDK logs through the transaction.

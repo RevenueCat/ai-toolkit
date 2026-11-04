@@ -78,7 +78,7 @@ Branch on the flavor (via `--dart-define=FLAVOR=dev` or equivalent) to pick the 
 When testing, watch the platform console, not just the Dart console:
 
 - iOS → Xcode (attached to `flutter run`) shows the native SDK logs.
-- Android → `flutter logs` or `adb logcat -s Purchases` shows the native SDK logs.
+- Android → `adb logcat | grep "\[Purchases\]"` shows the native SDK logs. The SDK logs under the tag `[Purchases] - <LEVEL>`, so `adb logcat -s Purchases` matches nothing, and `flutter logs` only keeps Flutter's own tags.
 
 The Dart `print` output does not show native SDK logs.
 

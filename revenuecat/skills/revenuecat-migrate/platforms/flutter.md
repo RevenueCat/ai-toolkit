@@ -74,7 +74,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. `flutter run` builds on both iOS and Android.
-2. Xcode console (iOS) shows `[Purchases] - INFO: 😻‍👼 Purchases is configured`. Logcat (Android) shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`.
+2. With `LogLevel.debug`, the Xcode console (iOS) and `adb logcat | grep "\[Purchases\]"` (Android) show a line containing `SDK Version - <version>` at launch, with the version of the native SDK that `purchases_flutter` depends on.
 3. A sandbox purchase on each platform shows on the RevenueCat dashboard Sandbox view with the right appUserID.
 4. A user with a pre migration active subscription still shows that entitlement active.
 5. `await Purchases.setLogLevel(LogLevel.info);` before shipping.

@@ -74,7 +74,9 @@ Future<void> main() async {
 
 ## Verify
 
-`flutter run`. Expect the native SDK log banner in the Dart/native console:
+`flutter run` with `LogLevel.debug` set before `configure`. At configure time each native SDK logs a debug line containing `SDK Version - <version>`, with the version of purchases-ios or purchases-android, not of `purchases_flutter`:
 
-- iOS simulator/device → Xcode console also shows `[Purchases] - INFO: 😻‍👼 Purchases is configured`
-- Android emulator/device → `flutter logs` (or `adb logcat`) shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`
+- iOS simulator/device → the Xcode console shows the line.
+- Android emulator/device → `adb logcat | grep "\[Purchases\]"` shows it. The SDK logs under the tag `[Purchases] - <LEVEL>`, so `adb logcat -s Purchases` matches nothing, and `flutter logs` drops these lines because it only keeps Flutter's own tags.
+
+No such line with the log level at debug usually means `configure` never ran. If the app calls `Purchases.setLogHandler`, the native lines go to that Dart handler instead of the platform console.

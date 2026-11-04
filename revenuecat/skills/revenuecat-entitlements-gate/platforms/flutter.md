@@ -83,4 +83,4 @@ For a one off check with less ceremony, `FutureBuilder<CustomerInfo>(future: Pur
 
 1. A sandbox user with the entitlement renders `PremiumScreen`; a fresh user renders `PaywallScreen`.
 2. Make a sandbox purchase. The listener fires, `notifyListeners()` runs, and the widget tree rebuilds without a hot restart.
-3. Watch the native logs (`flutter logs` / Xcode console) for `Purchases` entries. A repeated auth error on launch means the API key is wrong or the SDK was never configured.
+3. Watch the native logs (`adb logcat | grep "\[Purchases\]"` / Xcode console) for `Purchases` entries. A repeated auth error on launch means the API key is wrong or the SDK was never configured.

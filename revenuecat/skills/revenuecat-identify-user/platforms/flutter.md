@@ -73,4 +73,4 @@ class RevenueCatIdentitySync {
 1. Sign in your test user. The RevenueCat dashboard Customer page shows the appUserID you passed, not `$RCAnonymousID:…`.
 2. Sign out. A subsequent `Purchases.getCustomerInfo()` returns an `originalAppUserId` starting with `$RCAnonymousID:`.
 3. Sign in as a different user. Their entitlement state appears and the previous user's does not.
-4. `flutter logs` shows the `Purchases` native logs for logIn / logOut without errors.
+4. The native logs (`adb logcat | grep "\[Purchases\]"` on Android, the Xcode console on iOS) show logIn / logOut without errors.
