@@ -80,7 +80,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. App builds with `Purchases.logLevel = .debug`.
-2. Xcode console shows `[Purchases] - INFO: 😻‍👼 Purchases is configured` at launch.
+2. Xcode console shows the `SDK Version - <version>` debug line at launch, with the new version.
 3. A fresh sandbox purchase shows on the RevenueCat dashboard Sandbox view.
 4. A user who had an active subscription before the upgrade still shows that entitlement active.
 5. Debug log level is removed before the next release build.

@@ -52,7 +52,7 @@ The first call to `Purchases.shared.purchase(package:)` opens the Test Store dia
 
 ### Verify
 
-1. Xcode console shows the SDK configured with a `test_` key.
+1. Xcode console shows the warning `Using a Test Store API key.` at configure. The key itself is not logged.
 2. Picking **Test valid purchase** flips the entitlement on the returned `CustomerInfo`; the dashboard records the transaction.
 3. Picking **Test failed purchase** or **Cancel** routes through the same error / `userCancelled` paths your app already handles for the real store.
 
@@ -125,6 +125,6 @@ Use TestFlight once you have already verified your integration in sandbox. It is
 
 1. `Purchases.logLevel = .debug` in the build.
 2. A sandbox purchase completes on the device.
-3. Xcode console shows the SDK logging the transaction (look for `PostedTransaction` or `Purchase succeeded` style log lines).
+3. Xcode console shows the SDK logging the transaction: `Purchased product - '<product id>'`, and at debug level `API request completed: POST '/v1/receipts' (200)`.
 4. The RevenueCat dashboard Sandbox view shows the transaction with the expected `appUserID`.
 5. `Purchases.shared.customerInfo()` after the purchase shows the expected entitlement active.

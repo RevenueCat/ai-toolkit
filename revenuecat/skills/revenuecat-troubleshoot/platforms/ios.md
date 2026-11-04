@@ -10,13 +10,13 @@ import RevenueCat
 Purchases.logLevel = .debug
 ```
 
-Set this before `Purchases.configure(...)`. The SDK emits a banner when configuration succeeds:
+Set this before `Purchases.configure(...)`. During configure the SDK logs debug lines, among them:
 
 ```
-[Purchases] - INFO: 😻‍👼 Purchases is configured
+DEBUG: ℹ️ SDK Version - <version>
 ```
 
-If you do not see that line at app launch, `configure` is not running. Check that the call is in the SwiftUI `App.init` or the `UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)` entry point.
+On iOS 14 and later these go through `os.Logger`, so they start with the level and have no `[Purchases]` prefix. If you do not see the `SDK Version` line at app launch, `configure` is usually not running. Check that the call is in the SwiftUI `App.init` or the `UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)` entry point. A custom `Purchases.logHandler` also keeps these lines out of the console.
 
 ## StoreKit Configuration File vs real sandbox
 

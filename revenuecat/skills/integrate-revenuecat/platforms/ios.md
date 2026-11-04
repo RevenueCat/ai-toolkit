@@ -91,10 +91,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ## Verify
 
-Build and run. In the Xcode console look for:
+Build and run with `Purchases.logLevel = .debug` set before `configure`. The SDK logs its configure lines at debug level. In the Xcode console look for:
 
 ```
-[Purchases] - INFO: 😻‍👼 Purchases is configured
+DEBUG: ℹ️ SDK Version - <version>
 ```
 
-A wrong API key shows up as an auth error log on the first `getOfferings` call. If you see no Purchases logs at all, `Purchases.logLevel = .debug` is missing or the configure call isn't running at launch.
+On iOS 14 and later the SDK logs through `os.Logger`, so lines start with the level (`DEBUG:`, `ERROR:`) and have no `[Purchases]` prefix.
+
+A wrong API key shows up at launch as an error containing `There was a credentials issue`. If the `SDK Version` line is missing with the log level at `.debug`, the configure call isn't running at launch, or a custom `Purchases.logHandler` is taking the logs.
