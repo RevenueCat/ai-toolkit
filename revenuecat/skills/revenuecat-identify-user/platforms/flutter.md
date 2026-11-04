@@ -21,13 +21,11 @@ Future<void> syncRevenueCat(String appUserID) async {
 
 ## Log out
 
-Calling `logOut` while the SDK is anonymous rejects with `PurchasesErrorCode.logOutWithAnonymousUserError`. Guard with `Purchases.isAnonymous` (available on the current customer info).
+Calling `logOut` while the SDK is anonymous rejects with `PurchasesErrorCode.logOutWithAnonymousUserError`. Guard with `await Purchases.isAnonymous`. Do not test `CustomerInfo.originalAppUserId` for the `$RCAnonymousID:` prefix: when an anonymous user logs in with a new appUserID, the original ID stays the anonymous one, so that check skips `logOut` for every signed in user who started out anonymous.
 
 ```dart
 Future<void> signOutRevenueCat() async {
-  final info = await Purchases.getCustomerInfo();
-  // Anonymous IDs always start with $RCAnonymousID:
-  if (info.originalAppUserId.startsWith(r'$RCAnonymousID:')) return;
+  if (await Purchases.isAnonymous) return;
 
   try {
     await Purchases.logOut();
@@ -71,6 +69,6 @@ class RevenueCatIdentitySync {
 ## Verify
 
 1. Sign in your test user. The RevenueCat dashboard Customer page shows the appUserID you passed, not `$RCAnonymousID:…`.
-2. Sign out. A subsequent `Purchases.getCustomerInfo()` returns an `originalAppUserId` starting with `$RCAnonymousID:`.
+2. Sign out. `await Purchases.isAnonymous` returns `true`, and `await Purchases.appUserID` starts with `$RCAnonymousID:`.
 3. Sign in as a different user. Their entitlement state appears and the previous user's does not.
 4. The native logs (`adb logcat | grep "\[Purchases\]"` on Android, the Xcode console on iOS) show logIn / logOut without errors.
