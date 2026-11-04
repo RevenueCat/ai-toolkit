@@ -13,10 +13,10 @@ export async function currentPackages(): Promise<PurchasesPackage[]> {
 
 ## Purchase a package
 
-`Purchases.purchasePackage` rejects on failure. The SDK sets `error.userCancelled === true` when the user dismisses the store sheet. Check that before treating anything as an error.
+`Purchases.purchasePackage` rejects on failure. When the user dismisses the store sheet, the error's `code` is `PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR`. Check that before treating anything as an error.
 
 ```ts
-import Purchases, { PurchasesPackage } from 'react-native-purchases';
+import Purchases, { PURCHASES_ERROR_CODE, PurchasesPackage } from 'react-native-purchases';
 
 export type PurchaseOutcome =
   | { kind: 'purchased' }
@@ -30,13 +30,13 @@ export async function buy(pkg: PurchasesPackage): Promise<PurchaseOutcome> {
     // gated UI (see revenuecat-entitlements-gate).
     return { kind: 'purchased' };
   } catch (e: any) {
-    if (e?.userCancelled === true) return { kind: 'cancelled' };
+    if (e?.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) return { kind: 'cancelled' };
     return { kind: 'failed', error: e };
   }
 }
 ```
 
-If you prefer an explicit error code comparison, `Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR` is also set on `e.code` when the user cancels.
+`e.userCancelled === true` still works, but the SDK's typings mark `userCancelled` deprecated in favor of this `code` comparison.
 
 ## Wire it to a component
 
@@ -85,9 +85,9 @@ Expose this from a visible "Restore purchases" button on the paywall and/or sett
 
 ## Notes
 
-- The SDK sets `error.userCancelled = (error.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR)` inside the reject path, so the shortcut `e.userCancelled === true` is safe on both iOS and Android.
+- The SDK's error normalizer sets `userCancelled` from `code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR` whenever a rejection carries a code, so the two checks agree on iOS and Android.
 - In Expo Go, `react-native-purchases` runs in a JavaScript browser mode that needs a Test Store key (a platform key makes configure throw). `purchasePackage` then shows a JavaScript alert with **Test valid purchase**, **Test failed purchase**, and **Cancel** instead of a store sheet. Store purchases need a development build.
-- Disable the buy button while a purchase is in flight. StoreKit and Play Billing queue duplicate calls; your UI should not let the user fire them.
+- Disable the buy button while a purchase is in flight. On Android, and on iOS with StoreKit 1, the SDK rejects a second `purchasePackage` for the same product with `OPERATION_ALREADY_IN_PROGRESS_ERROR`, which `buy` above reports as a failure. On iOS with StoreKit 2, the default, nothing stops the second purchase.
 
 ## Verify
 
