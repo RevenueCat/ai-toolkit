@@ -81,7 +81,7 @@ if (
 import { View } from 'react-native';
 import RevenueCatUI from 'react-native-purchases-ui';
 
-export function PremiumScreen({ navigation }) {
+export function PremiumScreen({ navigation }: { navigation: { goBack(): void } }) {
   return (
     <View style={{ flex: 1 }}>
       <RevenueCatUI.Paywall

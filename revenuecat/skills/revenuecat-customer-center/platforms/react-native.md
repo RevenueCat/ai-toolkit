@@ -68,7 +68,7 @@ All callbacks are optional. The promise resolves when the Customer Center is dis
 import { View } from 'react-native';
 import RevenueCatUI from 'react-native-purchases-ui';
 
-export function SubscriptionSettingsScreen({ navigation }) {
+export function SubscriptionSettingsScreen({ navigation }: { navigation: { goBack(): void } }) {
   return (
     <View style={{ flex: 1 }}>
       <RevenueCatUI.CustomerCenterView
