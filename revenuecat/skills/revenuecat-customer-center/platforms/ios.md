@@ -119,8 +119,8 @@ final class SettingsViewController: UIViewController {
 
 - Customer Center is available on `iOS 15+` only. Guard the call site with `if #available(iOS 15, *)` if your deployment target is lower.
 - The view is self contained. Do not call `Purchases.shared.restorePurchases()` from outside when it is on screen; the Restore flow inside the view owns that path.
-- Refund request flows (Apple's `SKPaymentQueue.showRequestRefundController`) are triggered by the Customer Center only when the dashboard has the refund action enabled and the underlying transaction is eligible.
-- Dashboard configuration lives under **Customer Center** in the RevenueCat app. Without it, the view shows an empty state.
+- Refund requests go through StoreKit 2's `Transaction.beginRefundRequest(for:in:)`, which the Customer Center calls via `Purchases.shared.beginRefundRequest(forProduct:)`. Outside the Customer Center, call `beginRefundRequest(forProduct:)` or `beginRefundRequest(forEntitlement:)` yourself. The Customer Center offers the refund action only when the dashboard configuration includes it and the purchase is eligible: a paid App Store purchase the customer owns, not in a trial, inside the configured refund window.
+- Dashboard configuration lives under Project Settings → Monetization Tools → **Customer Center**. Projects start with a default configuration (missing purchase, cancel, refund request, change plans), so the view has actions before you customize anything.
 
 ## Verify
 
