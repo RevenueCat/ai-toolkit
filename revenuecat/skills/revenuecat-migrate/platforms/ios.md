@@ -70,7 +70,7 @@ Do not ship an interim build where both sides try to finish transactions.
 Major version upgrades change configuration shape, drop deprecated APIs, and shift default behavior in ways that move with each release. This skill does not duplicate the per-version diff. Read the canonical sources from the SDK repo:
 
 - **CHANGELOG**: <https://github.com/RevenueCat/purchases-ios/blob/main/CHANGELOG.md>. Walk entries from your installed version up to the target.
-- **Migration guides**: search the repo for files matching `*MIGRATION*.md` or a `migrations/` directory; major bumps usually ship a dedicated guide there. The release notes for the major version on <https://github.com/RevenueCat/purchases-ios/releases> typically link to it.
+- **Migration guides**: purchases-ios keeps them in `Sources/DocCDocumentation/DocCDocumentation.docc/` (`V4_API_Migration_guide.md`, `V5_API_Migration_guide.md`). RevenueCat's docs carry them too, for example <https://www.revenuecat.com/docs/sdk-guides/ios-native-4x-to-5x-migration>.
 - **Release notes**: each major version's release notes on the GitHub releases page summarize the breaking changes.
 
 Treat the SDK repo's docs as authoritative. Any version-specific diff written here would drift out of date.
