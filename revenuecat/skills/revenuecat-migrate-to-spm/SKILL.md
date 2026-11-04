@@ -13,10 +13,7 @@ CocoaPods trunk becomes read-only on December 2, 2026. Existing RevenueCat pods 
 
 RevenueCat likely comes from CocoaPods or Carthage when any of these is true:
 
-- `Podfile.lock` or `Podfile` lists `RevenueCat` or `PurchasesHybridCommon`. `Podfile.lock` is often missing or not committed, so check the `Podfile` too.
-- A Flutter, React Native, or Capacitor app has an iOS `Podfile` (`ios/` for Flutter and React Native, `ios/App/` for Capacitor). These Podfiles add the RevenueCat plugin automatically, so they don't name it.
-- A Cordova app depends on `cordova-plugin-purchases` 8.x or earlier in `package.json` or `config.xml`. Version 9 uses SPM. Don't rely on `platforms/`, which is usually not committed.
-- A Unity app's `ProjectSettings/GvhProjectSettings.xml` doesn't set `Google.IOSResolver.SwiftPackageManagerEnabled` to `True`. Don't rely on the exported Xcode project, which is usually not committed.
+- `Podfile.lock` or `Podfile` lists `RevenueCat` or `PurchasesHybridCommon`.
 - `Cartfile` lists `RevenueCat/purchases-ios`.
 
 If none is true, tell the user RevenueCat doesn't appear to come from CocoaPods or Carthage, and ask before continuing.
