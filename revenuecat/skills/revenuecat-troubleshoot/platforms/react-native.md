@@ -1,6 +1,6 @@
 # revenuecat-troubleshoot: React Native
 
-Work the universal checklist in `../SKILL.md` first. React Native bugs usually surface in JavaScript but are rooted in the underlying native SDK. The iOS and Android platform files in `platforms/` apply.
+Work the universal checklist in `../SKILL.md` first. React Native bugs usually surface in JavaScript but are rooted in the underlying native SDK. The iOS and Android platform files in `platforms/` apply to the native setup (store products, credentials, sandbox accounts), but not to logs: React Native routes the SDK logs to the JavaScript console, so use the log steps below instead of their Xcode and logcat checks.
 
 ## Turn on debug logging
 
@@ -64,7 +64,7 @@ A common report: one platform works, the other returns `INVALID_CREDENTIALS`. Ca
 
 ## Offerings empty or products missing
 
-- Log the output of `await Purchases.getOfferings()`. If the returned object has `current: null` or `current.availablePackages` is an empty array, the dashboard offering is misconfigured.
+- Log the output of `await Purchases.getOfferings()`. The native SDKs drop an offering that ends up with no packages, so a misconfigured current offering shows up as `current: null`, not as an empty `availablePackages`. Either the offering has no packages attached in the dashboard, or none of its products loaded from the store. If no offering has any products, `getOfferings` rejects with a configuration error.
 - Watch the `[RevenueCat]` lines for product lookup failures. Product IDs in the dashboard must match the store exactly, including case.
 
 ## Paywall does not render
