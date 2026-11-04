@@ -8,7 +8,7 @@ Find the latest stable release at <https://github.com/RevenueCat/purchases-ios/r
 
 ### Swift Package Manager
 
-In Xcode: target → **General → Frameworks, Libraries, and Embedded Content → +**, pick the `purchases-ios` package and add the `RevenueCatUI` library.
+In Xcode: target → **General → Frameworks, Libraries, and Embedded Content → +**, pick the RevenueCat package the app already uses (`purchases-ios-spm`, or `purchases-ios` in older setups) and add the `RevenueCatUI` library.
 
 For a `Package.swift`-based project:
 
@@ -16,11 +16,13 @@ For a `Package.swift`-based project:
 .target(
     name: "MyApp",
     dependencies: [
-        .product(name: "RevenueCat", package: "purchases-ios"),
-        .product(name: "RevenueCatUI", package: "purchases-ios"),
+        .product(name: "RevenueCat", package: "purchases-ios-spm"),
+        .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
     ]
 )
 ```
+
+If the manifest depends on `https://github.com/RevenueCat/purchases-ios` instead of the mirror, use `package: "purchases-ios"`.
 
 ### CocoaPods
 

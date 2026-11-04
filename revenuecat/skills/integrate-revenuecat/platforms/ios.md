@@ -11,8 +11,10 @@ Pick the dependency manager already in use.
 In Xcode: **File → Add Package Dependencies…**, enter:
 
 ```
-https://github.com/RevenueCat/purchases-ios
+https://github.com/RevenueCat/purchases-ios-spm.git
 ```
+
+This is the SPM mirror of `purchases-ios` that RevenueCat's install guide uses. It carries the same releases and products, downloads faster, and is the package the AdMob adapter depends on. If the app already depends on `https://github.com/RevenueCat/purchases-ios`, keep that package rather than adding a second one.
 
 Pick the version you resolved above and add the `RevenueCat` product to your app target. Also add `RevenueCatUI` if the user will want native paywalls later.
 
@@ -20,14 +22,14 @@ For a `Package.swift`-based project:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/RevenueCat/purchases-ios", from: "<latest>")
+    .package(url: "https://github.com/RevenueCat/purchases-ios-spm.git", from: "<latest>")
 ],
 targets: [
     .target(
         name: "MyApp",
         dependencies: [
-            .product(name: "RevenueCat", package: "purchases-ios"),
-            // .product(name: "RevenueCatUI", package: "purchases-ios"),
+            .product(name: "RevenueCat", package: "purchases-ios-spm"),
+            // .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
         ]
     )
 ]
