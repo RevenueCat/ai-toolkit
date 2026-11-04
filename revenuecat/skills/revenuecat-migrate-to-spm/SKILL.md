@@ -9,30 +9,23 @@ Use this skill when an app installs the RevenueCat SDK on iOS through CocoaPods 
 
 CocoaPods trunk becomes read-only on December 2, 2026. Existing RevenueCat pods stay installable, but apps must move to SPM to keep receiving RevenueCat's native SDK updates.
 
-## 1. Confirm the migration applies
+## 1. Identify the SDK and confirm it uses CocoaPods or Carthage
 
-The app installs RevenueCat through CocoaPods or Carthage when either is true:
+Find the RevenueCat SDK the app uses, then check whether it installs RevenueCat on iOS through CocoaPods or Carthage. If a hybrid SDK matches, use it, even if its `ios/` folder also matches a native iOS entry.
 
-- Its `Podfile.lock` or `Podfile` lists `RevenueCat` or `PurchasesHybridCommon`. Look in `ios/` for Flutter and React Native, `ios/App/` for Capacitor, `platforms/ios/` for Cordova, and the exported Xcode project for Unity.
-- Its `Cartfile` lists `RevenueCat/purchases-ios`.
-
-If neither is true, RevenueCat doesn't come from CocoaPods or Carthage. Tell the user and stop.
-
-## 2. Pick the guide
-
-Each SDK has a step by step guide. Pick the one for the RevenueCat SDK the app uses:
-
-- **Native iOS with CocoaPods**: <https://www.revenuecat.com/docs/sdk-guides/ios-native-cocoapods-to-spm-migration.md>
-- **Native iOS with Carthage**: <https://www.revenuecat.com/docs/sdk-guides/ios-native-carthage-to-spm-migration.md>
-- **Flutter** (`pubspec.yaml` depends on `purchases_flutter`): <https://www.revenuecat.com/docs/sdk-guides/flutter-cocoapods-to-spm-migration.md>
-- **React Native** (`package.json` depends on `react-native-purchases`): <https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration.md>. React Native's SPM integration is experimental. For Expo apps, recommend staying on CocoaPods: Expo's SPM support is still a preview, and common Expo libraries such as `expo-router` don't support SPM yet. Explain this to the user, and migrate if they confirm.
-- **Capacitor** (`package.json` depends on `@revenuecat/purchases-capacitor`): <https://www.revenuecat.com/docs/sdk-guides/capacitor-cocoapods-to-spm-migration.md>
-- **Unity** (`Packages/manifest.json` lists `com.revenuecat.purchases-unity`, or the project imported the RevenueCat `.unitypackage`): <https://www.revenuecat.com/docs/sdk-guides/unity-cocoapods-to-spm-migration.md>
-- **Cordova** (`package.json` depends on `cordova-plugin-purchases`): <https://github.com/RevenueCat/cordova-plugin-purchases/blob/main/migrations/v9-MIGRATION.md#ios>
+- **Flutter** (`pubspec.yaml` depends on `purchases_flutter`): uses CocoaPods when `ios/Podfile` (or `macos/Podfile`) exists and `ios/Runner.xcodeproj/project.pbxproj` doesn't reference `FlutterGeneratedPluginSwiftPackage`, or when `purchases_flutter` is older than 9.10.0. Guide: <https://www.revenuecat.com/docs/sdk-guides/flutter-cocoapods-to-spm-migration.md>
+- **React Native** (`package.json` depends on `react-native-purchases`): uses CocoaPods when `ios/Podfile` exists and there is no `ios/*.xcodeproj/.spm-injected.json`. Expo apps use CocoaPods, even when `ios/` isn't committed. Guide: <https://www.revenuecat.com/docs/sdk-guides/react-native-cocoapods-to-spm-migration.md>. React Native's SPM integration is experimental. For Expo apps, recommend staying on CocoaPods: Expo's SPM support is still a preview, and common Expo libraries such as `expo-router` don't support SPM yet. Explain this to the user, and migrate if they confirm.
+- **Capacitor** (`package.json` depends on `@revenuecat/purchases-capacitor`): uses CocoaPods when `ios/App/Podfile` exists. Projects on SPM have `ios/App/CapApp-SPM/Package.swift` instead. Guide: <https://www.revenuecat.com/docs/sdk-guides/capacitor-cocoapods-to-spm-migration.md>
+- **Unity** (`Packages/manifest.json` lists `com.revenuecat.purchases-unity`, or the project imported the RevenueCat `.unitypackage`): uses CocoaPods unless `ProjectSettings/GvhProjectSettings.xml` sets `Google.IOSResolver.SwiftPackageManagerEnabled` to `True`, and always when the SDK is older than the guide's minimum SPM version. Guide: <https://www.revenuecat.com/docs/sdk-guides/unity-cocoapods-to-spm-migration.md>
+- **Cordova** (`package.json` depends on `cordova-plugin-purchases`): uses CocoaPods on 8.x or earlier. Version 9 uses SPM. Check the version in `package.json` or `config.xml`, since `platforms/` is usually not committed. Guide: <https://github.com/RevenueCat/cordova-plugin-purchases/blob/main/migrations/v9-MIGRATION.md#ios>
+- **Native iOS with CocoaPods**: `Podfile` or `Podfile.lock` lists `RevenueCat`. Guide: <https://www.revenuecat.com/docs/sdk-guides/ios-native-cocoapods-to-spm-migration.md>
+- **Native iOS with Carthage**: `Cartfile` or `Cartfile.resolved` lists `RevenueCat/purchases-ios`. Guide: <https://www.revenuecat.com/docs/sdk-guides/ios-native-carthage-to-spm-migration.md>
 
 The index at <https://www.revenuecat.com/docs/sdk-guides/spm-migration-guides-index.md> lists every guide.
 
-## 3. Migrate
+If RevenueCat already comes from SPM, tell the user and stop. If the project doesn't show which one it uses, ask the user.
+
+## 2. Migrate
 
 Fetch the guide's Markdown version and follow it in order.
 
@@ -41,12 +34,12 @@ Fetch the guide's Markdown version and follow it in order.
 - Only RevenueCat has to leave CocoaPods. Leave unrelated pods alone unless the guide says otherwise.
 - Keep the migration in its own change, separate from feature work or other dependency updates.
 
-## 4. Verify
+## 3. Verify
 
 Do not declare the migration done until:
 
 1. The guide's verification steps pass.
-2. `Podfile.lock` and `Podfile` (if they remain) no longer list `RevenueCat` or `PurchasesHybridCommon`, and `Cartfile` (if one remains) no longer lists `RevenueCat/purchases-ios`.
+2. `Podfile.lock` and `Podfile` (if they remain) no longer list `RevenueCat` or `PurchasesHybridCommon`, and `Cartfile` and `Cartfile.resolved` (if they remain) no longer list `RevenueCat/purchases-ios`.
 3. The app builds.
 
 Then ask the user to run their usual purchase flow in a sandbox build before shipping.
