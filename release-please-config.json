@@ -1,23 +1,24 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "include-component-in-tag": false,
+  "changelog-sections": [
+    { "type": "feat", "section": "Added" },
+    { "type": "fix", "section": "Fixed" },
+    { "type": "perf", "section": "Changed" },
+    { "type": "revert", "section": "Changed" },
+    { "type": "docs", "section": "Documentation" },
+    { "type": "chore", "hidden": true },
+    { "type": "ci", "hidden": true },
+    { "type": "build", "hidden": true },
+    { "type": "refactor", "hidden": true },
+    { "type": "test", "hidden": true },
+    { "type": "style", "hidden": true }
+  ],
   "packages": {
     ".": {
       "release-type": "node",
       "package-name": "ai-toolkit",
-      "changelog-sections": [
-        { "type": "feat", "section": "Added" },
-        { "type": "fix", "section": "Fixed" },
-        { "type": "perf", "section": "Changed" },
-        { "type": "revert", "section": "Changed" },
-        { "type": "docs", "section": "Documentation" },
-        { "type": "chore", "hidden": true },
-        { "type": "ci", "hidden": true },
-        { "type": "build", "hidden": true },
-        { "type": "refactor", "hidden": true },
-        { "type": "test", "hidden": true },
-        { "type": "style", "hidden": true }
-      ],
+      "exclude-paths": ["revenuecat-play-billing"],
       "extra-files": [
         { "type": "json", "path": ".claude-plugin/marketplace.json", "jsonpath": "$.plugins[?(@.name=='revenuecat')].version" },
         { "type": "json", "path": ".claude-plugin/plugin.json", "jsonpath": "$.version" },
@@ -27,6 +28,18 @@
         { "type": "json", "path": "revenuecat/.codex-plugin/plugin.json", "jsonpath": "$.version" },
         { "type": "json", "path": "revenuecat/.cursor-plugin/plugin.json", "jsonpath": "$.version" },
         { "type": "json", "path": "revenuecat/gemini-extension.json", "jsonpath": "$.version" }
+      ]
+    },
+    "revenuecat-play-billing": {
+      "release-type": "simple",
+      "component": "revenuecat-play-billing",
+      "include-component-in-tag": true,
+      "extra-files": [
+        { "type": "json", "path": "/.claude-plugin/marketplace.json", "jsonpath": "$.plugins[?(@.name=='revenuecat-play-billing')].version" },
+        { "type": "json", "path": "plugin.json", "jsonpath": "$.version" },
+        { "type": "json", "path": ".claude-plugin/plugin.json", "jsonpath": "$.version" },
+        { "type": "json", "path": ".codex-plugin/plugin.json", "jsonpath": "$.version" },
+        { "type": "json", "path": ".cursor-plugin/plugin.json", "jsonpath": "$.version" }
       ]
     }
   }
