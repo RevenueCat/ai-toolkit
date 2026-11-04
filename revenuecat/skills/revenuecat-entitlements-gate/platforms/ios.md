@@ -81,4 +81,4 @@ Task {
 
 1. A sandbox user with the entitlement renders `PremiumView`; a fresh user renders `PaywallView`.
 2. Make a sandbox purchase. The stream fires and the UI swaps without relaunching.
-3. Revoke the entitlement in the dashboard (or let the sandbox subscription expire). Within a few minutes, or on next app foreground, the stream emits the downgrade.
+3. Revoke the entitlement in the dashboard (or let the sandbox subscription expire). The SDK does not poll, so the stream stays quiet while the app stays open unless something fetches `CustomerInfo`. Wait at least five minutes, background the app, and bring it back: the foreground refresh fetches `CustomerInfo` and the stream emits the downgrade.
