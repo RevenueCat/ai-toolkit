@@ -28,7 +28,7 @@ flutter pub get
 
 Then rebuild with `flutter run`. Flutter reinstalls the iOS native code during the build, through Swift Package Manager or CocoaPods, so a separate `pod install` isn't needed.
 
-Hot restart does **not** re-run native initialization. After changing the API key or `Purchases.configure` call, do a full stop and relaunch. Hot reload / hot restart keep the old SDK state.
+Hot reload does not re-run `main`, so it keeps the old SDK configuration. Hot restart calls `Purchases.configure` again, and with changed values the native SDK replaces its instance and logs "Purchases instance already set". After changing the API key or the `Purchases.configure` call, do a full stop and relaunch so you are not debugging a replaced instance.
 
 ## Platform branching errors
 

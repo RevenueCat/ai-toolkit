@@ -82,9 +82,9 @@ When testing, watch the platform console, not just the Dart console:
 
 The Dart `print` output does not show native SDK logs.
 
-## Hot restart does not re-configure the SDK
+## Restart fully after changing the configuration
 
-`Purchases.configure(...)` runs once per native process launch. After changing the API key, observer mode setting, or any configuration value, kill the app fully and relaunch. Hot reload and hot restart keep the old SDK state.
+Hot reload does not re-run `main`, so the SDK keeps its old configuration. Hot restart re-runs `main` and calls `Purchases.configure(...)` again: with unchanged values the native SDK ignores the call, and with changed values it replaces the configured instance and logs "Purchases instance already set". After changing the API key, observer mode setting, or any configuration value, kill the app fully and relaunch so the test starts from one cleanly configured instance.
 
 ## Verify
 
