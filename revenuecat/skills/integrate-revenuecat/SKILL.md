@@ -8,7 +8,7 @@ description: End-to-end RevenueCat integration — sets up the dashboard side vi
 Use this skill when the user wants to add RevenueCat to a project for the first time, or to reconfigure the SDK with a public API key. The skill covers two halves:
 
 1. **Dashboard side** — set up the project, register the app, and obtain the public API key, through the RevenueCat MCP server or the `rc` CLI.
-2. **App side** — install the Purchases SDK, call `Purchases.configure(…)` at app entry, and verify the configuration banner in the logs.
+2. **App side** — install the Purchases SDK, call `Purchases.configure(…)` at app entry, and verify the SDK's configure log line.
 
 Once the SDK is configured, settle **how the paywall is built** (Section 5c) before writing any paywall code.
 
@@ -97,8 +97,8 @@ Each platform file is self-contained: install command, exact `configure` snippet
 Do not claim setup is complete until:
 
 1. The project **builds** (Xcode build, `./gradlew assembleDebug`, `flutter run`, `npx react-native run-ios`, or the KMP equivalent).
-2. The app launches and the RevenueCat SDK logs a configuration banner in the console / logcat / Metro output (each platform file describes the expected log line).
-3. No authentication errors appear on the first SDK network call. A wrong API key surfaces as an auth error log as soon as the app fetches offerings.
+2. The app launches and the RevenueCat SDK logs its configure line at debug level (`SDK Version - …`). Each platform file says which log level to set and where the line appears.
+3. No authentication or credentials errors appear in the logs. A wrong API key surfaces on the SDK's first network calls, which start during configure.
 
 If the user only asked to "install" without running the app, tell them what to look for in the logs when they do run it.
 
