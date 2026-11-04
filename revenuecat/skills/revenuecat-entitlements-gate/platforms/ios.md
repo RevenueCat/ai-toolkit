@@ -73,7 +73,7 @@ Task {
 
 ## Notes
 
-- `customerInfo()` requires iOS 13+. For older targets, use `getCustomerInfo(completion:)`.
+- `customerInfo()` works on every iOS version the SDK supports (13.0 and later). Code without async/await uses `getCustomerInfo(completion:)`.
 - Replace `"premium"` with the entitlement identifier configured in the RevenueCat dashboard. It is case sensitive.
 - Do not call `customerInfo()` in a tight loop. One initial fetch plus the stream is sufficient for the lifetime of the app.
 

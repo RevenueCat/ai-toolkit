@@ -86,7 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ## Notes
 
 - Use the **iOS** public SDK key: it starts with `appl_`. Find it in the RevenueCat dashboard under Project → API keys.
-- Deployment target: async/await SDK APIs require iOS 13+. For older targets, completion handler variants exist (`getOfferings(completion:)`, `purchase(product:completion:)`).
+- Deployment target: the SDK requires iOS 13.0 or later, and the core async/await calls (`offerings()`, `customerInfo()`, `purchase(package:)`) work on every target it supports. A few newer APIs need more, such as refund requests (iOS 15) and `showStoreMessages` (iOS 16). Completion handler variants (`getOfferings(completion:)`, `purchase(product:completion:)`) are there for code that does not use async/await.
 - For sandbox testing with a StoreKit Configuration File, attach it to the scheme (Run → Options → StoreKit Configuration). See `revenuecat-testing-setup` when available.
 
 ## Verify

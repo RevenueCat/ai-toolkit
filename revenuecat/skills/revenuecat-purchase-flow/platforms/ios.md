@@ -91,7 +91,7 @@ Surface this from a visible "Restore purchases" button in the paywall and/or set
 
 ## Notes
 
-- `purchase(package:)` throws on iOS 13+ via `async`. For older targets, the completion variant `purchase(package:completion:)` delivers `(transaction, customerInfo, error, userCancelled)`.
+- The async `purchase(package:)` throws on failure. For code without async/await, the completion variant `purchase(package:completion:)` delivers `(transaction, customerInfo, error, userCancelled)`.
 - `ErrorCode` is a Swift enum conforming to `Error`. Because the SDK throws a `PublicError` (an `NSError`), compare against `ErrorCode.<case>.rawValue` on the `NSError.code` instead of casting with `as?`.
 - `offerings.current` reflects the current offering for this user. Targeting rules in the dashboard can change it between users.
 
