@@ -94,4 +94,4 @@ Expose this from a visible "Restore purchases" button on the paywall and/or sett
 1. A sandbox purchase of a package flips the `entitlements.active['premium']` flag and your listener re-renders gated screens.
 2. Dismissing the native purchase sheet returns `cancelled` and does not show an alert.
 3. On a fresh install signed into the same store account, "Restore purchases" re-grants access.
-4. Platform logs (Xcode console on iOS, `adb logcat` filtered by `Purchases` on Android) show the full transaction lifecycle. Metro's JS console will not.
+4. The `[RevenueCat]` lines in the JavaScript console (React Native DevTools, the Expo CLI terminal, `adb logcat -s ReactNativeJS`, or the Xcode console) show the full transaction lifecycle. `react-native-purchases` routes the native SDK logs there.

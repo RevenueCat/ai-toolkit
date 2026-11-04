@@ -81,12 +81,15 @@ Every bundle identifier (iOS) or applicationId (Android) that you test must be r
 
 If you ship multiple environments (dev, staging, prod) with different identifiers, each one needs its own dashboard app entry and its own API key. Branch on `Platform.OS` and an environment variable (or a build-time constant) to pick the right key.
 
-## Platform consoles for logs
+## Where the SDK logs appear
 
-Metro's JS console does not show native SDK logs. Watch:
+Unless the app passes its own handler to `Purchases.setLogHandler`, `Purchases.configure` routes the native SDK logs through the JavaScript console with a `[RevenueCat]` prefix. They do not appear as native `[Purchases]` lines, so `adb logcat -s Purchases` shows nothing. Watch:
 
-- iOS → Xcode console (when the app is attached) or Console.app filtering by the bundle ID.
-- Android → Android Studio Logcat or `adb logcat -s Purchases`.
+- React Native DevTools or the Expo CLI terminal.
+- Android → `adb logcat -s ReactNativeJS`, React Native's tag for JavaScript console output.
+- iOS → Xcode console while the app is attached.
+
+Debug lines go through `console.debug`, so a console that hides debug output hides them too.
 
 ## Reload does not re-configure the SDK
 
@@ -111,7 +114,7 @@ Stale caches let the JS side bind to an old native module and produce confusing 
 
 1. `Purchases.setLogLevel(LOG_LEVEL.DEBUG);` before `configure`.
 2. You are running a dev client (not Expo Go). On Android, a license tester who opted in to the testing track installed it, either from that track or as a debug build.
-3. A test purchase succeeds. The native platform console shows the SDK posting the transaction.
+3. A test purchase succeeds. The `[RevenueCat]` lines in the JavaScript console show the SDK posting the transaction.
 4. The RevenueCat dashboard Sandbox view shows the transaction on the expected `appUserID`.
 5. `await Purchases.getCustomerInfo()` shows the expected entitlement active.
 6. Drop log level back to `LOG_LEVEL.INFO` before shipping.

@@ -86,7 +86,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. App builds and launches on both iOS and Android.
-2. Native platform console (Xcode / logcat) shows the `Purchases is configured` banner.
+2. With `LOG_LEVEL.DEBUG`, the JavaScript console shows `[RevenueCat]` lines from configure, including one with `SDK Version - ` (see `integrate-revenuecat/platforms/react-native.md` for where to read it).
 3. A sandbox purchase on each platform shows on the RevenueCat dashboard Sandbox view with the right appUserID.
 4. A user with a pre migration active subscription still shows that entitlement active.
 5. `Purchases.setLogLevel(LOG_LEVEL.INFO);` before shipping.

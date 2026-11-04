@@ -71,4 +71,4 @@ function RootScreen() {
 
 1. A sandbox user with the entitlement renders `<PremiumScreen />`; a fresh user renders `<PaywallScreen />`.
 2. Make a sandbox purchase. The listener fires, state updates, and the component re-renders without reloading the bundle.
-3. On iOS check the Xcode console, on Android check `adb logcat` filtered by `Purchases`. Metro's JS console will not show native SDK logs.
+3. Read the SDK logs as `[RevenueCat]` lines in the JavaScript console (React Native DevTools, the Expo CLI terminal, `adb logcat -s ReactNativeJS`, or the Xcode console). `react-native-purchases` routes the native logs there, so filtering logcat by `Purchases` shows nothing.

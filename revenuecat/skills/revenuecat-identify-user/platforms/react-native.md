@@ -85,4 +85,4 @@ function Root() {
 1. Sign in your test user. The RevenueCat dashboard Customer page shows the appUserID you passed, not `$RCAnonymousID:…`.
 2. Sign out. A subsequent `Purchases.getCustomerInfo()` returns `originalAppUserId` starting with `$RCAnonymousID:`.
 3. Sign in as a different user. Their entitlement state appears and the previous user's does not.
-4. Platform logs (Xcode console on iOS, `adb logcat` filtered by `Purchases` on Android) show the logIn / logOut lifecycle.
+4. The `[RevenueCat]` lines in the JavaScript console (React Native DevTools, the Expo CLI terminal, `adb logcat -s ReactNativeJS`, or the Xcode console) show the logIn / logOut lifecycle. `react-native-purchases` routes the native SDK logs there.

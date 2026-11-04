@@ -88,4 +88,4 @@ Rewarded ads only: `trackRewardedAdPromptShown({ mediatorName, placement, adUnit
 
 ## Verify
 
-Native SDK logs appear in Xcode or logcat, not Metro. On iOS, background and reopen the app to flush events. Check the Ads page with **Sandbox data** on.
+SDK logs appear as `[RevenueCat]` lines in the JavaScript console (React Native DevTools, the Expo CLI terminal, `adb logcat -s ReactNativeJS`, or the Xcode console), not as native `[Purchases]` lines. On iOS, background and reopen the app to flush events. Check the Ads page with **Sandbox data** on.

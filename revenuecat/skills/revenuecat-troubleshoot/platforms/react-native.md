@@ -10,12 +10,13 @@ import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 Purchases.setLogLevel(LOG_LEVEL.DEBUG);
 ```
 
-Call this before `Purchases.configure(...)`. The SDK logs on the **native** console, not the Metro bundler console:
+Call this before `Purchases.configure(...)`. Unless the app passes its own handler to `Purchases.setLogHandler`, `configure` routes the native SDK logs through the **JavaScript** console with a `[RevenueCat]` prefix. They do not appear as native `[Purchases]` lines, so `adb logcat -s Purchases` shows nothing. Read them in:
 
-- iOS → Xcode console when the app is attached, or Console.app filtering by the app's bundle ID.
-- Android → Android Studio Logcat, or `adb logcat -s Purchases`.
+- React Native DevTools or the Expo CLI terminal.
+- Android → `adb logcat -s ReactNativeJS`, React Native's tag for JavaScript console output.
+- iOS → Xcode console while the app is attached.
 
-If you only see JS output in Metro, you are not looking at the SDK logs. This catches most "I have no logs" reports.
+Debug lines go through `console.debug`, so a console that hides debug output hides them too. With `LOG_LEVEL.DEBUG`, configure prints a line containing `SDK Version - ` (the native SDK's version). If no `[RevenueCat]` line appears at all, check for a custom `Purchases.setLogHandler` before concluding that `configure` never ran.
 
 ## Expo Go vs dev client
 
@@ -61,7 +62,7 @@ A common report: one platform works, the other returns `INVALID_CREDENTIALS`. Ca
 ## Offerings empty or products missing
 
 - Log the output of `await Purchases.getOfferings()`. If the returned object has `current: null` or `current.availablePackages` is an empty array, the dashboard offering is misconfigured.
-- Watch the native console for product lookup failures. Product IDs in the dashboard must match the store exactly, including case.
+- Watch the `[RevenueCat]` lines for product lookup failures. Product IDs in the dashboard must match the store exactly, including case.
 
 ## Paywall does not render
 
@@ -86,4 +87,4 @@ When the iOS native code stays on the old version after a `react-native-purchase
 
 ## Verify
 
-Reproduce with `LOG_LEVEL.DEBUG` and watch the native platform console. Confirm the success log, then confirm the RevenueCat dashboard shows the transaction. Drop back to `LOG_LEVEL.INFO` before shipping.
+Reproduce with `LOG_LEVEL.DEBUG` and watch the `[RevenueCat]` lines in the JavaScript console. Confirm the success log, then confirm the RevenueCat dashboard shows the transaction. Drop back to `LOG_LEVEL.INFO` before shipping.

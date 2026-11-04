@@ -61,9 +61,6 @@ export default function App() {
 
 ## Verify
 
-Run the app. Expect the native SDK logs:
+Run the app. Unless the app passes its own handler to `Purchases.setLogHandler`, `Purchases.configure` routes the native SDK logs through the JavaScript console with a `[RevenueCat]` prefix, so they do not appear as native `[Purchases]` lines in Xcode or logcat. With `LOG_LEVEL.DEBUG`, configure prints a line like `[RevenueCat] ℹ️ SDK Version - …` on both platforms. The version is the native SDK's (purchases-ios or purchases-android), not the `react-native-purchases` version.
 
-- iOS → Xcode console: `[Purchases] - INFO: 😻‍👼 Purchases is configured`
-- Android → Android Studio logcat (or `adb logcat`) with tag `Purchases`: `ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`
-
-Metro bundler (JS) console will not show the native SDK logs; you need the platform logs.
+Read the JavaScript console in React Native DevTools or the Expo CLI terminal, on Android in logcat under React Native's `ReactNativeJS` tag (`adb logcat -s ReactNativeJS`), or on iOS in the Xcode console. Debug lines go through `console.debug`, which React Native DevTools files under the Verbose level; enable Verbose in its log levels menu if the line does not show.
