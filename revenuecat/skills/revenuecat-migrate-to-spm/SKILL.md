@@ -47,4 +47,6 @@ Do not declare the migration done until:
 
 1. The guide's verification steps pass.
 2. `Podfile.lock` (if one remains) no longer lists `RevenueCat` or `PurchasesHybridCommon`, and `Cartfile` (if one remains) no longer lists `RevenueCat/purchases-ios`.
-3. The app builds, and a sandbox purchase succeeds with the expected entitlement.
+3. The app builds.
+
+Then ask the user to run their usual purchase flow in a sandbox build before shipping.
