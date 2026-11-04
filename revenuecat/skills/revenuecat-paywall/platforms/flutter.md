@@ -28,7 +28,13 @@ Minimum iOS deployment target is **15.0** (required by `RevenueCatUI`). Set it i
 platform :ios, '15.0'
 ```
 
-Android minimum SDK is **24**. `purchases_ui_flutter` uses Jetpack Compose on Android; the Flutter embedding wraps that for you.
+Android minimum SDK is **24**. Paywalls on Android also need `MainActivity` to extend `FlutterFragmentActivity` instead of the `FlutterActivity` that `flutter create` generates. Otherwise `presentPaywall` and `presentPaywallIfNeeded` fail with a `PlatformException` (`PAYWALLS_MISSING_WRONG_ACTIVITY`), and the native `PaywallView` throws an error that asks for `FlutterFragmentActivity`. In `android/app/src/main/kotlin/<your package path>/MainActivity.kt`:
+
+```kotlin
+import io.flutter.embedding.android.FlutterFragmentActivity
+
+class MainActivity : FlutterFragmentActivity()
+```
 
 ## Implement
 

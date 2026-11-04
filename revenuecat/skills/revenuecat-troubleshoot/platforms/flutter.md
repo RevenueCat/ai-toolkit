@@ -54,6 +54,7 @@ A common report: the Android build works but iOS shows "invalid credentials". Ca
 
 - An offering with a paywall template configured in the dashboard.
 - Minimum iOS 15 for the iOS renderer. Android minSdk 24 for the Android renderer. Check your deployment targets.
+- On Android, `MainActivity` extending `FlutterFragmentActivity`. With the default `FlutterActivity`, `presentPaywall` fails with `PAYWALLS_MISSING_WRONG_ACTIVITY`.
 - A fresh offerings fetch after the dashboard was configured. Cached stale offerings without the paywall will render nothing.
 
 ## Entitlement not active after purchase
