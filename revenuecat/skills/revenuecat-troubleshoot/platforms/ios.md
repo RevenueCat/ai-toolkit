@@ -53,7 +53,7 @@ If `Purchases.shared.offerings()` returns an `Offerings` object with `current ==
 
 For `RevenueCatUI` paywalls:
 
-- A paywall template must be configured on the offering in the dashboard. An offering without a paywall renders nothing.
+- A paywall must be attached to the offering in the dashboard and published. An offering without one does not render blank: RevenueCatUI shows its default fallback paywall with the offering's packages, and in debug builds a "No Paywall configured" warning.
 - The paywall view requires a valid `Offering` instance. If you fetched a stale cached offerings object before the dashboard was configured, restart the app to force a refetch.
 - On iOS 13, the paywall UI is not available. `RevenueCatUI` targets iOS 15+. Check your deployment target.
 
