@@ -55,7 +55,7 @@ Flutter supports multiple ways to install a test build. Only the signed, correct
 ### iOS
 
 - `flutter run` on a connected iOS device with a development provisioning profile works for sandbox testing with a sandbox Apple ID.
-- `flutter build ipa` → distribute via TestFlight for TestFlight style testing. Note: TestFlight purchases land on the **production** dashboard view, not sandbox.
+- `flutter build ipa` → distribute via TestFlight for TestFlight style testing. Apps installed from TestFlight run in Apple's sandbox environment, so their purchases show in the dashboard's **sandbox** data, not production, and subscriptions renew daily.
 
 ### Android
 
