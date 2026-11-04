@@ -65,7 +65,7 @@ function RootScreen() {
 
 - Always call `removeCustomerInfoUpdateListener` on unmount. Listeners registered without cleanup accumulate across navigation.
 - Replace `'premium'` with the entitlement identifier configured in the RevenueCat dashboard. It is case sensitive.
-- Under Expo, `react-native-purchases` requires a development build. Entitlement calls throw on Expo Go. Verify with `npx expo start --dev-client`.
+- In Expo Go, `react-native-purchases` runs in a JavaScript Preview API Mode. `getCustomerInfo` works there with a Test Store key (a platform key makes `configure` throw), but `addCustomerInfoUpdateListener` callbacks never fire, so the hook keeps its seeded value. Test the listener on a development build with `npx expo start --dev-client`.
 
 ## Verify
 

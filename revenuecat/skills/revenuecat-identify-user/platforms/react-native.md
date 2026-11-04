@@ -77,7 +77,7 @@ function Root() {
 ## Notes
 
 - Use a stable opaque identifier (UUID / hash). Do not pass an email address, phone number, or a raw integer database id.
-- Under Expo, `Purchases.logIn` requires a development build. It throws in Expo Go because the native module is not linked.
+- In Expo Go, `react-native-purchases` runs in a JavaScript Preview API Mode. `Purchases.logIn` and `logOut` work there with a Test Store key, while a platform key makes `configure` throw and every later call reject as not configured. Use a development build to test against the stores.
 - Any purchase made anonymously before `Purchases.logIn` is aliased onto the identified user automatically on the first login with that id.
 
 ## Verify

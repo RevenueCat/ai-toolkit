@@ -1,6 +1,6 @@
 # revenuecat-testing-setup: React Native
 
-`react-native-purchases` runs against the native iOS and Android SDKs. Testing an RN app means testing each platform against its native testing channel. RN itself does not add a testing mode.
+`react-native-purchases` runs against the native iOS and Android SDKs. Testing an RN app means testing each platform against its native testing channel. Apart from the Expo Go preview mode below, RN itself does not add a testing mode.
 
 ## Test Store (RevenueCat synthetic store)
 
@@ -51,17 +51,18 @@ Follow the platform files directly:
 - iOS → `revenuecat-testing-setup/platforms/ios.md`. Prefer a real sandbox Apple ID for RevenueCat dashboard verification.
 - Android → `revenuecat-testing-setup/platforms/android.md`. Test purchases need a license tester who has opted in to an internal or closed testing track.
 
-## Dev client is required (Expo)
+## Dev client is required for the stores (Expo)
 
-Expo Go cannot run `react-native-purchases`. Any attempt to call the SDK throws a "native module not found" error. Produce a dev client:
+Expo Go has no native module for `react-native-purchases`, so the SDK switches to a JavaScript browser mode there (it logs "Using RevenueCat in Browser Mode"). Use a Test Store key: an `appl_` or `goog_` key makes `Purchases.configure` throw "Invalid API key. The native store is not available when running inside Expo Go…". With a Test Store key, `purchasePackage` shows a JavaScript alert with the same three buttons, `addCustomerInfoUpdateListener` callbacks never fire, and `react-native-purchases-ui` does not show the native paywall or Customer Center. Sandbox and store testing need a development build:
 
 ```bash
-npx expo prebuild # bare workflow: generate native projects
-# or
+npx expo install expo-dev-client
 eas build --profile development
+# or build locally:
+npx expo run:ios # or npx expo run:android
 ```
 
-Install the dev client and reload. Expo Go itself cannot be fixed to support purchase native modules.
+Install the development build and reload.
 
 ## Build the right build for each store
 

@@ -86,7 +86,7 @@ Expose this from a visible "Restore purchases" button on the paywall and/or sett
 ## Notes
 
 - The SDK sets `error.userCancelled = (error.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR)` inside the reject path, so the shortcut `e.userCancelled === true` is safe on both iOS and Android.
-- Under Expo you must be on a development build. `purchasePackage` throws in Expo Go because the native module is missing.
+- In Expo Go, `react-native-purchases` runs in a JavaScript browser mode that needs a Test Store key (a platform key makes configure throw). `purchasePackage` then shows a JavaScript alert with **Test valid purchase**, **Test failed purchase**, and **Cancel** instead of a store sheet. Store purchases need a development build.
 - Disable the buy button while a purchase is in flight. StoreKit and Play Billing queue duplicate calls; your UI should not let the user fire them.
 
 ## Verify

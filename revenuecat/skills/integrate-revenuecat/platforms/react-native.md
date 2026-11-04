@@ -26,7 +26,7 @@ npx expo install react-native-purchases
 # npx expo install react-native-purchases-ui
 ```
 
-`react-native-purchases` requires a **development build**. It will not work in Expo Go because it links native code. Produce a dev client with `npx expo prebuild` (bare workflow) or `eas build --profile development`.
+Expo Go has no native module for `react-native-purchases`, so the SDK switches to a JavaScript browser mode there (it logs "Using RevenueCat in Browser Mode"). Use a Test Store API key (`test_…`): an `appl_` or `goog_` key makes `Purchases.configure` throw, and purchases are simulated. Store purchases need a **development build**: `npx expo install expo-dev-client`, then `eas build --profile development` or a local `npx expo run:ios` / `npx expo run:android`.
 
 ## Configure
 
@@ -57,7 +57,7 @@ export default function App() {
 - Two public SDK keys, one per platform. Branch on `Platform.OS`.
 - Deployment targets: iOS 13+, Android minSdk 21.
 - `Purchases.configure` is synchronous; it kicks off async initialization internally. You can call `getOfferings()` right after without awaiting configure.
-- If running under Expo, confirm the user is on a dev client (not Expo Go) before testing. Purchase APIs will throw otherwise.
+- If running under Expo, confirm the user is on a development build (not Expo Go) before testing store purchases. In Expo Go a platform key makes `configure` throw, so use a Test Store key there, and purchases are simulated (see Expo above).
 
 ## Verify
 

@@ -20,17 +20,20 @@ Debug lines go through `console.debug`, so a console that hides debug output hid
 
 ## Expo Go vs dev client
 
-`react-native-purchases` links native code and will throw if run in Expo Go. Symptom: any call to `Purchases.configure` or `Purchases.getOfferings` rejects with a "native module not found" error.
+Expo Go has no native module for `react-native-purchases`, so the SDK switches to a JavaScript Preview API Mode there. Symptom: with an `appl_` or `goog_` key, `Purchases.configure` throws "Invalid API key. The native store is not available when running inside Expo Go…", and every later call such as `Purchases.getOfferings` rejects because the SDK is not configured. A Test Store key works in Expo Go, but purchases are simulated and customer info listeners never fire.
+
+A "[RevenueCat] Native module (RNPurchases) not found" error is a different problem: the app is not Expo Go, but the installed build does not include the native module. Rebuild it after installing the package.
 
 Fix: produce a development build.
 
 ```bash
-npx expo prebuild # bare workflow
-# or
+npx expo install expo-dev-client
 eas build --profile development
+# or build locally:
+npx expo run:ios # or npx expo run:android
 ```
 
-Install the dev client, then reload. Expo Go itself cannot be fixed to support this.
+Install the development build, then reload.
 
 ## Cache problems after a dependency change
 

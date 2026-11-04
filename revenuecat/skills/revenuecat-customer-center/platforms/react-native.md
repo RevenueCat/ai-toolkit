@@ -26,7 +26,7 @@ If the app uses React Native's Swift Package Manager integration (React Native 0
 npx expo install react-native-purchases-ui
 ```
 
-`react-native-purchases-ui` links native code. It will not work in Expo Go. Use a **development build**: `npx expo prebuild` (bare) or `eas build --profile development`.
+`react-native-purchases-ui` links native code. Expo Go does not have it, so the package switches to a Preview API Mode there and never shows the Customer Center: `<RevenueCatUI.CustomerCenterView />` renders a placeholder, `presentCustomerCenter()` opens nothing, and `presentCustomerCenter({ callbacks })` throws a `TypeError` (react-native-purchases-ui 11.0.0), so do not call it there. Use a **development build**: `npx expo install expo-dev-client`, then `eas build --profile development` or a local `npx expo run:ios` / `npx expo run:android`.
 
 Deployment targets: iOS 15+, Android minSdk 24 (Compose requirement on the native side).
 
@@ -88,7 +88,7 @@ export function SubscriptionSettingsScreen({ navigation }) {
 
 ## Notes
 
-- `react-native-purchases-ui` is iOS + Android only. There is no web or desktop target.
+- The Customer Center is iOS + Android only. On web (`react-native-web`), `<RevenueCatUI.CustomerCenterView />` renders a placeholder, `presentCustomerCenter()` opens nothing, and passing `callbacks` throws a `TypeError`. There is no desktop target.
 - Refund requests are iOS only. `onRefundRequestStarted` / `onRefundRequestCompleted` never fire on Android; the UI deep links into Google Play's subscriptions screen instead.
 - `shouldShowCloseButton` only affects iOS. Android always shows a close button regardless of this prop.
 - `<RevenueCatUI.CustomerCenterView />` is a native view host. Wrap it in `<View style={{ flex: 1 }} />` or give it an explicit height. Zero-size constraints render a blank view.
