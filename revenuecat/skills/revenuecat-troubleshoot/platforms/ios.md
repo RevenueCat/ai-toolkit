@@ -43,10 +43,10 @@ TestFlight builds run in Apple's sandbox environment, not production. Their purc
 
 ## Offerings come back empty
 
-If `Purchases.shared.offerings()` returns an `Offerings` object with `current == nil` or `current?.availablePackages.isEmpty == true`:
+If `Purchases.shared.offerings()` throws, or returns an `Offerings` object with `current == nil`:
 
 - Check the log for `Error fetching offerings`. If present, the dashboard is misconfigured or the bundle ID does not match.
-- If the log shows offerings fetched but packages empty, the "current" offering in the dashboard has no packages attached.
+- The SDK drops an offering that ends up with no packages and logs "No packages could be found for offering with identifier …". Either the offering has no packages attached in the dashboard, or none of its products loaded from StoreKit (next item).
 - If the log shows products failing to be fetched from StoreKit, the product IDs in the RevenueCat dashboard do not match the products in App Store Connect, or those products are missing metadata. Products do not need to be approved to load in sandbox. Product IDs are case sensitive.
 
 ## Paywall does not render
