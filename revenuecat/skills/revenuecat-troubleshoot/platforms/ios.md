@@ -28,18 +28,18 @@ If a StoreKit Configuration File is attached to the active scheme (Xcode → Edi
 - The RevenueCat dashboard will **not** show the transaction in the Sandbox view.
 - Entitlements may or may not update depending on SDK version and StoreKit version.
 
-**To test against the real sandbox**, detach the StoreKit configuration from the scheme, then run on a device signed into a Sandbox Apple ID. Settings → App Store → Sandbox Account holds the tester login on iOS 14+.
+**To test against the real sandbox**, detach the StoreKit configuration from the scheme, then run on a device signed into a Sandbox Apple ID. The tester login lives under Settings → Developer → Sandbox Apple Account on iOS 18 and later, and Settings → App Store → Sandbox Account on iOS 17 and earlier.
 
 The StoreKit config file is still useful for pure UI iteration, but any bug report that involves "purchase does not appear on dashboard" must be reproduced without it.
 
 ## Sandbox tester setup
 
-1. App Store Connect → Users and Access → Sandbox → Testers → create a tester with an email that is **not** associated with a real Apple ID.
-2. On the device, sign out of the production App Store account is **not** required in iOS 14+. Instead, Settings → App Store → Sandbox Account holds a separate sandbox login.
+1. App Store Connect → Users and Access → Sandbox → **+** → create a tester with an email that is **not** associated with a real Apple ID.
+2. On the device, signing out of the production App Store account is **not** required. The sandbox login is separate: Settings → Developer → Sandbox Apple Account on iOS 18 and later, Settings → App Store → Sandbox Account on iOS 17 and earlier. It appears after the first purchase attempt in a development-signed build.
 3. Trigger a purchase in the app. iOS will prompt for the sandbox password on the first purchase.
-4. Accelerated renewal: monthly subscriptions renew every 5 minutes in sandbox, weekly renews every 3 minutes, yearly every 1 hour. A subscription auto-renews up to 6 times then expires.
+4. Accelerated renewal at the default rate: monthly subscriptions renew every 5 minutes in sandbox, weekly renews every 3 minutes, yearly every 1 hour. A subscription auto-renews up to 12 times, then stops renewing.
 
-TestFlight builds behave like production for receipt purposes. Transactions in TestFlight appear in the production dashboard view, not the Sandbox view.
+TestFlight builds run in Apple's sandbox environment, not production. Their purchases are not charged and appear in the dashboard's Sandbox view, not the production view.
 
 ## Offerings come back empty
 
@@ -47,7 +47,7 @@ If `Purchases.shared.offerings()` returns an `Offerings` object with `current ==
 
 - Check the log for `Error fetching offerings`. If present, the dashboard is misconfigured or the bundle ID does not match.
 - If the log shows offerings fetched but packages empty, the "current" offering in the dashboard has no packages attached.
-- If the log shows products failing to be fetched from StoreKit, the product IDs in the RevenueCat dashboard do not match what App Store Connect has approved. Product IDs are case sensitive.
+- If the log shows products failing to be fetched from StoreKit, the product IDs in the RevenueCat dashboard do not match the products in App Store Connect, or those products are missing metadata. Products do not need to be approved to load in sandbox. Product IDs are case sensitive.
 
 ## Paywall does not render
 
