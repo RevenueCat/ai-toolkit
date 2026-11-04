@@ -44,9 +44,9 @@ A common report: the Android build works but iOS shows "invalid credentials". Ca
 
 ## Offerings come back empty
 
-- `await Purchases.getOfferings()` throws on network failure. Wrap in try/catch and print the exception.
-- An `Offerings` object where `current == null` means the dashboard has no current offering assigned. Fix in the dashboard.
-- An `Offering` with an empty `availablePackages` list means packages exist but none of their store products resolved. Check the native console for product lookup failures. This is almost always a product ID mismatch between RevenueCat and the store.
+- `await Purchases.getOfferings()` throws on network failure, and with a configuration error when none of the offerings' store products could be fetched. Wrap in try/catch and print the exception.
+- An `Offerings` object where `current == null` means the dashboard has no current offering assigned, or the SDK dropped the current offering because none of its store products resolved.
+- The SDK leaves out every package whose store product did not resolve, and drops an offering that is left with no packages, so unresolved products show up as missing packages or a missing offering, never as an empty `availablePackages` list. Check the native console for product lookup failures. This is almost always a product ID mismatch between RevenueCat and the store.
 
 ## Paywall does not render
 
@@ -55,7 +55,7 @@ A common report: the Android build works but iOS shows "invalid credentials". Ca
 - An offering with a paywall template configured in the dashboard.
 - Minimum iOS 15 for the iOS renderer. Android minSdk 24 for the Android renderer. Check your deployment targets.
 - On Android, `MainActivity` extending `FlutterFragmentActivity`. With the default `FlutterActivity`, `presentPaywall` fails with `PAYWALLS_MISSING_WRONG_ACTIVITY`.
-- A fresh offerings fetch after the dashboard was configured. Cached stale offerings without the paywall will render nothing.
+- A fresh offerings fetch after the dashboard was configured. For an offering cached before the paywall was attached, RevenueCatUI renders its default fallback layout instead of your template.
 
 ## Entitlement not active after purchase
 
