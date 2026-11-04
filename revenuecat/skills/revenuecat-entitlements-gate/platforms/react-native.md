@@ -40,7 +40,9 @@ export function useHasPremium(entitlementId = 'premium'): boolean {
     Purchases.addCustomerInfoUpdateListener(listener);
 
     // Seed initial value.
-    Purchases.getCustomerInfo().then(apply).catch(() => {/* ignore */});
+    Purchases.getCustomerInfo()
+      .then(apply)
+      .catch((e) => console.warn('RevenueCat getCustomerInfo failed', e));
 
     return () => {
       cancelled = true;
