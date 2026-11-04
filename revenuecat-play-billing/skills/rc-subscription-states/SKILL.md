@@ -31,9 +31,9 @@ If you only need access on/off, you only need `isActive`. Everything else is opt
 
 ## Phase 2: Plan
 
-### Google's seven states versus RevenueCat's boolean
+### Google's eight states versus RevenueCat's boolean
 
-Rolling your own tracker with the Google Play Developer API means mapping seven subscription states and deciding which grant access.
+Rolling your own tracker with the Google Play Developer API means mapping eight subscription states and deciding which grant access.
 
 | Google state | Grants access? |
 |---|---|
@@ -44,6 +44,7 @@ Rolling your own tracker with the Google Play Developer API means mapping seven 
 | PAUSED | no |
 | EXPIRED | no |
 | PENDING | no |
+| PENDING_PURCHASE_CANCELED | no |
 
 RevenueCat computes this on the backend from the Google `SubscriptionPurchaseV2` resource and exposes the result as one field: `EntitlementInfo.isActive`. You read a boolean instead of implementing the state machine.
 
@@ -93,6 +94,10 @@ val fresh = Purchases.sharedInstance.awaitCustomerInfo(
 
 ```kotlin
 fun updateUI(entitlement: EntitlementInfo?) {
+    if (entitlement != null && !entitlement.isActive && entitlement.billingIssueDetectedAt != null) {
+        // Account hold, or an expiry after a billing issue that was never resolved. See rc-payment-recovery.
+        showAccountHoldScreen(); return
+    }
     if (entitlement == null || !entitlement.isActive) {
         showSubscribeScreen(); return
     }
@@ -139,7 +144,7 @@ Purchases.sharedInstance.updatedCustomerInfoListener =
     }
 ```
 
-The listener does not fire when the SDK starts with a cache hit and nothing changed. Always call `awaitCustomerInfo()` on launch in addition to setting the listener.
+Setting the listener immediately delivers the cached `CustomerInfo` if one exists. On a first launch with no cache it fires only after the first fetch, so still call `awaitCustomerInfo()` on launch to drive the initial UI.
 
 ### Test matrix
 
@@ -150,7 +155,8 @@ Walk through each case and confirm the UI responds correctly.
 | Fresh purchase | true | Premium content |
 | Grace period (billing issue, still granted) | true | Premium + billing warning |
 | Canceled, still before `expirationDate` | true | Premium + expiry notice |
-| On hold | false | Subscribe screen |
+| On hold | false | Account hold screen (fix payment method, paywall as a fallback) |
+| Expired after a billing issue that was never resolved | false | Account hold screen, whose paywall path lets the user buy again |
 | Paused | false | Subscribe screen |
 | Expired | false | Subscribe screen |
 | Pending (no payment yet) | false | Subscribe screen |

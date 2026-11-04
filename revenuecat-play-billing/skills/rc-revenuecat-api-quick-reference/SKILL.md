@@ -42,7 +42,7 @@ Route to the REST API (server side):
 - You need to grant or revoke a promotional entitlement, override a subscription, look up a subscriber from another service, refund, or deliver events to another system.
 - You are integrating with a system that cannot embed the SDK.
 
-The tables in this skill cover the Android SDK 10.x surface from appendix A verbatim. For REST endpoint paths, authentication, and payloads, see the [full appendix on revenuecat.com](https://www.revenuecat.com/guides/revenuecat-android-sdk/appendix-revenuecat-api-quick-reference) together with the backend and webhooks skills, and treat this file as the SDK index.
+The tables in this skill cover the Android SDK 10.x surface from appendix A verbatim, plus a short REST endpoint index. For full REST paths, authentication, and payloads, see the [full appendix on revenuecat.com](https://www.revenuecat.com/guides/revenuecat-android-sdk/appendix-revenuecat-api-quick-reference) together with the backend and webhooks skills, and treat this file as the SDK index.
 
 ## Phase 2: Reference Tables
 
@@ -92,7 +92,7 @@ val result: PurchaseResult = Purchases.sharedInstance.awaitPurchase(
 val result = Purchases.sharedInstance.awaitPurchase(
     PurchaseParams.Builder(activity, newPackage)
         .oldProductId("old_product_id")
-        .googleReplacementMode(GoogleReplacementMode.WITH_TIME_PRORATION)
+        .replacementMode(StoreReplacementMode.WITH_TIME_PRORATION)
         .build()
 )
 ```
@@ -143,7 +143,7 @@ pkg.webCheckoutURL         // URL? (RevenueCat web billing)
 
 ```kotlin
 val product: StoreProduct
-product.productId
+product.id                 // "productId" (INAPP) or "productId:basePlanId" (SUBS); product.googleProduct?.productId for the bare Play ID
 product.title
 product.description
 product.price.formatted    // "$4.99"
@@ -172,8 +172,8 @@ entitlement.isActive                     // Boolean, the main access gate
 entitlement.willRenew                    // false if canceled
 entitlement.expirationDate               // Date? (null for lifetime)
 entitlement.periodType                   // NORMAL, TRIAL, INTRO, PREPAID
-entitlement.billingIssueDetectedAt       // Date? (non-null = grace/hold)
-entitlement.unsubscribeDetectedAt        // Date? (non-null = canceled)
+entitlement.billingIssueDetectedAt       // Date? (non null = grace/hold, or ended unrecovered)
+entitlement.unsubscribeDetectedAt        // Date? (non null = canceled)
 entitlement.store                        // PLAY_STORE, APP_STORE, etc.
 entitlement.productIdentifier            // subscription product ID
 entitlement.productPlanIdentifier        // base plan ID (Google only)
@@ -207,7 +207,7 @@ PurchasesErrorCode.ProductAlreadyPurchasedError
 PurchasesErrorCode.PaymentPendingError
 PurchasesErrorCode.NetworkError
 PurchasesErrorCode.StoreProblemError
-PurchasesErrorCode.IneligibleError
+PurchasesErrorCode.ProductNotAvailableForPurchaseError
 PurchasesErrorCode.ConfigurationError
 ```
 
@@ -221,6 +221,22 @@ Purchases.sharedInstance.updatedCustomerInfoListener =
 // Show in-app messages manually
 Purchases.sharedInstance.showInAppMessagesIfNeeded(activity)
 ```
+
+### Most Used REST Endpoints
+
+All with `Authorization: Bearer <secret key>` from your backend only, never the client.
+
+| Endpoint | Use |
+|---|---|
+| `GET /v1/subscribers/{app_user_id}` | Read a subscriber |
+| `POST /v1/subscribers/{app_user_id}/entitlements/{entitlement_id}/promotional` | Grant promotional access (`end_time_ms`) |
+| `POST /v1/subscribers/{app_user_id}/entitlements/{entitlement_id}/revoke_promotionals` | Revoke promotional access |
+| `POST /v1/subscribers/{app_user_id}/attributes` | Set subscriber attributes |
+| `POST /v1/subscribers/{app_user_id}/subscriptions/{product_identifier}/defer` | Defer a Google Play subscription |
+| `POST /v1/subscribers/{app_user_id}/subscriptions/{product_identifier}/revoke` | Refund and revoke a Google Play subscription |
+| `POST /v1/subscribers/{app_user_id}/transactions/{store_transaction_identifier}/refund` | Refund and revoke a Google Play purchase (subscription or one time, last 365 days) |
+
+See [rc-backend](../rc-backend/) and [rc-webhooks](../rc-webhooks/) for request and response payloads.
 
 ## Phase 3: Typical Snippets
 
@@ -252,7 +268,7 @@ try {
     when (e.error.code) {
         PurchasesErrorCode.PaymentPendingError -> showPendingUi()
         PurchasesErrorCode.NetworkError -> showRetry()
-        else -> showGenericError(e.error.message)
+        else -> showGenericError(userFacingMessage(e.error)) // log e.error.message
     }
 }
 ```

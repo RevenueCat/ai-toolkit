@@ -48,7 +48,7 @@ Before you make a change, decide:
    - Repackaging (new offering, new targeting, new entitlement mapping): stay in RevenueCat.
 2. **Which entitlement does the product unlock?** If you do not have a matching entitlement, create one first.
 3. **Which offering and package identifier?** Decide the package identifier (for example `$rc_monthly`, `$rc_annual`) so your paywall code keeps working.
-4. **Does targeting need to change?** If different users should see different offerings, plan the placement name and the targeting rule (OS version, country, custom attribute).
+4. **Does targeting need to change?** If different users should see different offerings, plan the placement name and the targeting rule (country, app version, platform, custom attribute).
 
 ## Phase 3: Execute
 
@@ -87,7 +87,7 @@ val isPro = customerInfo.entitlements["pro"]?.isActive == true
    - `$rc_annual` for annual
    - Or a custom identifier
 4. Attach the Play Console product to the package.
-5. Save. Mark the offering as Current if it should be the default.
+5. Save. Make it the Default offering if it should be the default (the SDK returns it as `offerings.current`).
 
 Your client code stays the same:
 
@@ -102,7 +102,7 @@ If different users should see different offerings, use placements.
 
 1. In the dashboard, open **Targeting** -> **Placements**.
 2. Create a placement (for example `paywall_upsell`).
-3. Add rules (OS version, country, custom attribute) that map users to specific offerings.
+3. Add rules (country, app version, platform, custom attribute) that map users to specific offerings.
 
 Client code:
 
@@ -126,14 +126,14 @@ Check the change landed before you close the task.
 | Runtime fetch | Launch the app, call `awaitOfferings()`, confirm the package resolves |
 | Entitlement unlock | Complete a test purchase, confirm `customerInfo.entitlements["pro"].isActive` is true |
 
-If `awaitOfferings()` returns `null` for a package you expect, the most common causes are: the offering is not marked Current, the product is not attached to the package, or Play has not finished propagating the product.
+If `awaitOfferings()` returns `null` for a package you expect, the most common causes are: the offering is not the Default offering, the product is not attached to the package, or Play has not finished propagating the product. If no configured product resolves from Play at all, `awaitOfferings()` throws `PurchasesException` with `PurchasesErrorCode.ConfigurationError`. Check the product IDs, that the base plan is active, and that Play has propagated the product.
 
 ## Common Mistakes
 
 - Calling `monetization.subscriptions` from your backend. Use RevenueCat instead.
 - Creating an offering before importing the product. Import first, then wire.
 - Shipping hard coded product IDs in your paywall UI. Use package identifiers so you can swap products without an app release.
-- Forgetting to mark an offering as Current. Clients that call `offerings.current` will see the old offering until you flip this.
+- Forgetting to make an offering the Default offering. Clients that call `offerings.current` will see the old offering until you flip this.
 
 ## References
 

@@ -45,12 +45,12 @@ If the concern is split (for example, RevenueCat verifies the token but you stil
 | Concern | Raw PBL | RevenueCat |
 |---|---|---|
 | BillingClient setup and configuration | You write | Handled internally |
-| Connection lifecycle and reconnection | You write | Handled internally |
+| Connection lifecycle and reconnection | You write `startConnection()`; reconnection is one builder flag since PBL 8 (`enableAutoServiceReconnection()`) | Handled internally |
 | PurchasesUpdatedListener | You write | Replaced by purchase callbacks |
 | queryProductDetailsAsync() | You write | Replaced by awaitOfferings() / awaitGetProducts() |
 | launchBillingFlow() | You write | Called internally by awaitPurchase() |
 | Acknowledgement after purchase | You write | Handled automatically |
-| Consumption of consumables | You write | Handled automatically (mark product as consumable in dashboard) |
+| Consumption of consumables | You write | Handled automatically (one time products are consumed unless marked non consumable in the dashboard) |
 | queryPurchasesAsync() on launch | You write | Handled internally on connection |
 | Retry logic for transient errors | You write | Handled internally by SDK |
 | BillingResponseCode handling | You write | Abstracted to PurchasesErrorCode |
@@ -67,12 +67,14 @@ If the concern is split (for example, RevenueCat verifies the token but you stil
 | Purchase token validation and deduplication | You build | RevenueCat backend |
 | linkedPurchaseToken chain traversal | You build | RevenueCat backend |
 | RTDN processing and dispatch | You build | RevenueCat processes, sends webhooks |
-| Cloud Pub/Sub setup | You set up | Not needed |
+| Cloud Pub/Sub setup | You set up topic, subscription, and push endpoint | Enable Pub/Sub once; RevenueCat creates the topic and you paste it into Play Console (strongly recommended; needed for DEFERRED plan changes and one time refunds) |
 | Subscription state machine on backend | You build | CustomerInfo computed by RC |
-| Entitlement computation across 7 states | You build | isActive computed by RC |
+| Entitlement computation across 8 states | You build | isActive computed by RC |
 | Grace period / account hold tracking | You build | billingIssueDetectedAt |
 | Cancellation with access-until-expiry logic | You build | isActive + unsubscribeDetectedAt |
-| Price cohort tracking | You build | RC backend handles |
+| Subscription deferral | Direct Google Play Developer API call (your backend) | REST API `POST /v1/subscribers/{app_user_id}/subscriptions/{product_identifier}/defer` |
+| Subscription revocation and refund | Direct Google Play Developer API call (your backend) | REST API `.../subscriptions/{product_identifier}/revoke` or `.../transactions/{store_transaction_identifier}/refund` |
+| Price cohort tracking | You build | Not tracked per subscriber on Google Play (RC assumes renewal at the purchase price); manage legacy cohorts in Play Console |
 | Product-to-entitlement mapping | You build | Configured in RC dashboard |
 
 ### What remains your responsibility either way
@@ -84,9 +86,7 @@ If the concern is split (for example, RevenueCat verifies the token but you stil
 | Premium content server side | Verify via RC REST API or webhooks |
 | Webhook receiver endpoint | You build; RC sends, you receive |
 | Play Console product creation | Still done in Play Console |
-| Subscription deferral | Direct Google Play API call |
-| Subscription revocation | Direct Google Play API call |
-| Alternative billing programs | Limited RC support; may need raw PBL |
+| Alternative billing programs | Not supported by the RevenueCat SDK (10.27.1); integrate the Play Billing Library directly |
 | App UI (paywalls, onboarding) | You build (RC Paywalls UI optional) |
 | Push notifications for payment issues | You build on top of webhook events |
 
@@ -94,7 +94,7 @@ If the concern is split (for example, RevenueCat verifies the token but you stil
 
 Use these rules to convert the tables into a decision:
 
-1. If your app needs subscription deferral, subscription revocation, or an alternative billing program that RevenueCat does not yet cover, plan to keep a raw PBL path for those specific calls regardless of your main choice.
+1. If your app needs an alternative billing program that RevenueCat does not cover, plan to keep a raw PBL path for it.
 2. If you would otherwise build a receipt verification service, an RTDN pipeline, and a subscription state machine from scratch, the server side table lists at least eight concerns that RevenueCat removes. Choose RevenueCat unless you have a concrete reason to own that stack.
 3. If you already have a mature billing backend with verified tokens and tested state handling, the gain is smaller. Weigh it against RevenueCat's client side simplifications and dashboard driven catalog.
 4. Always confirm the "remains your responsibility" row items are staffed. RevenueCat does not replace your auth, your user database, your paywall UI, or your premium content gate. Passing `appUserID` and verifying entitlements server side via the REST API or webhooks is still on you.
@@ -104,7 +104,7 @@ Quick gate:
 
 ```text
 need custom RTDN pipeline?      -> raw PBL only if you must own it end to end
-need deferral or revocation?    -> keep a raw PBL path for those API calls
+need deferral or revocation?    -> RevenueCat REST API v1 defer/revoke endpoints
 need fast time to production?   -> RevenueCat, then add raw PBL escape hatches later
 ```
 

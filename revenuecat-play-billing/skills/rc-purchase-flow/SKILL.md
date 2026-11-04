@@ -74,7 +74,7 @@ try {
         e.userCancelled -> { /* backed out, do nothing */ }
         e.error.code == PurchasesErrorCode.ProductAlreadyPurchasedError ->
             showMessage("You already have this subscription")
-        else -> showError(e.error.message)
+        else -> showError(userFacingMessage(e.error)) // log e.error.message; mapping in rc-error-handling
     }
 }
 ```
@@ -113,7 +113,7 @@ try {
         showMessage("No active purchases found")
     }
 } catch (e: PurchasesException) {
-    showError(e.error.message)
+    showError(userFacingMessage(e.error)) // log e.error.message
 }
 ```
 
