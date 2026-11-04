@@ -76,8 +76,13 @@ final result = await RevenueCatUI.presentPaywallIfNeeded(
   displayCloseButton: true,
 );
 
-if (result == PaywallResult.purchased || result == PaywallResult.notPresented) {
+if (result == PaywallResult.purchased) {
   // user has access
+} else if (result == PaywallResult.restored) {
+  // A restore finished, but it can end without the entitlement. Check it.
+} else if (result == PaywallResult.notPresented) {
+  // Usually the entitlement is already active, but the SDK also skips the
+  // paywall when it cannot fetch CustomerInfo. Check the entitlement first.
 }
 ```
 
@@ -92,13 +97,16 @@ class PremiumPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var purchased = false;
     return Scaffold(
       body: PaywallView(
         displayCloseButton: true,
         onPurchaseCompleted: (customerInfo, storeTransaction) {
-          Navigator.of(context).pop(true);
+          // entitlement granted; the paywall calls onDismiss next
+          purchased = true;
         },
-        onDismiss: () => Navigator.of(context).pop(false),
+        // Pop once, here: onDismiss also fires after a purchase.
+        onDismiss: () => Navigator.of(context).pop(purchased),
         onPurchaseError: (error) {
           // surface the error
         },
@@ -115,7 +123,8 @@ To target a specific offering, pass it via the `offering:` parameter (both metho
 - `purchases_ui_flutter` supports **iOS and Android only**. Web, macOS, Windows, and Linux targets are not supported.
 - Do not call `Purchases.purchase(…)` inside the widget callbacks or around the imperative method. The paywall runs the purchase itself.
 - `displayCloseButton: true` only affects original template paywalls. V2 Paywalls render their own close affordance.
-- `presentPaywall` returns a `PaywallResult` enum. `notPresented` only appears for `presentPaywallIfNeeded` when the entitlement is already active.
+- `presentPaywall` returns a `PaywallResult` enum. `notPresented` only comes from `presentPaywallIfNeeded`: the entitlement is already active, or fetching `CustomerInfo` failed and the paywall was skipped.
+- `PaywallView` calls `onDismiss` after a completed purchase as well as on close, so pop the route only in `onDismiss`. Popping in `onPurchaseCompleted` too pops twice.
 - `PaywallView` is a `StatelessWidget` that hosts a native platform view. Do not wrap it in a container that constrains its height to zero; it needs to fill available space.
 
 ## Verify
