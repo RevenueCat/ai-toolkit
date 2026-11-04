@@ -18,6 +18,8 @@ Add `purchases_flutter` to `pubspec.yaml` and run `flutter pub get`. See `integr
 
 ```dart
 import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 Future<void> main() async {
@@ -30,7 +32,7 @@ Future<void> main() async {
       : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
 
   final config = PurchasesConfiguration(apiKey)
-    ..purchasesAreCompletedBy = const PurchasesAreCompletedByMyApp(
+    ..purchasesAreCompletedBy = PurchasesAreCompletedByMyApp(
       storeKitVersion: StoreKitVersion.storeKit2,
     );
 
