@@ -12,10 +12,14 @@ Use observer mode. Your existing purchase code (whether Dart based or native via
 
 Add `purchases_flutter` to `pubspec.yaml` and run `flutter pub get`. See `integrate-revenuecat/platforms/flutter.md` for the setup details.
 
+`purchases_flutter` 11.x puts Play Billing Library 9.1.0 on the Android classpath, so the billing plugin your existing code uses must support Billing Library 9. For `in_app_purchase`, the first `in_app_purchase_android` built on Billing Library 9 is 0.5.5, which needs Flutter 3.44 or newer.
+
 ### Configure in observer mode
 
 ```dart
 import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 Future<void> main() async {
@@ -28,7 +32,7 @@ Future<void> main() async {
       : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
 
   final config = PurchasesConfiguration(apiKey)
-    ..purchasesAreCompletedBy = const PurchasesAreCompletedByMyApp(
+    ..purchasesAreCompletedBy = PurchasesAreCompletedByMyApp(
       storeKitVersion: StoreKitVersion.storeKit2,
     );
 
@@ -55,7 +59,7 @@ Call this after your app's authentication completes.
 
 ### Cutover to full RevenueCat mode (optional, later)
 
-Remove the `purchasesAreCompletedBy` assignment. Default is `PurchasesAreCompletedByRevenueCat`. Replace your purchase code with `Purchases.purchasePackage(...)` or `Purchases.purchaseStoreProduct(...)`. Remove your own transaction finishing / acknowledgement code at the same time.
+Remove the `purchasesAreCompletedBy` assignment. Default is `PurchasesAreCompletedByRevenueCat`. Replace your purchase code with `Purchases.purchase(PurchaseParams.package(...))` or `Purchases.purchase(PurchaseParams.storeProduct(...))`. Remove your own transaction finishing / acknowledgement code at the same time.
 
 ## Path B: upgrade `purchases_flutter` across a major version
 
@@ -72,7 +76,7 @@ Treat the SDK repo's docs as authoritative. Any version-specific diff written he
 After migration:
 
 1. `flutter run` builds on both iOS and Android.
-2. Xcode console (iOS) shows `[Purchases] - INFO: 😻‍👼 Purchases is configured`. Logcat (Android) shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`.
+2. With `LogLevel.debug`, the Xcode console (iOS) and `adb logcat | grep "\[Purchases\]"` (Android) show a line containing `SDK Version - <version>` at launch, with the version of the native SDK that `purchases_flutter` depends on.
 3. A sandbox purchase on each platform shows on the RevenueCat dashboard Sandbox view with the right appUserID.
 4. A user with a pre migration active subscription still shows that entitlement active.
 5. `await Purchases.setLogLevel(LogLevel.info);` before shipping.

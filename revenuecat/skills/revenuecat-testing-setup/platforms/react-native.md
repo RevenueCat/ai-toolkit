@@ -1,6 +1,6 @@
 # revenuecat-testing-setup: React Native
 
-`react-native-purchases` runs against the native iOS and Android SDKs. Testing an RN app means testing each platform against its native testing channel. RN itself does not add a testing mode.
+`react-native-purchases` runs against the native iOS and Android SDKs. Testing an RN app means testing each platform against its native testing channel. Apart from the Expo Go preview mode below, RN itself does not add a testing mode.
 
 ## Test Store (RevenueCat synthetic store)
 
@@ -27,15 +27,24 @@ const apiKey = __DEV__
 Purchases.configure({ apiKey });
 ```
 
-For Expo, use `eas.json` build profiles (`development`, `preview`, `production`) each with its own `EXPO_PUBLIC_REVENUECAT_API_KEY` environment variable so the key never appears in the JS bundle of the wrong build.
+For Expo, the app passes `EXPO_PUBLIC_REVENUECAT_API_KEY` to `Purchases.configure` as `apiKey`, and each kind of build gets it from a different place, so the key never appears in the JS bundle of the wrong build. A development build (`developmentClient: true`, a debug build) loads its JavaScript from your local `npx expo start`, which reads `.env` files, not `eas.json`: put `EXPO_PUBLIC_REVENUECAT_API_KEY=test_YOUR_TEST_STORE_KEY` in a gitignored `.env`. Only development builds may use the Test Store key. `preview` and `production` are release builds whose JavaScript is bundled during the EAS build, so their keys go in the profile's `env`; in a release build the SDK shows an error and crashes on purpose when it finds a Test Store key, and React Native has no setting to allow it. Release profiles also need a different key per platform, so set `env` inside the profile's `ios` and `android` objects:
 
-```bash
-# eas.json
+```json
 {
   "build": {
-    "development": { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "test_YOUR_TEST_STORE_KEY" } },
-    "preview":     { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "test_YOUR_TEST_STORE_KEY" } },
-    "production":  { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "appl_YOUR_IOS_PRODUCTION_KEY" } }
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal",
+      "ios": { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "appl_YOUR_IOS_PRODUCTION_KEY" } },
+      "android": { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "goog_YOUR_ANDROID_PRODUCTION_KEY" } }
+    },
+    "production": {
+      "ios": { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "appl_YOUR_IOS_PRODUCTION_KEY" } },
+      "android": { "env": { "EXPO_PUBLIC_REVENUECAT_API_KEY": "goog_YOUR_ANDROID_PRODUCTION_KEY" } }
+    }
   }
 }
 ```
@@ -51,24 +60,25 @@ Follow the platform files directly:
 - iOS → `revenuecat-testing-setup/platforms/ios.md`. Prefer a real sandbox Apple ID for RevenueCat dashboard verification.
 - Android → `revenuecat-testing-setup/platforms/android.md`. Test purchases need a license tester who has opted in to an internal or closed testing track.
 
-## Dev client is required (Expo)
+## Dev client is required for the stores (Expo)
 
-Expo Go cannot run `react-native-purchases`. Any attempt to call the SDK throws a "native module not found" error. Produce a dev client:
+Expo Go has no native module for `react-native-purchases`, so the SDK switches to a JavaScript browser mode there (it logs "Using RevenueCat in Browser Mode"). Use a Test Store key: an `appl_` or `goog_` key makes `Purchases.configure` throw "Invalid API key. The native store is not available when running inside Expo Go…". With a Test Store key, `purchasePackage` shows a JavaScript alert with the same three buttons, `addCustomerInfoUpdateListener` callbacks never fire, and `react-native-purchases-ui` does not show the native paywall or Customer Center. Sandbox and store testing need a development build:
 
 ```bash
-npx expo prebuild # bare workflow: generate native projects
-# or
+npx expo install expo-dev-client
 eas build --profile development
+# or build locally:
+npx expo run:ios # or npx expo run:android
 ```
 
-Install the dev client and reload. Expo Go itself cannot be fixed to support purchase native modules.
+Install the development build and reload.
 
 ## Build the right build for each store
 
 ### iOS
 
 - `npx react-native run-ios` on a connected device with a sandbox Apple ID works for sandbox testing.
-- `eas build --profile preview` or a standard archive uploaded to TestFlight for TestFlight style testing. TestFlight purchases show on the **production** dashboard view, not sandbox.
+- For TestFlight, build with `eas build --platform ios --profile production` and upload with `eas submit --platform ios`, or upload a standard Xcode archive. The default `preview` profile uses internal distribution (ad hoc or enterprise provisioning), which cannot go to TestFlight. TestFlight purchases run in Apple's sandbox, and RevenueCat treats them as sandbox data: they show with **View sandbox data** on, not in production.
 
 ### Android
 
@@ -81,16 +91,19 @@ Every bundle identifier (iOS) or applicationId (Android) that you test must be r
 
 If you ship multiple environments (dev, staging, prod) with different identifiers, each one needs its own dashboard app entry and its own API key. Branch on `Platform.OS` and an environment variable (or a build-time constant) to pick the right key.
 
-## Platform consoles for logs
+## Where the SDK logs appear
 
-Metro's JS console does not show native SDK logs. Watch:
+Unless the app passes its own handler to `Purchases.setLogHandler`, `Purchases.configure` routes the native SDK logs through the JavaScript console with a `[RevenueCat]` prefix. They do not appear as native `[Purchases]` lines, so `adb logcat -s Purchases` shows nothing. Watch:
 
-- iOS → Xcode console (when the app is attached) or Console.app filtering by the bundle ID.
-- Android → Android Studio Logcat or `adb logcat -s Purchases`.
+- React Native DevTools or the Expo CLI terminal.
+- Android → `adb logcat -s ReactNativeJS`, React Native's tag for JavaScript console output.
+- iOS → Xcode console while the app is attached.
 
-## Reload does not re-configure the SDK
+Debug lines go through `console.debug`, so a console that hides debug output hides them too.
 
-`Purchases.configure(...)` runs once per native process launch. Reloading the JS bundle does **not** re-run native initialization. After changing the API key or `purchasesAreCompletedBy`, kill the app fully and relaunch.
+## Relaunch after changing the configuration
+
+Reloading the JS bundle runs `Purchases.configure(...)` again in the same native process. The native SDK ignores a repeat call with an identical configuration and, when the configuration changed, replaces its instance and logs "Purchases instance already set". After changing the API key or `purchasesAreCompletedBy`, kill the app fully and relaunch so the new configuration starts in a fresh process.
 
 ## Metro cache after a dependency change
 
@@ -111,7 +124,7 @@ Stale caches let the JS side bind to an old native module and produce confusing 
 
 1. `Purchases.setLogLevel(LOG_LEVEL.DEBUG);` before `configure`.
 2. You are running a dev client (not Expo Go). On Android, a license tester who opted in to the testing track installed it, either from that track or as a debug build.
-3. A test purchase succeeds. The native platform console shows the SDK posting the transaction.
+3. A test purchase succeeds. The `[RevenueCat]` lines in the JavaScript console show the SDK posting the transaction.
 4. The RevenueCat dashboard Sandbox view shows the transaction on the expected `appUserID`.
 5. `await Purchases.getCustomerInfo()` shows the expected entitlement active.
 6. Drop log level back to `LOG_LEVEL.INFO` before shipping.

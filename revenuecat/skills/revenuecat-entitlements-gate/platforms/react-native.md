@@ -40,7 +40,9 @@ export function useHasPremium(entitlementId = 'premium'): boolean {
     Purchases.addCustomerInfoUpdateListener(listener);
 
     // Seed initial value.
-    Purchases.getCustomerInfo().then(apply).catch(() => {/* ignore */});
+    Purchases.getCustomerInfo()
+      .then(apply)
+      .catch((e) => console.warn('RevenueCat getCustomerInfo failed', e));
 
     return () => {
       cancelled = true;
@@ -65,10 +67,10 @@ function RootScreen() {
 
 - Always call `removeCustomerInfoUpdateListener` on unmount. Listeners registered without cleanup accumulate across navigation.
 - Replace `'premium'` with the entitlement identifier configured in the RevenueCat dashboard. It is case sensitive.
-- Under Expo, `react-native-purchases` requires a development build. Entitlement calls throw on Expo Go. Verify with `npx expo start --dev-client`.
+- In Expo Go, `react-native-purchases` runs in a JavaScript Preview API Mode. `getCustomerInfo` works there with a Test Store key (a platform key makes `configure` throw), but `addCustomerInfoUpdateListener` callbacks never fire, so the hook keeps its seeded value. Test the listener on a development build with `npx expo start --dev-client`.
 
 ## Verify
 
 1. A sandbox user with the entitlement renders `<PremiumScreen />`; a fresh user renders `<PaywallScreen />`.
 2. Make a sandbox purchase. The listener fires, state updates, and the component re-renders without reloading the bundle.
-3. On iOS check the Xcode console, on Android check `adb logcat` filtered by `Purchases`. Metro's JS console will not show native SDK logs.
+3. Read the SDK logs as `[RevenueCat]` lines in the JavaScript console (React Native DevTools, the Expo CLI terminal, `adb logcat -s ReactNativeJS`, or the Xcode console). `react-native-purchases` routes the native logs there, so filtering logcat by `Purchases` shows nothing.

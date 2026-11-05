@@ -4,7 +4,7 @@
 
 Minimum `purchases-ios` 5.95.0, with `purchases-ios-admob` at the **same version** (the adapter pins it exactly). Google Mobile Ads SDK 12.x or 13.x. The adapter is Swift only.
 
-Ad tracking needs iOS 15.0+ (tvOS 15, macOS 12, watchOS 8). On older OS versions calls are ignored with a logged warning. Objective-C apps have no adapter; use the manual calls.
+Ad tracking needs iOS 15.0+ (tvOS 15, macOS 12, watchOS 8). `Purchases.shared.adTracker` only exists on iOS 15.0 and later, so with a lower deployment target, mark the code that stores or calls it `@available(iOS 15.0, *)` (including a top-level `let adTracker` like the one below) or wrap the calls in `if #available(iOS 15.0, *)`, and the adapter package itself requires iOS 15. Objective-C apps have no adapter, and `AdTracker` is not exposed to Objective-C: make the manual calls from a Swift file in the app and call that from Objective-C.
 
 ## Adapter (AdMob)
 
@@ -63,7 +63,7 @@ Present full-screen ads as usual with `present(from:)`. To set the placement at 
 
 Never assign `fullScreenContentDelegate` after `loadAndTrack`; that replaces the tracking wrapper. Pass the delegate into the load call, or replace it later with `ad.setTrackingFullScreenContentDelegate(myDelegate)`.
 
-## Manual calls (other mediators, Objective-C)
+## Manual calls (other mediators, Objective-C through Swift)
 
 ```swift
 import RevenueCat

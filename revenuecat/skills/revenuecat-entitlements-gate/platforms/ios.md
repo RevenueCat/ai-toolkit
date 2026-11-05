@@ -60,7 +60,7 @@ The `.task` modifier starts the stream when the view appears and cancels it on d
 
 ## UIKit alternative
 
-For UIKit, call `customerInfo(completion:)` on screens that need a fresh value, and keep a long lived `Task` observing `customerInfoStream` on a singleton or scene delegate.
+For UIKit, call `getCustomerInfo(completion:)` on screens that need a fresh value, and keep a long lived `Task` observing `customerInfoStream` on a singleton or scene delegate.
 
 ```swift
 Task {
@@ -73,7 +73,7 @@ Task {
 
 ## Notes
 
-- `customerInfo()` requires iOS 13+. For older targets, use `customerInfo(completion:)`.
+- `customerInfo()` works on every iOS version the SDK supports (13.0 and later). Code without async/await uses `getCustomerInfo(completion:)`.
 - Replace `"premium"` with the entitlement identifier configured in the RevenueCat dashboard. It is case sensitive.
 - Do not call `customerInfo()` in a tight loop. One initial fetch plus the stream is sufficient for the lifetime of the app.
 
@@ -81,4 +81,4 @@ Task {
 
 1. A sandbox user with the entitlement renders `PremiumView`; a fresh user renders `PaywallView`.
 2. Make a sandbox purchase. The stream fires and the UI swaps without relaunching.
-3. Revoke the entitlement in the dashboard (or let the sandbox subscription expire). Within a few minutes, or on next app foreground, the stream emits the downgrade.
+3. Revoke the entitlement in the dashboard (or let the sandbox subscription expire). The SDK does not poll, so the stream stays quiet while the app stays open unless something fetches `CustomerInfo`. Wait at least five minutes, background the app, and bring it back: the foreground refresh fetches `CustomerInfo` and the stream emits the downgrade.

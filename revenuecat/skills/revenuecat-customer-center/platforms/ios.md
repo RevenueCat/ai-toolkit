@@ -8,7 +8,7 @@ Find the latest stable release at <https://github.com/RevenueCat/purchases-ios/r
 
 ### Swift Package Manager
 
-In Xcode: target → **General → Frameworks, Libraries, and Embedded Content → +**, pick the `purchases-ios` package and add the `RevenueCatUI` library.
+In Xcode: target → **General → Frameworks, Libraries, and Embedded Content → +**, pick the RevenueCat package the app already uses (`purchases-ios-spm`, or `purchases-ios` in older setups) and add the `RevenueCatUI` library.
 
 For a `Package.swift`-based project:
 
@@ -16,11 +16,13 @@ For a `Package.swift`-based project:
 .target(
     name: "MyApp",
     dependencies: [
-        .product(name: "RevenueCat", package: "purchases-ios"),
-        .product(name: "RevenueCatUI", package: "purchases-ios"),
+        .product(name: "RevenueCat", package: "purchases-ios-spm"),
+        .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
     ]
 )
 ```
+
+If the manifest depends on `https://github.com/RevenueCat/purchases-ios` instead of the mirror, use `package: "purchases-ios"`.
 
 ### CocoaPods
 
@@ -94,7 +96,7 @@ Attach modifiers to the `CustomerCenterView` to react to specific flows:
 - `.onCustomerCenterFeedbackSurveyCompleted { optionId in … }`
 - `.onCustomerCenterManagementOptionSelected { action in … }`
 - `.onCustomerCenterCustomActionSelected { actionId, purchaseId in … }`
-- `.onCustomerCenterPromotionalOfferSucceeded { … }`
+- `.onCustomerCenterPromotionalOfferSucceeded { customerInfo, transaction, offerId in … }`
 
 All are optional.
 
@@ -119,8 +121,8 @@ final class SettingsViewController: UIViewController {
 
 - Customer Center is available on `iOS 15+` only. Guard the call site with `if #available(iOS 15, *)` if your deployment target is lower.
 - The view is self contained. Do not call `Purchases.shared.restorePurchases()` from outside when it is on screen; the Restore flow inside the view owns that path.
-- Refund request flows (Apple's `SKPaymentQueue.showRequestRefundController`) are triggered by the Customer Center only when the dashboard has the refund action enabled and the underlying transaction is eligible.
-- Dashboard configuration lives under **Customer Center** in the RevenueCat app. Without it, the view shows an empty state.
+- Refund requests go through StoreKit 2's `Transaction.beginRefundRequest(for:in:)`, which the Customer Center calls via `Purchases.shared.beginRefundRequest(forProduct:)`. Outside the Customer Center, call `beginRefundRequest(forProduct:)` or `beginRefundRequest(forEntitlement:)` yourself. The Customer Center offers the refund action only when the dashboard configuration includes it and the purchase is eligible: a paid App Store purchase the customer owns, not in a trial, inside the configured refund window.
+- Dashboard configuration lives under Project Settings → Monetization Tools → **Customer Center**. Projects start with a default configuration (missing purchase, cancel, refund request, change plans), so the view has actions before you customize anything.
 
 ## Verify
 

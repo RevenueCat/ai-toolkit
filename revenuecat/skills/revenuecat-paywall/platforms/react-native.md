@@ -26,9 +26,9 @@ If the app uses React Native's Swift Package Manager integration (React Native 0
 npx expo install react-native-purchases-ui
 ```
 
-`react-native-purchases-ui` links native code (`RevenueCatUI` on iOS, `purchases-ui` Compose on Android). It will not work in Expo Go. Use a **development build** via `npx expo prebuild` (bare) or `eas build --profile development`.
+`react-native-purchases-ui` links native code (`RevenueCatUI` on iOS, `purchases-ui` Compose on Android). Expo Go does not have it, so the package switches to a Preview API Mode there and never shows the native paywall: `<RevenueCatUI.Paywall />` renders a placeholder. Use a **development build**: `npx expo install expo-dev-client`, then `eas build --profile development` or a local `npx expo run:ios` / `npx expo run:android`.
 
-Deployment targets: iOS 15+, Android minSdk 24 (Compose requirement on the native side).
+Deployment targets: iOS 15+, Android minSdk 24 (the native purchases-ui module declares minSdk 24).
 
 ## Implement
 
@@ -81,7 +81,7 @@ if (
 import { View } from 'react-native';
 import RevenueCatUI from 'react-native-purchases-ui';
 
-export function PremiumScreen({ navigation }) {
+export function PremiumScreen({ navigation }: { navigation: { goBack(): void } }) {
   return (
     <View style={{ flex: 1 }}>
       <RevenueCatUI.Paywall
@@ -103,7 +103,7 @@ Target a specific offering by passing `options={{ offering, displayCloseButton: 
 
 ## Notes
 
-- `react-native-purchases-ui` is iOS + Android only. There is no web or desktop target.
+- The native paywall is iOS + Android only. On web (`react-native-web`), `<RevenueCatUI.Paywall />` renders a placeholder, and `presentPaywall` / `presentPaywallIfNeeded` hand off to the purchases-js web paywall. There is no desktop target.
 - Do not call `Purchases.purchasePackage(…)` inside the paywall callbacks. The paywall drives the purchase itself.
 - The component `<RevenueCatUI.Paywall />` is a native view host. It needs a non zero size. Wrap it in a `<View style={{ flex: 1 }} />` or give it an explicit height.
 - `displayCloseButton` only affects original template paywalls. V2 Paywalls render their own close button.

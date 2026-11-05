@@ -30,13 +30,15 @@ platform :ios, '13.0'
 
 ### Android target
 
-Minimum SDK is **21**. In `android/app/build.gradle`:
+Minimum SDK is **23**, or **24** with `purchases_ui_flutter`. Flutter 3.35 and newer set `flutter.minSdkVersion` to 24, so a project that keeps `minSdk = flutter.minSdkVersion` needs no change. Otherwise, in `android/app/build.gradle` (or `build.gradle.kts`, with `minSdk = 23`):
 
 ```groovy
 defaultConfig {
-    minSdk 21
+    minSdk 23
 }
 ```
+
+Android also needs Kotlin 2.1.0 or newer (the `org.jetbrains.kotlin.android` plugin version in `android/settings.gradle.kts` or `android/settings.gradle`; older projects set `ext.kotlin_version` in `android/build.gradle`) and `compileSdk` 35 or higher, which Flutter 3.27 and newer set by default.
 
 ## Configure
 
@@ -67,12 +69,14 @@ Future<void> main() async {
 
 - Two public SDK keys, one per platform. Branch on `Platform.isIOS` / `Platform.isAndroid`.
 - `Purchases.configure` is async; `await` it before `runApp` or any code that reads offerings.
-- `purchases_flutter` supports iOS and Android only. Web, macOS, Windows, and Linux targets are not supported.
+- `purchases_flutter` also supports macOS and web (web since 9.0.0, with the public API key of a RevenueCat web config for RevenueCat Billing, Stripe Billing, or Paddle Billing). This file covers iOS and Android. Windows and Linux are not supported.
 - For a multi flavor app, load the API key from `--dart-define` or an environment wrapper rather than hard coding it.
 
 ## Verify
 
-`flutter run`. Expect the native SDK log banner in the Dart/native console:
+`flutter run` with `LogLevel.debug` set before `configure`. At configure time each native SDK logs a debug line containing `SDK Version - <version>`, with the version of purchases-ios or purchases-android, not of `purchases_flutter`:
 
-- iOS simulator/device → Xcode console also shows `[Purchases] - INFO: 😻‍👼 Purchases is configured`
-- Android emulator/device → `flutter logs` (or `adb logcat`) shows `Purchases: ℹ️ [Purchases] - INFO: 😻‍👼 Purchases is configured`
+- iOS simulator/device → the Xcode console shows the line.
+- Android emulator/device → `adb logcat | grep "\[Purchases\]"` shows it. The SDK logs under the tag `[Purchases] - <LEVEL>`, so `adb logcat -s Purchases` matches nothing, and `flutter logs` drops these lines because it only keeps Flutter's own tags.
+
+No such line with the log level at debug usually means `configure` never ran. If the app calls `Purchases.setLogHandler`, the native lines go to that Dart handler instead of the platform console.

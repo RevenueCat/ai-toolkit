@@ -10,13 +10,13 @@ import RevenueCat
 Purchases.logLevel = .debug
 ```
 
-Set this before `Purchases.configure(...)`. The SDK emits a banner when configuration succeeds:
+Set this before `Purchases.configure(...)`. During configure the SDK logs debug lines, among them:
 
 ```
-[Purchases] - INFO: 😻‍👼 Purchases is configured
+DEBUG: ℹ️ SDK Version - <version>
 ```
 
-If you do not see that line at app launch, `configure` is not running. Check that the call is in the SwiftUI `App.init` or the `UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)` entry point.
+On iOS 14 and later these go through `os.Logger`, so they start with the level and have no `[Purchases]` prefix. If you do not see the `SDK Version` line at app launch, `configure` is usually not running. Check that the call is in the SwiftUI `App.init` or the `UIApplicationDelegate.application(_:didFinishLaunchingWithOptions:)` entry point. A custom `Purchases.logHandler` also keeps these lines out of the console.
 
 ## StoreKit Configuration File vs real sandbox
 
@@ -28,32 +28,32 @@ If a StoreKit Configuration File is attached to the active scheme (Xcode → Edi
 - The RevenueCat dashboard will **not** show the transaction in the Sandbox view.
 - Entitlements may or may not update depending on SDK version and StoreKit version.
 
-**To test against the real sandbox**, detach the StoreKit configuration from the scheme, then run on a device signed into a Sandbox Apple ID. Settings → App Store → Sandbox Account holds the tester login on iOS 14+.
+**To test against the real sandbox**, detach the StoreKit configuration from the scheme, then run on a device signed into a Sandbox Apple ID. The tester login lives under Settings → Developer → Sandbox Apple Account on iOS 18 and later, and Settings → App Store → Sandbox Account on iOS 17 and earlier.
 
 The StoreKit config file is still useful for pure UI iteration, but any bug report that involves "purchase does not appear on dashboard" must be reproduced without it.
 
 ## Sandbox tester setup
 
-1. App Store Connect → Users and Access → Sandbox → Testers → create a tester with an email that is **not** associated with a real Apple ID.
-2. On the device, sign out of the production App Store account is **not** required in iOS 14+. Instead, Settings → App Store → Sandbox Account holds a separate sandbox login.
+1. App Store Connect → Users and Access → Sandbox → **+** → create a tester with an email that is **not** associated with a real Apple ID.
+2. On the device, signing out of the production App Store account is **not** required. The sandbox login is separate: Settings → Developer → Sandbox Apple Account on iOS 18 and later, Settings → App Store → Sandbox Account on iOS 17 and earlier. It appears after the first purchase attempt in a development-signed build.
 3. Trigger a purchase in the app. iOS will prompt for the sandbox password on the first purchase.
-4. Accelerated renewal: monthly subscriptions renew every 5 minutes in sandbox, weekly renews every 3 minutes, yearly every 1 hour. A subscription auto-renews up to 6 times then expires.
+4. Accelerated renewal at the default rate: monthly subscriptions renew every 5 minutes in sandbox, weekly renews every 3 minutes, yearly every 1 hour. A subscription auto-renews up to 12 times, then stops renewing.
 
-TestFlight builds behave like production for receipt purposes. Transactions in TestFlight appear in the production dashboard view, not the Sandbox view.
+TestFlight builds run in Apple's sandbox environment, not production. Their purchases are not charged and appear in the dashboard's Sandbox view, not the production view.
 
 ## Offerings come back empty
 
-If `Purchases.shared.offerings()` returns an `Offerings` object with `current == nil` or `current?.availablePackages.isEmpty == true`:
+If `Purchases.shared.offerings()` throws, or returns an `Offerings` object with `current == nil`:
 
 - Check the log for `Error fetching offerings`. If present, the dashboard is misconfigured or the bundle ID does not match.
-- If the log shows offerings fetched but packages empty, the "current" offering in the dashboard has no packages attached.
-- If the log shows products failing to be fetched from StoreKit, the product IDs in the RevenueCat dashboard do not match what App Store Connect has approved. Product IDs are case sensitive.
+- The SDK drops an offering that ends up with no packages and logs "No packages could be found for offering with identifier …". Either the offering has no packages attached in the dashboard, or none of its products loaded from StoreKit (next item).
+- If the log shows products failing to be fetched from StoreKit, the product IDs in the RevenueCat dashboard do not match the products in App Store Connect, or those products are missing metadata. Products do not need to be approved to load in sandbox. Product IDs are case sensitive.
 
 ## Paywall does not render
 
 For `RevenueCatUI` paywalls:
 
-- A paywall template must be configured on the offering in the dashboard. An offering without a paywall renders nothing.
+- A paywall must be attached to the offering in the dashboard and published. An offering without one does not render blank: RevenueCatUI shows its default fallback paywall with the offering's packages, and in debug builds a "No Paywall configured" warning.
 - The paywall view requires a valid `Offering` instance. If you fetched a stale cached offerings object before the dashboard was configured, restart the app to force a refetch.
 - On iOS 13, the paywall UI is not available. `RevenueCatUI` targets iOS 15+. Check your deployment target.
 

@@ -28,7 +28,7 @@ Minimum iOS deployment target is **15.0** (required by `RevenueCatUI`). Set it i
 platform :ios, '15.0'
 ```
 
-Android minimum SDK is **21**. The Customer Center uses Jetpack Compose on Android under the hood.
+Android minimum SDK is **24**. The Customer Center uses Jetpack Compose on Android under the hood.
 
 ## Implement
 

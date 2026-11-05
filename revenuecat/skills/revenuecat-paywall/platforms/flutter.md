@@ -28,7 +28,13 @@ Minimum iOS deployment target is **15.0** (required by `RevenueCatUI`). Set it i
 platform :ios, '15.0'
 ```
 
-Android minimum SDK is **21**. `purchases_ui_flutter` uses Jetpack Compose on Android; the Flutter embedding wraps that for you.
+Android minimum SDK is **24**. Paywalls on Android also need `MainActivity` to extend `FlutterFragmentActivity` instead of the `FlutterActivity` that `flutter create` generates. Otherwise `presentPaywall` and `presentPaywallIfNeeded` fail with a `PlatformException` (`PAYWALLS_MISSING_WRONG_ACTIVITY`), and the native `PaywallView` throws an error that asks for `FlutterFragmentActivity`. In `android/app/src/main/kotlin/<your package path>/MainActivity.kt`:
+
+```kotlin
+import io.flutter.embedding.android.FlutterFragmentActivity
+
+class MainActivity : FlutterFragmentActivity()
+```
 
 ## Implement
 
@@ -70,8 +76,13 @@ final result = await RevenueCatUI.presentPaywallIfNeeded(
   displayCloseButton: true,
 );
 
-if (result == PaywallResult.purchased || result == PaywallResult.notPresented) {
+if (result == PaywallResult.purchased) {
   // user has access
+} else if (result == PaywallResult.restored) {
+  // A restore finished, but it can end without the entitlement. Check it.
+} else if (result == PaywallResult.notPresented) {
+  // Usually the entitlement is already active, but the SDK also skips the
+  // paywall when it cannot fetch CustomerInfo. Check the entitlement first.
 }
 ```
 
@@ -86,13 +97,16 @@ class PremiumPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var purchased = false;
     return Scaffold(
       body: PaywallView(
         displayCloseButton: true,
         onPurchaseCompleted: (customerInfo, storeTransaction) {
-          Navigator.of(context).pop(true);
+          // entitlement granted; the paywall calls onDismiss next
+          purchased = true;
         },
-        onDismiss: () => Navigator.of(context).pop(false),
+        // Pop once, here: onDismiss also fires after a purchase.
+        onDismiss: () => Navigator.of(context).pop(purchased),
         onPurchaseError: (error) {
           // surface the error
         },
@@ -107,9 +121,10 @@ To target a specific offering, pass it via the `offering:` parameter (both metho
 ## Notes
 
 - `purchases_ui_flutter` supports **iOS and Android only**. Web, macOS, Windows, and Linux targets are not supported.
-- Do not call `Purchases.purchasePackage(…)` inside the widget callbacks or around the imperative method. The paywall runs the purchase itself.
+- Do not call `Purchases.purchase(…)` inside the widget callbacks or around the imperative method. The paywall runs the purchase itself.
 - `displayCloseButton: true` only affects original template paywalls. V2 Paywalls render their own close affordance.
-- `presentPaywall` returns a `PaywallResult` enum. `notPresented` only appears for `presentPaywallIfNeeded` when the entitlement is already active.
+- `presentPaywall` returns a `PaywallResult` enum. `notPresented` only comes from `presentPaywallIfNeeded`: the entitlement is already active, or fetching `CustomerInfo` failed and the paywall was skipped.
+- `PaywallView` calls `onDismiss` after a completed purchase as well as on close, so pop the route only in `onDismiss`. Popping in `onPurchaseCompleted` too pops twice.
 - `PaywallView` is a `StatelessWidget` that hosts a native platform view. Do not wrap it in a container that constrains its height to zero; it needs to fill available space.
 
 ## Verify

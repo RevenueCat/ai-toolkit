@@ -55,7 +55,7 @@ Flutter supports multiple ways to install a test build. Only the signed, correct
 ### iOS
 
 - `flutter run` on a connected iOS device with a development provisioning profile works for sandbox testing with a sandbox Apple ID.
-- `flutter build ipa` → distribute via TestFlight for TestFlight style testing. Note: TestFlight purchases land on the **production** dashboard view, not sandbox.
+- `flutter build ipa` → distribute via TestFlight for TestFlight style testing. Apps installed from TestFlight run in Apple's sandbox environment, so their purchases show in the dashboard's **sandbox** data, not production, and subscriptions renew daily.
 
 ### Android
 
@@ -78,13 +78,13 @@ Branch on the flavor (via `--dart-define=FLAVOR=dev` or equivalent) to pick the 
 When testing, watch the platform console, not just the Dart console:
 
 - iOS → Xcode (attached to `flutter run`) shows the native SDK logs.
-- Android → `flutter logs` or `adb logcat -s Purchases` shows the native SDK logs.
+- Android → `adb logcat | grep "\[Purchases\]"` shows the native SDK logs. The SDK logs under the tag `[Purchases] - <LEVEL>`, so `adb logcat -s Purchases` matches nothing, and `flutter logs` only keeps Flutter's own tags.
 
 The Dart `print` output does not show native SDK logs.
 
-## Hot restart does not re-configure the SDK
+## Restart fully after changing the configuration
 
-`Purchases.configure(...)` runs once per native process launch. After changing the API key, observer mode setting, or any configuration value, kill the app fully and relaunch. Hot reload and hot restart keep the old SDK state.
+Hot reload does not re-run `main`, so the SDK keeps its old configuration. Hot restart re-runs `main` and calls `Purchases.configure(...)` again: with unchanged values the native SDK ignores the call, and with changed values it replaces the configured instance and logs "Purchases instance already set". After changing the API key, observer mode setting, or any configuration value, kill the app fully and relaunch so the test starts from one cleanly configured instance.
 
 ## Verify
 

@@ -13,7 +13,7 @@ Future<List<Package>> currentPackages() async {
 
 ## Purchase a package
 
-`Purchases.purchasePackage` throws a `PlatformException` on failure. Use `PurchasesErrorHelper.getErrorCode(e)` to detect cancellation.
+`Purchases.purchase` throws a `PlatformException` on failure. Use `PurchasesErrorHelper.getErrorCode(e)` to detect cancellation.
 
 ```dart
 import 'package:flutter/services.dart';
@@ -29,7 +29,7 @@ class Failed extends PurchaseOutcome {
 
 Future<PurchaseOutcome> buy(Package pkg) async {
   try {
-    await Purchases.purchasePackage(pkg);
+    await Purchases.purchase(PurchaseParams.package(pkg));
     // Do not unlock content here. A CustomerInfoUpdateListener flips the
     // gated UI (see revenuecat-entitlements-gate).
     return Purchased();
@@ -109,12 +109,12 @@ Expose this from a visible "Restore purchases" button on the paywall and/or sett
 ## Notes
 
 - `PurchasesErrorHelper.getErrorCode(e)` returns a `PurchasesErrorCode` enum. Compare with `==` against `PurchasesErrorCode.purchaseCancelledError` and friends. This is the supported way and survives plugin version bumps.
-- `Purchases.purchase(PurchaseParams.package(pkg))` is the newer overload and accepts promotional offers and other options. `purchasePackage(pkg)` remains the simplest call for the common case.
-- Do not read `PlatformException.code` strings directly. The underlying native error strings differ between iOS and Android.
+- `purchasePackage`, `purchaseStoreProduct` and the other per-type purchase methods are deprecated in favor of `Purchases.purchase(PurchaseParams…)` (`purchasePackage` since 9.6.0). `PurchaseParams.package` and `.storeProduct` also take promotional and win-back offers and product changes.
+- Do not compare `PlatformException.code` by hand. For purchase errors it holds the numeric error code as a string on both platforms, and `getErrorCode` is what maps it to `PurchasesErrorCode`.
 
 ## Verify
 
 1. A sandbox purchase flips the "premium" entitlement to active and the listener notifies the UI.
 2. Cancelling the native sheet returns `Cancelled` and no error dialog appears.
 3. On a fresh install signed into the same store account, "Restore purchases" re-grants access.
-4. `flutter logs` (or `adb logcat` / Xcode console) shows the `Purchases` SDK logs through the transaction.
+4. `adb logcat | grep "\[Purchases\]"` (Android) or the Xcode console (iOS) shows the `Purchases` SDK logs through the transaction.

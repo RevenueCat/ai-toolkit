@@ -8,7 +8,7 @@ Find the latest stable release at <https://github.com/RevenueCat/purchases-ios/r
 
 ### Swift Package Manager
 
-In Xcode: target → **General → Frameworks, Libraries, and Embedded Content → +**, pick the `purchases-ios` package and add the `RevenueCatUI` library.
+In Xcode: target → **General → Frameworks, Libraries, and Embedded Content → +**, pick the RevenueCat package the app already uses (`purchases-ios-spm`, or `purchases-ios` in older setups) and add the `RevenueCatUI` library.
 
 For a `Package.swift`-based project:
 
@@ -16,11 +16,13 @@ For a `Package.swift`-based project:
 .target(
     name: "MyApp",
     dependencies: [
-        .product(name: "RevenueCat", package: "purchases-ios"),
-        .product(name: "RevenueCatUI", package: "purchases-ios"),
+        .product(name: "RevenueCat", package: "purchases-ios-spm"),
+        .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
     ]
 )
 ```
+
+If the manifest depends on `https://github.com/RevenueCat/purchases-ios` instead of the mirror, use `package: "purchases-ios"`.
 
 ### CocoaPods
 
@@ -99,6 +101,7 @@ ContentView()
 
 ```swift
 import UIKit
+import RevenueCat
 import RevenueCatUI
 
 final class SettingsViewController: UIViewController {
@@ -130,6 +133,6 @@ extension SettingsViewController: PaywallViewControllerDelegate {
 
 Run the app on a device or simulator signed into a sandbox account:
 
-1. Trigger the code path that presents the paywall. The dashboard configured template renders. If you see the default RevenueCat fallback template, the offering in the dashboard has no paywall attached.
+1. Trigger the code path that presents the paywall. The dashboard configured template renders. If you see the default RevenueCat fallback template, the offering in the dashboard has no paywall attached, or its paywall is not published.
 2. Tap a package and complete a sandbox purchase. The paywall dismisses and `customerInfo.entitlements["premium"].isActive` is `true` on the next `Purchases.shared.customerInfo()` call.
 3. Close the paywall without purchasing. The sheet dismisses and your `.onDismiss` / delegate method fires.
