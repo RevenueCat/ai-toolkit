@@ -15,7 +15,7 @@
       "displayName": "RevenueCat",
       "source": "./revenuecat",
       "description": "Set up RevenueCat, integrate it, and access data.",
-      "version": "2.5.1",
+      "version": "2.6.0",
       "category": "developer-tools",
       "author": {
         "name": "RevenueCat"
@@ -35,7 +35,7 @@
       "name": "revenuecat-play-billing",
       "source": "./revenuecat-play-billing",
       "description": "Deep Google Play subscription lifecycle skills for the RevenueCat Android SDK — purchases, plan and price changes, payment recovery, webhooks, security.",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "developer-tools",
       "author": {
         "name": "RevenueCat"

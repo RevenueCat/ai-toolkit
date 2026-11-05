@@ -5,6 +5,18 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0](https://github.com/RevenueCat/ai-toolkit/compare/v2.5.1...v2.6.0) (2026-11-05)
+
+
+### Added
+
+* **skills:** add revenuecat-migrate-to-spm skill ([#88](https://github.com/RevenueCat/ai-toolkit/issues/88)) ([41a9649](https://github.com/RevenueCat/ai-toolkit/commit/41a96496921b182b9e32efcfc3b4cb35184b6f64))
+
+
+### Fixed
+
+* **skills:** iOS, Flutter, and React Native platform file audit findings ([#86](https://github.com/RevenueCat/ai-toolkit/issues/86)) ([f395dbb](https://github.com/RevenueCat/ai-toolkit/commit/f395dbb0eb83a0ecd7f21b22968972727e16350e))
+
 ## [2.5.1](https://github.com/RevenueCat/ai-toolkit/compare/v2.5.0...v2.5.1) (2026-10-30)
 
 
