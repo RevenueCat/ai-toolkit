@@ -13,14 +13,17 @@
 //
 // Usage: node scripts/check-skill-references.mjs
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { glob, readFile } from 'node:fs/promises';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const toolsFile = join(repoRoot, 'scripts', 'mcp-tools.txt');
+const [toolsText, marketplaceText] = await Promise.all([
+  readFile(join(repoRoot, 'scripts', 'mcp-tools.txt'), 'utf8'),
+  readFile(join(repoRoot, '.claude-plugin', 'marketplace.json'), 'utf8'),
+]);
 const tools = new Set(
-  readFileSync(toolsFile, 'utf8')
+  toolsText
     .split('\n')
     .map((line) => line.trim())
     .filter((line) => line && !line.startsWith('#')),
@@ -28,72 +31,72 @@ const tools = new Set(
 const verbs = [...new Set([...tools].map((tool) => tool.split('-')[0]))];
 const toolShaped = new RegExp(`^(?:${verbs.join('|')})-[a-z0-9]+(?:-[a-z0-9]+)*$`);
 
-const marketplace = JSON.parse(readFileSync(join(repoRoot, '.claude-plugin', 'marketplace.json'), 'utf8'));
-const skillsByPlugin = new Map();
-for (const plugin of marketplace.plugins) {
-  const skillsDir = join(repoRoot, plugin.source, 'skills');
-  const skills = readdirSync(skillsDir, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && existsSync(join(skillsDir, entry.name, 'SKILL.md')))
-    .map((entry) => entry.name);
-  skillsByPlugin.set(plugin.name, { root: join(repoRoot, plugin.source), skills: new Set(skills) });
-}
+const plugins = await Promise.all(
+  JSON.parse(marketplaceText).plugins.map(async (plugin) => {
+    const root = join(repoRoot, plugin.source);
+    const [skillFiles, files] = await Promise.all([
+      Array.fromAsync(glob('skills/*/SKILL.md', { cwd: root })),
+      Array.fromAsync(glob('**/*.md', { cwd: root })),
+    ]);
+    return {
+      name: plugin.name,
+      skills: new Set(skillFiles.map((file) => basename(dirname(file)))),
+      files: files.sort().map((file) => join(root, file)),
+    };
+  }),
+);
+const skillsByPlugin = new Map(plugins.map((plugin) => [plugin.name, plugin]));
 // Skill names share the tools' verb-noun shape (create-revenuecat-project), so
 // a code span holding a skill name is a skill reference, not an unknown tool.
-const allSkills = new Set([...skillsByPlugin.values()].flatMap(({ skills }) => [...skills]));
+const allSkills = new Set(plugins.flatMap(({ skills }) => [...skills]));
 
-function markdownFiles(dir) {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(dir, entry.name);
-    if (entry.isDirectory()) return markdownFiles(path);
-    return entry.name.endsWith('.md') ? [path] : [];
-  });
-}
+const documents = await Promise.all(
+  plugins.flatMap((plugin) =>
+    plugin.files.map(async (file) => ({ plugin: plugin.name, file, text: await readFile(file, 'utf8') })),
+  ),
+);
 
 const counts = { files: 0, toolRefs: 0, skillNames: 0, slashRefs: 0 };
 const toolsSeen = new Set();
 const problems = [];
 
-for (const [pluginName, { root }] of skillsByPlugin) {
-  for (const file of markdownFiles(root)) {
-    counts.files += 1;
-    const where = relative(repoRoot, file);
-    const synced = pluginName === 'revenuecat-play-billing';
-    let inFence = false;
-    readFileSync(file, 'utf8')
-      .split('\n')
-      .forEach((line, index) => {
-        const at = `${where}:${index + 1}`;
-        if (/^\s*```/.test(line)) {
-          inFence = !inFence;
-          return;
-        }
-        const candidates = inFence
-          ? [line.match(/^\s*([a-z][a-z0-9]*(?:-[a-z0-9]+)+)(?=[\s(:]|$)/)?.[1]]
-          : [...line.matchAll(/`([^`\n]+)`/g)].map((match) => match[1].trim());
-        for (const name of candidates) {
-          if (!name || !toolShaped.test(name)) continue;
-          if (allSkills.has(name)) {
-            counts.skillNames += 1;
-          } else if (tools.has(name)) {
-            counts.toolRefs += 1;
-            toolsSeen.add(name);
-          } else {
-            problems.push({ at, synced, message: `unknown MCP tool \`${name}\`` });
-          }
-        }
-        for (const match of line.matchAll(/(?<![\w/])\/([a-z][a-z0-9-]*):([a-z][a-z0-9-]*)/g)) {
-          const [ref, plugin, skill] = match;
-          if (/^https?$/.test(plugin)) continue;
-          counts.slashRefs += 1;
-          const target = skillsByPlugin.get(plugin);
-          if (!target) {
-            problems.push({ at, synced, message: `\`${ref}\` names plugin \`${plugin}\`, which this marketplace does not have` });
-          } else if (!target.skills.has(skill)) {
-            problems.push({ at, synced, message: `\`${ref}\` names skill \`${skill}\`, which ${plugin} does not have` });
-          }
-        }
-      });
-  }
+for (const { plugin: pluginName, file, text } of documents) {
+  counts.files += 1;
+  const where = relative(repoRoot, file);
+  const synced = pluginName === 'revenuecat-play-billing';
+  let inFence = false;
+  text.split('\n').forEach((line, index) => {
+    const at = `${where}:${index + 1}`;
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence;
+      return;
+    }
+    const candidates = inFence
+      ? [line.match(/^\s*([a-z][a-z0-9]*(?:-[a-z0-9]+)+)(?=[\s(:]|$)/)?.[1]]
+      : [...line.matchAll(/`([^`\n]+)`/g)].map((match) => match[1].trim());
+    for (const name of candidates) {
+      if (!name || !toolShaped.test(name)) continue;
+      if (allSkills.has(name)) {
+        counts.skillNames += 1;
+      } else if (tools.has(name)) {
+        counts.toolRefs += 1;
+        toolsSeen.add(name);
+      } else {
+        problems.push({ at, synced, message: `unknown MCP tool \`${name}\`` });
+      }
+    }
+    for (const match of line.matchAll(/(?<![\w/])\/([a-z][a-z0-9-]*):([a-z][a-z0-9-]*)/g)) {
+      const [ref, plugin, skill] = match;
+      if (/^https?$/.test(plugin)) continue;
+      counts.slashRefs += 1;
+      const target = skillsByPlugin.get(plugin);
+      if (!target) {
+        problems.push({ at, synced, message: `\`${ref}\` names plugin \`${plugin}\`, which this marketplace does not have` });
+      } else if (!target.skills.has(skill)) {
+        problems.push({ at, synced, message: `\`${ref}\` names skill \`${skill}\`, which ${plugin} does not have` });
+      }
+    }
+  });
 }
 
 console.log(
