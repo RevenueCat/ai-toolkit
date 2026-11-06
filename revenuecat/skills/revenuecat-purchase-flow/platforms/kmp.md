@@ -42,7 +42,7 @@ suspend fun buy(pkg: Package): PurchaseOutcome = try {
 }
 ```
 
-On Android, Google Play requires an `Activity` to host the billing sheet. The KMP SDK takes the foreground activity from the platform `actual` on Android automatically in most versions. If your installed version requires you to pass one explicitly, prefer what the IDE autocompletes and see the purchases-kmp README.
+On Android, Google Play requires an `Activity` to host the billing sheet. `purchases-kmp` tracks the foreground activity itself, through the same AndroidX App Startup initializer that gives it the `Application`, so the purchase calls take no `Activity`. Keep `androidx.startup.InitializationProvider` in the merged manifest (see `integrate-revenuecat/platforms/kmp.md`).
 
 ## Restore purchases (commonMain)
 

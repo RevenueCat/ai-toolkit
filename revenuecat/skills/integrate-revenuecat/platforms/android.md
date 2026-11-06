@@ -65,7 +65,7 @@ class MyApplication : Application() {
 ## Notes
 
 - Use the **Google Play** public SDK key: it starts with `goog_` (Amazon Appstore keys start with `amzn_`).
-- The SDK declares `com.android.vending.BILLING` in its own manifest; you do not need to add it.
+- The Play Billing Library that the SDK depends on declares `com.android.vending.BILLING`, and it merges into your app's manifest; you do not need to add it.
 - Minimum SDK: **23**, or **24** if you use `purchases-ui` for paywalls or Customer Center. Confirm `minSdk` in the app module's `build.gradle(.kts)`.
 - Since 11.0.0 the app, and every module that depends on the SDK, needs `compileSdk` **35** or higher, and each of those modules that compiles Kotlin needs Kotlin **2.1.0** or newer. A lower `compileSdk` fails `checkDebugAarMetadata`, and an older Kotlin fails with "Module was compiled with an incompatible version of Kotlin".
 - Proguard/R8: the SDK ships consumer rules, no extra config needed.

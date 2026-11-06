@@ -15,6 +15,7 @@ See `integrate-revenuecat/platforms/android.md` for dependency specifics. Target
 ### Configure in observer mode
 
 ```kotlin
+import android.app.Application
 import com.revenuecat.purchases.LogLevel
 import com.revenuecat.purchases.Purchases
 import com.revenuecat.purchases.PurchasesAreCompletedBy
