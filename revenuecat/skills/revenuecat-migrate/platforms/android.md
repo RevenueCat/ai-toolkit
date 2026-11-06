@@ -10,7 +10,7 @@ Use observer mode. Your existing Play Billing code keeps owning the purchase flo
 
 ### Install the SDK
 
-See `integrate-revenuecat/platforms/android.md` for dependency specifics. Target the current major release (10.x). It depends on Play Billing Library 8.3.0 and minSdk 23, so your existing Play Billing code must compile against Billing Library 8.
+See `integrate-revenuecat/platforms/android.md` for dependency specifics. Target the latest release at <https://github.com/RevenueCat/purchases-android/releases>. Since 11.0.0 the SDK depends on Play Billing Library 9.1.0, which it exposes as an `api` dependency, so your existing Play Billing code compiles against Billing Library 9. If you declare Billing Library yourself, use 9.0.0 or later. Billing Library 9 removed `SkuDetails`, `SkuDetailsParams`, `SkuDetailsResponseListener`, `BillingClient.SkuType`, `QueryPurchaseHistoryParams`, and `BillingFlowParams.Builder.setSkuDetails`, so move code that still uses them to `ProductDetails`, `QueryProductDetailsParams`, and `BillingClient.ProductType` first. Code written before Billing Library 8 also needs the 8.0.0 removals listed in Google's [release notes](https://developer.android.com/google/play/billing/release-notes). The app also needs `compileSdk` 35+ and minSdk 23, and Kotlin 2.1.0+ in every module that compiles Kotlin.
 
 ### Configure in observer mode
 
