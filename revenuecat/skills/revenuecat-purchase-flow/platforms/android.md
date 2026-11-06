@@ -111,6 +111,7 @@ Expose this from a visible "Restore purchases" button on the paywall and/or sett
 - `PurchaseParams.Builder` must receive the **currently visible** `Activity`, not the `Application` or a detached context. Google Play needs a surface to attach its billing sheet.
 - The callback variants (`purchase(PurchaseParams, PurchaseCallback)`) expose `userCancelled: Boolean` directly in `onError`. Use them if you do not want the coroutine dependency.
 - Kotlin enum comparison uses `==` on `PurchasesErrorCode`. `e.code` returns the enum value.
+- Since 11.0.0, a purchase on a device where the system blocks the Play Store (for example an OEM kids mode) fails with `PurchasesErrorCode.PurchaseNotAllowedError`; 10.x reported `StoreProblemError` there. `StoreProblemError` still covers other store failures, so if you message per code, handle both. `Purchases.canMakePayments` returns `false` on these devices.
 
 ## Verify
 

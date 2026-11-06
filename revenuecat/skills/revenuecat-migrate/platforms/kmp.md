@@ -36,7 +36,7 @@ On the iOS side, observer mode still requires explicit `storeKitVersion` selecti
 
 ### Acknowledgement on Android
 
-On Android, observer mode still means your own code must acknowledge purchases within 3 days. The KMP wrapper does not change this.
+On Android, observer mode still means your own code must acknowledge purchases within 3 days. The KMP wrapper does not change this. Since 4.0.0 the Android side gets Play Billing Library 9.1.0 through purchases-android 11, so that code, or any other in-app purchase library that completes your purchases, must support Billing Library 9 (see `android.md`).
 
 ### Tie existing users
 

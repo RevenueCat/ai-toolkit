@@ -18,7 +18,7 @@ fun onAdLoaded(ad: YourAdType) {
     adTracker.trackAdLoaded(
         AdLoadedData(
             networkName = ad.networkName,            // e.g. "Google Ads", nullable
-            mediatorName = AdMediatorName.AD_MOB,    // AD_MOB, APP_LOVIN, or AdMediatorName.fromString("LevelPlay")
+            mediatorName = AdMediatorName.AD_MOB,    // AD_MOB or APP_LOVIN; KMP has no public way to name another mediator
             adFormat = AdFormat.REWARDED,            // BANNER, INTERSTITIAL, REWARDED_INTERSTITIAL, NATIVE, APP_OPEN, OTHER
             placement = "home_screen",
             adUnitId = ad.adUnitId,
@@ -49,6 +49,8 @@ fun onAdRevenue(ad: YourAdType, revenueMicros: Long, currency: String, precision
     )
 }
 ```
+
+`AdMediatorName` in purchases-kmp has only `AD_MOB` and `APP_LOVIN`, and its `fromString` is internal, so LevelPlay and other mediators cannot be named. Do not report their events under either name; tell the user instead.
 
 For a mediator other than AdMob, apply that mediator's units from `../mediator-callbacks.md` in the same place, on the platform side.
 
