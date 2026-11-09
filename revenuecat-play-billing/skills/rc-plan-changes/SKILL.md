@@ -25,7 +25,7 @@ Confirm the following before invoking a plan change:
 - The user has exactly one active Google Play subscription you intend to replace.
 - You have a fresh `CustomerInfo` from `Purchases.sharedInstance.awaitCustomerInfo()` or a cached value from a recent listener callback.
 - You have the target `Package` resolved from `offerings.current` (see [rc-subscriptions](../rc-subscriptions/)).
-- RevenueCat SDK 10.x is on the classpath (it bundles Play Billing Library 8.3.0).
+- RevenueCat SDK 10.3.0 or later is on the classpath (`StoreReplacementMode` arrived in 10.3.0). This skill was checked against 11.1.0, which brings Play Billing Library 9.1.0.
 - If you will use `DEFERRED`, Google Real Time Developer Notifications must be connected to RevenueCat (RevenueCat Play app settings > Connect to Google, then paste the topic in Play Console > Monetize > Monetization setup). RevenueCat requires this for `DEFERRED`.
 
 Skip this skill if the user has no active subscription. For a fresh purchase, use [rc-purchase-flow](../rc-purchase-flow/) instead.
