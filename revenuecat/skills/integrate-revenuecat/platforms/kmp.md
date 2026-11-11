@@ -4,7 +4,7 @@
 
 ## Install
 
-Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below (for example `3.10.1`). Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+ and Android API 23+ (24+ once you add `purchases-kmp-ui`). Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
+Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below. Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+ and Android API 23+ (24+ once you add `purchases-kmp-ui`). Since 4.0.0 every Android module that depends on purchases-kmp, the shared module as well as the app, must set `compileSdk` 35 or higher (36 with `purchases-kmp-either`), or that module's `checkDebugAarMetadata` fails. The Android side also gets Play Billing Library 9.1.0 through purchases-android 11, so any other in-app purchase library in the app must support Billing Library 9. Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
 
 In the shared module's `build.gradle.kts`:
 

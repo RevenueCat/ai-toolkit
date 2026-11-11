@@ -44,7 +44,7 @@ Accounts that are not license testers either cannot buy or are charged real mone
 
 If `Purchases.sharedInstance.getOfferings(...)` returns an `Offerings` with no available packages, or offerings come back but products are missing:
 
-- Check logcat for `BillingClient` errors. `BillingResponseCode.BILLING_UNAVAILABLE` usually means the Play Store app is out of date or the user is not signed in.
+- Check logcat for `BillingClient` errors. `BillingResponseCode.BILLING_UNAVAILABLE` usually means the Play Store app is out of date or the user is not signed in. Since Play Billing Library 9 (purchases-android 11.x) it also means the system blocks the Play Store, for example in an OEM kids mode: the debug message says the Play Store is blocked, and for that case the SDK reports `PurchaseNotAllowedError` where 10.x reported `StoreProblemError`.
 - `ITEM_UNAVAILABLE` means the product ID in the RevenueCat dashboard does not match a live product in Play Console, or the product is in draft state.
 - Product IDs in Play Console are case sensitive and cannot be reused once deleted.
 - New subscriptions require at least one active base plan. A subscription with no base plan is not available for purchase.

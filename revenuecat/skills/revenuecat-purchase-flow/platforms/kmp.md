@@ -42,7 +42,7 @@ suspend fun buy(pkg: Package): PurchaseOutcome = try {
 }
 ```
 
-On Android, Google Play requires an `Activity` to host the billing sheet. The KMP SDK takes the foreground activity from the platform `actual` on Android automatically in most versions. If your installed version requires you to pass one explicitly, prefer what the IDE autocompletes and see the purchases-kmp README.
+On Android, Google Play requires an `Activity` to host the billing sheet. `purchases-kmp` tracks the foreground activity itself, through the same AndroidX App Startup initializer that gives it the `Application`, so the purchase calls take no `Activity`. Keep `androidx.startup.InitializationProvider` in the merged manifest (see `integrate-revenuecat/platforms/kmp.md`).
 
 ## Restore purchases (commonMain)
 
@@ -67,6 +67,7 @@ If you do not want the coroutine dependency, every suspending extension has a ca
 - `PurchasesTransactionException` is specific to transactional calls and exposes `userCancelled`. Non transactional calls (`awaitCustomerInfo`, `awaitOfferings`, `awaitRestore`, `awaitLogIn`, `awaitLogOut`) throw the plain `PurchasesException`.
 - Imports live under `com.revenuecat.purchases.kmp.ktx.*` for coroutines and `com.revenuecat.purchases.kmp.models.*` for types.
 - Error constants are on `com.revenuecat.purchases.kmp.models.PurchasesErrorCode` if you need to branch on specific non cancellation errors.
+- Since 4.0.0, an Android purchase on a device where the system blocks the Play Store (for example an OEM kids mode) fails with `PurchaseNotAllowedError` instead of `StoreProblemError`. `StoreProblemError` still covers other store failures, so if you message per code, handle both.
 
 ## Verify
 
