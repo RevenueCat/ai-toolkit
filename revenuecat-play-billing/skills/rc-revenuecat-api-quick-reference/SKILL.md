@@ -1,6 +1,6 @@
 ---
 name: rc-revenuecat-api-quick-reference
-description: Use this skill as a quick reference for the RevenueCat Android SDK 10.x and REST API. Covers SDK init, common Purchases calls, CustomerInfo / Offerings access patterns, and the most used REST endpoints.
+description: Use this skill as a quick reference for the RevenueCat Android SDK 11.x and REST API. Covers SDK init, common Purchases calls, CustomerInfo / Offerings access patterns, and the most used REST endpoints.
 license: Apache-2.0; see LICENSE
 metadata:
   author: RevenueCat
@@ -42,7 +42,7 @@ Route to the REST API (server side):
 - You need to grant or revoke a promotional entitlement, override a subscription, look up a subscriber from another service, refund, or deliver events to another system.
 - You are integrating with a system that cannot embed the SDK.
 
-The tables in this skill cover the Android SDK 10.x surface from appendix A verbatim, plus a short REST endpoint index. For full REST paths, authentication, and payloads, see the [full appendix on revenuecat.com](https://www.revenuecat.com/guides/revenuecat-android-sdk/appendix-revenuecat-api-quick-reference) together with the backend and webhooks skills, and treat this file as the SDK index.
+The tables in this skill cover the Android SDK 11.x surface from appendix A (the same calls compile against 10.27.1), plus a short REST endpoint index. For full REST paths, authentication, and payloads, see the [full appendix on revenuecat.com](https://www.revenuecat.com/guides/revenuecat-android-sdk/appendix-revenuecat-api-quick-reference) together with the backend and webhooks skills, and treat this file as the SDK index.
 
 ## Phase 2: Reference Tables
 
@@ -207,6 +207,7 @@ PurchasesErrorCode.ProductAlreadyPurchasedError
 PurchasesErrorCode.PaymentPendingError
 PurchasesErrorCode.NetworkError
 PurchasesErrorCode.StoreProblemError
+PurchasesErrorCode.PurchaseNotAllowedError // also a system blocked Play Store since 11.0.0
 PurchasesErrorCode.ProductNotAvailableForPurchaseError
 PurchasesErrorCode.ConfigurationError
 ```
