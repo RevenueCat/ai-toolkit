@@ -42,7 +42,7 @@ Store project_id for all subsequent calls
 
 6. Create Default Offering: `create-offering` tool (lookup_key: "default")
 
-7. Create Packages in Offering: `create-package` tool (for subscriptions, use $rc_monthly, $rc_annual, etc.)
+7. Create Packages in Offering: `create-packages` tool, one call per package (for subscriptions, use $rc_monthly, $rc_annual, etc.)
 
 8. Attach Products to Packages: `attach-products-to-package` tool
 
@@ -76,7 +76,7 @@ Offering: default (current)
 Next Steps:
 1. Configure store credentials in RevenueCat dashboard
 2. Create products in App Store Connect / Play Console
-3. Add SDK to your app (see /rc:create-app)
+3. Add SDK to your app (see the `integrate-revenuecat` skill)
 4. Implement paywall UI using the "default" offering
 ```
 
