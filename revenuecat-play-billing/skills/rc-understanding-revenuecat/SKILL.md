@@ -1,6 +1,6 @@
 ---
 name: rc-understanding-revenuecat
-description: Use this skill to orient an agent to the RevenueCat Android SDK (10.x) architecture. Covers how RevenueCat reorganizes BillingClient, Google Play Developer API, and RTDN into a single SDK, and how Products, Packages, Offerings, Entitlements, and CustomerInfo connect.
+description: Use this skill to orient an agent to the RevenueCat Android SDK (11.x) architecture. Covers how RevenueCat reorganizes BillingClient, Google Play Developer API, and RTDN into a single SDK, and how Products, Packages, Offerings, Entitlements, and CustomerInfo connect.
 license: Apache-2.0; see LICENSE
 metadata:
   author: RevenueCat

@@ -67,6 +67,8 @@ In the RevenueCat dashboard, open your app, go to **Apps & providers**, then **C
 
 ```kotlin
 // build.gradle.kts
+import com.android.build.api.variant.BuildConfigField
+
 android {
     buildFeatures {
         buildConfig = true
@@ -75,19 +77,31 @@ android {
         debug {
             buildConfigField("String", "RC_API_KEY", "\"test_YOUR_KEY\"")
         }
-        release {
-            buildConfigField("String", "RC_API_KEY", "\"${providers.gradleProperty("RC_API_KEY").get()}\"")
-        }
+    }
+}
+
+// Read the production key only when a release variant builds, so debug
+// builds work without it.
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.buildConfigFields?.put(
+            "RC_API_KEY",
+            providers.gradleProperty("RC_API_KEY").map { BuildConfigField("String", "\"$it\"", null) },
+        )
     }
 }
 ```
 
 AGP 8.0+ does not generate `BuildConfig` by default; `buildFeatures { buildConfig = true }` is required or the fields above fail to build.
 
-For CI, read the debug key from env so it never lands in git. Change only the `debug` field from Step 2. The `release` field reads the same `RC_API_KEY` Gradle property as configuring-the-sdk, so pass it in CI (`-PRC_API_KEY=...` or `ORG_GRADLE_PROJECT_RC_API_KEY`). Never put the `test_` key in `defaultConfig`, or it ships in release builds too:
+Do not read the production key with `.get()` inside `buildTypes { release { } }` or `defaultConfig { }`. Gradle runs those blocks on every build, so `assembleDebug` fails with "Cannot query the value of Gradle property 'RC_API_KEY'" on any machine without the production key. If you followed configuring-the-sdk, replace its `defaultConfig` field with the `androidComponents` block above. A release build without the property still fails, at `generateReleaseBuildConfig` with "property 'items' doesn't have a configured value", so a release never ships without a key.
+
+For CI, read the debug key from env so it never lands in git. Change only the `debug` field from Step 2. Release builds read the same `RC_API_KEY` Gradle property as configuring-the-sdk, so pass it to release jobs (`-PRC_API_KEY=...` or `ORG_GRADLE_PROJECT_RC_API_KEY`). Never put the `test_` key in `defaultConfig`, or it ships in release builds too:
 
 ```kotlin
 // build.gradle.kts
+import com.android.build.api.variant.BuildConfigField
+
 val testKey = System.getenv("RC_TEST_STORE_KEY") ?: "test_placeholder"
 android {
     buildFeatures {
@@ -97,9 +111,15 @@ android {
         debug {
             buildConfigField("String", "RC_API_KEY", "\"$testKey\"")
         }
-        release {
-            buildConfigField("String", "RC_API_KEY", "\"${providers.gradleProperty("RC_API_KEY").get()}\"")
-        }
+    }
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        variant.buildConfigFields?.put(
+            "RC_API_KEY",
+            providers.gradleProperty("RC_API_KEY").map { BuildConfigField("String", "\"$it\"", null) },
+        )
     }
 }
 ```

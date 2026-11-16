@@ -32,7 +32,7 @@ Do not call `BillingClient.queryProductDetailsAsync`, `acknowledgePurchase`, or 
 
 ## Phase 2: Prepare
 
-- Configure the product in Google Play Console as a one time product. Keep one buy purchase option marked backwards compatible (the first one is by default). RevenueCat 10.x sells only that purchase option; rent options and one time product offers are not exposed through the SDK.
+- Configure the product in Google Play Console as a one time product. Keep one buy purchase option marked backwards compatible (the first one is by default). RevenueCat 10.x and 11.x (checked at 11.1.0) sell only that purchase option; rent options and one time product offers are not exposed through the SDK.
 - In the RevenueCat dashboard, attach the product to an offering and package, and mark it non consumable if it should be bought only once (consumable is the default).
 - Confirm `Purchases.configure` runs once on app start with your Android API key and the current App User ID.
 

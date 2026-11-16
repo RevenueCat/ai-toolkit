@@ -49,7 +49,7 @@ Decide each of the following before changing code.
 | `DISABLED` | No signing happens | Only if you explicitly opt out |
 | `INFORMATIONAL` (default since SDK 8.11.0) | Logged in `verification`, access still granted | Act on `VerificationResult.FAILED` yourself if you need to deny access |
 
-SDK 10.x has no enforced mode; see 3.1 below for gating on the result yourself.
+The SDK has no enforced mode (none in 10.x, none through 11.1.0); see 3.1 below for gating on the result yourself.
 
 ### Decision B: Where is the authority?
 
@@ -87,7 +87,7 @@ when (customerInfo.entitlements.verification) {
 }
 ```
 
-SDK 10.x has no enforced mode: `FAILED` is informational and never blocks access by itself. To enforce, gate on the result yourself:
+There is no enforced mode through SDK 11.1.0: `FAILED` is informational and never blocks access by itself. To enforce, gate on the result yourself:
 
 ```kotlin
 val trusted = customerInfo.entitlements.verification != VerificationResult.FAILED

@@ -86,7 +86,7 @@ If the concern is split (for example, RevenueCat verifies the token but you stil
 | Premium content server side | Verify via RC REST API or webhooks |
 | Webhook receiver endpoint | You build; RC sends, you receive |
 | Play Console product creation | Still done in Play Console |
-| Alternative billing programs | Not supported by the RevenueCat SDK (10.27.1); integrate the Play Billing Library directly |
+| Alternative billing programs | Not supported by the RevenueCat SDK (11.1.0); integrate the Play Billing Library directly |
 | App UI (paywalls, onboarding) | You build (RC Paywalls UI optional) |
 | Push notifications for payment issues | You build on top of webhook events |
 

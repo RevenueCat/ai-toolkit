@@ -54,7 +54,7 @@ Use this table to categorize `PurchasesErrorCode` values and pick the UX respons
 | `PaymentPendingError` | Purchase entered pending state | Show a pending message. Wait for `UpdatedCustomerInfoListener`. |
 | `NetworkError` | Request failed due to connectivity | Prompt the user to retry. |
 | `StoreProblemError` | Google Play issue | Prompt to retry or update Play Store. |
-| `PurchaseNotAllowedError` | Device or account cannot purchase | Show an explanatory message. |
+| `PurchaseNotAllowedError` | Device or account cannot purchase. Since SDK 11.0.0 this includes a Play Store the system blocks (for example an OEM kids mode), which 10.x reported as `StoreProblemError`. | Show an explanatory message. `Purchases.awaitCanMakePayments(context)` returns `false` on such a device, so you can hide purchase entry points up front. |
 | `ProductNotAvailableForPurchaseError` | Play reports the product unavailable for this user or region | Hide it and refetch offerings. |
 
 `IneligibleError` is App Store only: it comes from a backend promotional offer code, not from Google Play. On Android, Play simply omits ineligible offers from `subscriptionOptions`.
@@ -120,6 +120,8 @@ fun userFacingMessage(error: PurchasesError): String = when (error.code) {
         "Please check your internet connection and try again."
     PurchasesErrorCode.StoreProblemError ->
         "There was a problem with Google Play. Please try again."
+    PurchasesErrorCode.PurchaseNotAllowedError ->
+        "Purchases are not available on this device or account."
     PurchasesErrorCode.ProductAlreadyPurchasedError ->
         "You already have this subscription."
     PurchasesErrorCode.PaymentPendingError ->
