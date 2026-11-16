@@ -63,16 +63,17 @@ export interface WebhookStore {
   saveEntitlements(userId: string, projectId: string, active: Record<string, number | null>, readAtMs: number): Promise<void>;
   /*
    * Consumable ledger, one row per transactionId: purchaseSeen, reversed, owner (user or none), units, the
-   * purchase's app user IDs, and refundEventMs (the event_timestamp_ms of the last refund or reversal applied).
+   * purchase's app user IDs, and refundEventMs (the event_timestamp_ms of the last refund or reversal applied, null
+   * until one is).
    * The balance holds `units` for a row exactly while purchaseSeen && !reversed && owner is set: after each change,
    * add the difference to the owner's balance. A row with no owner is "held". Each method creates the row if
    * it is missing.
    */
   /** Purchase: the first time, set purchaseSeen, units, IDs, and owner (when known). Later calls change nothing. */
   recordPurchase(transactionId: string, productId: string, units: number, owner: string | undefined, appUserIds: string[], eventMs: number): Promise<void>;
-  /** Refund: set reversed, only when eventMs is later than refundEventMs (then store it). */
+  /** Refund: set reversed when refundEventMs is null or eventMs is later than it (then store eventMs). */
   reverseCredit(transactionId: string, eventMs: number): Promise<void>;
-  /** Refund reversed: clear reversed, only when eventMs is later than refundEventMs (then store it). */
+  /** Refund reversed: clear reversed when refundEventMs is null or eventMs is later than it (then store eventMs). */
   restoreCredit(transactionId: string, eventMs: number): Promise<void>;
   /** Set owner = userId on every row without an owner whose IDs include one of appUserIds. */
   claimHeldCredits(userId: string, appUserIds: string[]): Promise<void>;
@@ -195,8 +196,10 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
         }
         await store.recordPurchase(event.transaction_id, productId, units * (event.quantity ?? 1), owner, ids, eventMs);
       } else if (event.type === "CANCELLATION") {
+        if (event.event_timestamp_ms == null) console.warn(`RevenueCat ${event.type} ${event.id} has no event_timestamp_ms`);
         await store.reverseCredit(event.transaction_id, eventMs);
       } else if (event.type === "REFUND_REVERSED") {
+        if (event.event_timestamp_ms == null) console.warn(`RevenueCat ${event.type} ${event.id} has no event_timestamp_ms`);
         await store.restoreCredit(event.transaction_id, eventMs);
       }
     }
@@ -403,7 +406,7 @@ Implement `WebhookStore` on your database. A relational layout that fits it:
 
 - `revenuecat_events`: `id` primary key, `body`, `attempts`, `next_attempt_at`, `done_at`, `last_error`. `recordEvent` is an insert that ignores a duplicate key and reports whether it inserted. With several workers, `dueEvents` claims rows by moving `next_attempt_at` forward in the same statement (`UPDATE ... WHERE id IN (SELECT ... FOR UPDATE SKIP LOCKED) RETURNING ...`), so no lock is held during the HTTP calls.
 - `revenuecat_access`: one row per user and RevenueCat project with `read_at_ms`, and one child row per lookup key with `expires_at` (null for no expiry). `saveEntitlements` locks the access row, returns when the stored `read_at_ms` is later, then replaces the child rows, all in one transaction.
-- `consumable_ledger`: `transaction_id` primary key, `purchase_seen`, `reversed`, `owner_user_id` (nullable), `units`, `app_user_ids`, `refund_event_ms`. Every method inserts the row if it is missing, reads it `FOR UPDATE`, and changes the row and the owner's balance by the difference in credited units in the same transaction, so a refund and a claim cannot both win.
+- `consumable_ledger`: `transaction_id` primary key, `purchase_seen`, `reversed`, `owner_user_id` (nullable), `units`, `app_user_ids`, `refund_event_ms` (null until a refund or reversal is applied). Every method inserts the row if it is missing, reads it `FOR UPDATE`, and changes the row and the owner's balance by the difference in credited units in the same transaction, so a refund and a claim cannot both win.
 
 The in-memory store below shows the same semantics, and is what the tests for this file run against:
 
@@ -411,7 +414,7 @@ The in-memory store below shows the same semantics, and is what the tests for th
 // memory-store.ts
 import type { InboxEvent, WebhookStore } from "./revenuecat-webhooks.ts";
 
-type LedgerRow = { purchaseSeen: boolean; reversed: boolean; owner?: string; units: number; ids: string[]; refundEventMs: number };
+type LedgerRow = { purchaseSeen: boolean; reversed: boolean; owner?: string; units: number; ids: string[]; refundEventMs: number | null };
 
 export class MemoryStore implements WebhookStore {
   users = new Map<string, { access: Map<string, { active: Record<string, number | null>; readAtMs: number }>; coins: number }>();
@@ -469,7 +472,7 @@ export class MemoryStore implements WebhookStore {
 
   async reverseCredit(transactionId: string, eventMs: number): Promise<void> {
     const row = this.row(transactionId);
-    if (eventMs <= row.refundEventMs) return;
+    if (row.refundEventMs !== null && eventMs <= row.refundEventMs) return;
     this.change(row, () => {
       row.reversed = true;
       row.refundEventMs = eventMs;
@@ -478,7 +481,7 @@ export class MemoryStore implements WebhookStore {
 
   async restoreCredit(transactionId: string, eventMs: number): Promise<void> {
     const row = this.row(transactionId);
-    if (eventMs <= row.refundEventMs) return;
+    if (row.refundEventMs !== null && eventMs <= row.refundEventMs) return;
     this.change(row, () => {
       row.reversed = false;
       row.refundEventMs = eventMs;
@@ -496,7 +499,7 @@ export class MemoryStore implements WebhookStore {
 
   private row(transactionId: string): LedgerRow {
     let row = this.ledger.get(transactionId);
-    if (!row) this.ledger.set(transactionId, (row = { purchaseSeen: false, reversed: false, units: 0, ids: [], refundEventMs: 0 }));
+    if (!row) this.ledger.set(transactionId, (row = { purchaseSeen: false, reversed: false, units: 0, ids: [], refundEventMs: null }));
     return row;
   }
 
