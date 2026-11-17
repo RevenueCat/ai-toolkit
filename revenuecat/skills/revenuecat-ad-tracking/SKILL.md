@@ -73,7 +73,7 @@ If you cannot ask (non-interactive run), continue with the most likely answer, l
 | --- | --- |
 | AdMob on iOS (Swift), Android (Kotlin), Flutter, React Native or Unity | **AdMob adapter** |
 | AdMob on iOS with RevenueCat installed through CocoaPods (`pod 'RevenueCat'` in the Podfile) | Move RevenueCat to SPM (`purchases-ios-spm`) first, then the **AdMob adapter**. If the app must stay on CocoaPods, **manual** calls; the adapter is SPM only |
-| AppLovin MAX, LevelPlay (including Unity Ads under LevelPlay), PlayWire or any other mediator with impression-level revenue | **Manual** `AdTracker` calls |
+| AppLovin MAX, LevelPlay (including Unity Ads under LevelPlay), PlayWire or any other mediator with impression-level revenue | **Manual** `AdTracker` calls. On KMP only AdMob and AppLovin MAX can be named; for other mediators, tell the user |
 | AdMob on Kotlin Multiplatform, Java-only Android, or Objective-C | **Manual** `AdTracker` calls (no adapter). On iOS, `AdTracker` has no Objective-C API, so Objective-C apps call it from a small Swift file |
 | Mediator reports only aggregated daily revenue, no per-impression data (standalone Unity Ads without LevelPlay is one) | Not supported. Tell the user and stop. |
 

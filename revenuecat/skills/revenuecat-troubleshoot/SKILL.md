@@ -213,8 +213,9 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 - Typically from automated testing or Play Store pre-launch reports on LG Nexus 5X / rooted devices.
 - Safe to ignore/silence in crash reporting tools.
 
-**NoCoreLibraryDesugaringException / NoClassDefFoundError**
-- Fix: Enable core library desugaring in `build.gradle` or raise `minSdk`.
+**NoCoreLibraryDesugaringException / NoClassDefFoundError when starting a purchase**
+- Only SDK versions on Play Billing Library 7.1 can hit this: purchases-android 8.10.8 to 8.25.0 (a raw `NoClassDefFoundError` before 8.16.0, `NoCoreLibraryDesugaringException` from 8.16.0), and the `purchases-bc7` artifacts (9.14.1 to 10.12.0) that 10.13.0 removed. Versions on Billing Library 8 or later are not affected, and 11.1.0 deprecates the exception and never throws it.
+- Fix: upgrade the SDK, or enable core library desugaring in `build.gradle`.
 
 ## Reference: platform configuration checklists
 
@@ -264,4 +265,4 @@ Purchases.sharedInstance.getCustomerInfoWith(CacheFetchPolicy.FETCH_CURRENT) { .
 
 **SDK crashes on launch (iOS / Xcode 26)** — Initialize RevenueCat before other networking libraries.
 
-**SDK crashes on launch (Android)** — Enable core library desugaring or raise `minSdk` to 24+.
+**SDK crashes when starting a purchase (Android, Play Billing Library 7.1)**: upgrade the SDK, or enable core library desugaring. See NoCoreLibraryDesugaringException above.

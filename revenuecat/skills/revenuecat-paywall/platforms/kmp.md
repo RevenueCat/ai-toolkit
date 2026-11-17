@@ -4,7 +4,7 @@
 
 ## Install
 
-Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below (for example `3.10.1`). Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+, and `purchases-kmp-ui` needs Android API 24+ (core alone needs 23+). Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
+Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below. Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+, and `purchases-kmp-ui` needs Android API 24+ (core alone needs 23+). Every Android module that depends on purchases-kmp, the shared module as well as the app, must set `compileSdk` 35 or higher, and `purchases-kmp-ui` also needs Android Gradle Plugin 8.6.0 or newer (both were already true for `purchases-kmp-ui` 3.16.0). `purchases-kmp-ui` raises the app's Jetpack Compose libraries to at least the versions in Compose BOM 2026.06.01. Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
 
 In the shared module's `build.gradle.kts`, add the UI artifact to `commonMain`:
 
@@ -83,7 +83,7 @@ Set a specific offering via the `offering` property on the builder. If left `nul
 
 - The `PaywallListener` callbacks, `PaywallOptions` surface, and the `dismissRequest` contract mirror the native Android SDK. See `purchases-android` docs for detailed semantics.
 - Do not call `Purchases.purchase(…)` from outside the paywall. The paywall runs the purchase itself and calls the listener with the result.
-- `com.revenuecat.purchases:purchases-kmp-ui` is the current coordinate for 3.x. If the IDE flags the dependency as unresolved, check the version first, then the [Paywalls installation docs for Kotlin Multiplatform](https://www.revenuecat.com/docs/tools/paywalls/installation#kotlin-multiplatform-installation).
+- `com.revenuecat.purchases:purchases-kmp-ui` is the coordinate for current releases. If the IDE flags the dependency as unresolved, check the version first, then the [Paywalls installation docs for Kotlin Multiplatform](https://www.revenuecat.com/docs/tools/paywalls/installation#kotlin-multiplatform-installation).
 - Compose Multiplatform paywalls require the Compose runtime on both targets. Desktop, web, and other non mobile targets are not supported by the paywall module.
 
 ## Verify

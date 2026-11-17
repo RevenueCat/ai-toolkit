@@ -34,7 +34,7 @@ Confirm the platform specific entry points pass the matching key:
 
 ## Version mismatch between KMP and native SDKs
 
-Since 3.0.0, `purchases-kmp` bundles `purchases-ios` and depends on a specific `purchases-android` version (3.10.1 uses 10.22.1). Do not add the native SDKs to the app yourself, so the versions `purchases-kmp` was built against stay in use. The exception is the Amazon Appstore: since 3.0.0 you add `purchases-store-amazon` yourself, so pin it to that same `purchases-android` version. If another dependency pulls in a different `purchases-android`, check the resolved version with `./gradlew :<module>:dependencies` on the module that applies the Android plugin (often `:composeApp` or `:androidApp`).
+Since 3.0.0, `purchases-kmp` bundles `purchases-ios` and depends on a specific `purchases-android` version (4.x uses 11.x; `revenuecat-android` in purchases-kmp's `gradle/libs.versions.toml` at the release tag names the exact version). Do not add the native SDKs to the app yourself, so the versions `purchases-kmp` was built against stay in use. The exception is the Amazon Appstore: since 3.0.0 you add `purchases-store-amazon` yourself, so pin it to that same `purchases-android` version. If another dependency pulls in a different `purchases-android`, check the resolved version with `./gradlew :<module>:dependencies` on the module that applies the Android plugin (often `:composeApp` or `:androidApp`).
 
 ## iOS framework linking issues
 

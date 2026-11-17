@@ -4,7 +4,7 @@
 
 ## Install
 
-Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below (for example `3.10.1`). Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+, and `purchases-kmp-ui` needs Android API 24+ (core alone needs 23+). Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
+Find the latest stable release at <https://github.com/RevenueCat/purchases-kmp/releases> and substitute that version for `<latest>` in the snippet below. Since 3.0.0, versions are plain, without the old `+<purchases-hybrid-common>` suffix. Current releases need Kotlin 2.3.20+, and `purchases-kmp-ui` needs Android API 24+ (core alone needs 23+). Every Android module that depends on purchases-kmp, the shared module as well as the app, must set `compileSdk` 35 or higher, and `purchases-kmp-ui` also needs Android Gradle Plugin 8.6.0 or newer (both were already true for `purchases-kmp-ui` 3.16.0). `purchases-kmp-ui` raises the app's Jetpack Compose libraries to at least the versions in Compose BOM 2026.06.01. Use 3.10.0 or later: 3.0 to 3.9 can log iOS users out when they update from a version before 3.0.0, and 3.10.0 recovers them. If GitHub is unreachable, ask the user for a version to pin.
 
 In the shared module's `build.gradle.kts`:
 
@@ -53,7 +53,7 @@ The common API is minimal: `modifier` and a required `onDismiss` callback. Platf
 
 - Customer Center requires iOS 15+ on the iOS target. On Android, refund flows degrade to deep linking into Google Play (Apple only feature).
 - The KMP common API exposes fewer hooks than either native SDK. If your product requires `onRestoreCompleted`, `onManagementOptionSelected`, or other lifecycle callbacks, wire them through platform code directly, or upgrade to a `purchases-kmp-ui` release that exposes them in common.
-- If the IDE cannot resolve `com.revenuecat.purchases:purchases-kmp-ui`, check the version against the [purchases-kmp releases](https://github.com/RevenueCat/purchases-kmp/releases) (current releases are 3.x) and the coordinates against the [Customer Center docs for Kotlin Multiplatform](https://www.revenuecat.com/docs/tools/customer-center/customer-center-kmp).
+- If the IDE cannot resolve `com.revenuecat.purchases:purchases-kmp-ui`, check the version against the [purchases-kmp releases](https://github.com/RevenueCat/purchases-kmp/releases) and the coordinates against the [Customer Center docs for Kotlin Multiplatform](https://www.revenuecat.com/docs/tools/customer-center/customer-center-kmp).
 - Ensure `Purchases.logIn(appUserId)` has run for signed in users before opening the Customer Center, or subscriptions will show up under an anonymous ID.
 
 ## Verify

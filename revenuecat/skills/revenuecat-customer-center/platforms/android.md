@@ -14,14 +14,20 @@ dependencies {
 }
 ```
 
-`purchases-ui` requires Jetpack Compose. If the app is not already on Compose, enable it in the module:
+`purchases-ui` requires Jetpack Compose. If the app is not already on Compose, enable it in the module and add the Compose Compiler Gradle plugin, at your Kotlin version, to the module's existing `plugins {}` block (a second `plugins {}` block fails the build):
 
 ```kotlin
+plugins {
+    // in the module's existing plugins block
+    id("org.jetbrains.kotlin.plugin.compose") version "<your Kotlin version>"
+}
+
 android {
     buildFeatures { compose = true }
-    composeOptions { kotlinCompilerExtensionVersion = "…" }
 }
 ```
+
+Since Kotlin 2.0 the Compose compiler ships as that plugin, and `composeOptions { kotlinCompilerExtensionVersion = … }` no longer sets it up: with `compose = true` and no plugin, the build fails. `purchases-ui` 11.x needs Kotlin 2.1.0+, `compileSdk` 35+, Android Gradle Plugin 8.6.0+, and minSdk 24. It also exports its Compose BOM as a platform constraint (2026.06.01 in 11.0.0), so your own Compose libraries resolve to at least that BOM's versions, for example `material3` 1.4.0.
 
 ## Implement
 
