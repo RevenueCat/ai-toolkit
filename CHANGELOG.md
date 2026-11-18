@@ -5,6 +5,21 @@ All notable changes to the RevenueCat AI Toolkit will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.6.0](https://github.com/RevenueCat/ai-toolkit/compare/v2.5.1...v2.6.0) (2026-11-18)
+
+
+### Added
+
+* **skills:** add revenuecat-migrate-to-spm skill ([#88](https://github.com/RevenueCat/ai-toolkit/issues/88)) ([41a9649](https://github.com/RevenueCat/ai-toolkit/commit/41a96496921b182b9e32efcfc3b4cb35184b6f64))
+* **skills:** add revenuecat-webhooks skill ([#94](https://github.com/RevenueCat/ai-toolkit/issues/94)) ([91488ef](https://github.com/RevenueCat/ai-toolkit/commit/91488efd7d4d5d78e20ae57f02f0b1bd80db263f))
+
+
+### Fixed
+
+* **revenuecat-migrate-to-spm:** detect CocoaPods installs without Podfile.lock ([#89](https://github.com/RevenueCat/ai-toolkit/issues/89)) ([678ea45](https://github.com/RevenueCat/ai-toolkit/commit/678ea455f5519d65a2e69e74a969599b291070f8))
+* **skills:** iOS, Flutter, and React Native platform file audit findings ([#86](https://github.com/RevenueCat/ai-toolkit/issues/86)) ([f395dbb](https://github.com/RevenueCat/ai-toolkit/commit/f395dbb0eb83a0ecd7f21b22968972727e16350e))
+* **skills:** update Android and KMP skills for purchases-android 11 and purchases-kmp 4 ([#90](https://github.com/RevenueCat/ai-toolkit/issues/90)) ([0127e63](https://github.com/RevenueCat/ai-toolkit/commit/0127e634f43fb4a8ffd93d8922e6216f196a315a))
+
 ## [2.5.1](https://github.com/RevenueCat/ai-toolkit/compare/v2.5.0...v2.5.1) (2026-10-30)
 
 
