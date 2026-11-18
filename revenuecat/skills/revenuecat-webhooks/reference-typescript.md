@@ -1,6 +1,6 @@
 # Reference implementation: Node.js (TypeScript)
 
-A complete implementation of the handler contract in `SKILL.md`, for Node.js 18 or later. It uses the built in `fetch` and `node:crypto` and has no dependencies. Express is used only in the wiring example; `handle()` takes the raw body and the headers, so any framework works.
+A complete implementation of the handler contract in `SKILL.md`, for Node.js 22 or later. It uses the built in `fetch` and `node:crypto` and has no dependencies. Express is used only in the wiring example; `handle()` takes the raw body and the headers, so any framework works.
 
 Port it to another language by keeping the same parts: `handle()` (authenticate, record, answer), the worker (`processEvents()`), the re-read (`syncCustomer()`), the login refresh (`refreshUser()`), and the store contract.
 
