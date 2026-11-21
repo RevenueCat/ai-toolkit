@@ -46,6 +46,9 @@ jobs:
               || { echo "  INVALID JSON: $f"; exit 1; }
           done
 
+      - name: Check skill references
+        run: node scripts/check-skill-references.mjs
+
       # ajv-cli is a pinned devDependency resolved through the committed
       # pnpm-lock.yaml, so CI runs the exact, integrity-checked versions we
       # reviewed.

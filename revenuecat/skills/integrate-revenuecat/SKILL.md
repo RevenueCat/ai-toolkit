@@ -51,7 +51,7 @@ Use whichever surface the user has available: the RevenueCat MCP server or the `
   - `name` derived from the identifier or asked from the user.
 
 ### 2c. Get the public API key
-- List public keys for the relevant app ID: `list-public-api-keys` (MCP) or `rc apps keys <app-id>`:
+- List public keys for the relevant app ID: `list-app-public-api-keys` (MCP) or `rc apps keys <app-id>`:
   - `app_store` / `play_store` if the store-side app exists.
   - Otherwise the `test_store` app.
 - The returned key is **public** and safe to embed in client app code. iOS keys are prefixed `appl_…`, Android keys `goog_…`, Amazon `amzn_…`.
@@ -111,15 +111,17 @@ Check whether products, entitlements, and offerings are already set up in the pr
 
 **iOS (App Store Connect)**
 
-1. **In-App Purchase Key (recommended for StoreKit 2)** — App Store Connect → Users and Access → Integrations → In-App Purchase. Generate key, download the `.p8` file. Note the Key ID and Issuer ID.
+1. **In-App Purchase Key (required)** — SDKs that use StoreKit 2 (iOS 5.0.0+, Flutter 7.0.0+, React Native 8.0.0+) do not record purchases without it. App Store Connect → Users and Access → Integrations → In-App Purchase. Generate key, download the `.p8` file. Note the Key ID and Issuer ID.
 2. **Shared Secret (legacy StoreKit 1)** — App Store Connect → App → App Information → App-Specific Shared Secret.
-3. If the user provides this information, register it on the RevenueCat side via `create-app` / `update-app`.
+3. The user uploads the `.p8` file (and, for StoreKit 1, enters the shared secret) in the app's settings in the RevenueCat dashboard. `create-app` / `update-app` cannot upload a key file or a secret. They only take the Key ID and Issuer ID, or copy the keys from another App Store app in the same project (`copy_subscription_key_from_app_id`, `copy_app_store_connect_api_key_from_app_id`).
+4. Confirm the saved key with `validate-app-credentials` (`credential_type: "app_store_subscriptions_key"`).
 
 **Android (Google Play Console)**
 
-1. **Service account credentials** — Create a service account in Google Cloud Console. Grant "Service Account User" role. Create a JSON key. In Play Console, grant the service account access with "View financial data" permission.
+1. **Service account credentials** — Create a service account in Google Cloud Console with the Pub/Sub Editor and Monitoring Viewer roles, and create a JSON key. In Play Console, invite the service account and grant four account permissions: View app information and download bulk reports, View financial data, Manage orders and subscriptions, and Manage store presence. Without Manage orders and subscriptions RevenueCat cannot refund or defer, and without Manage store presence it cannot create or update Play products.
 2. **Real-time Developer Notifications (RTDN)** — Set up a Cloud Pub/Sub topic. Configure in Play Console → Monetization setup.
-3. If the user provides this information, register it via `create-app` / `update-app`.
+3. The user uploads the JSON key in the RevenueCat dashboard (Apps → the Play Store app → Service Account Credentials JSON). `create-app` / `update-app` take only the package name for Play apps and cannot upload credentials.
+4. Confirm with `validate-app-credentials` (`credential_type: "google_play_service_account"`). New Play credentials can take up to 36 hours to work with the Google Play Developer API, so a failed check right after setup does not mean the setup is wrong.
 
 ### 5c. Choose how the paywall is built
 
