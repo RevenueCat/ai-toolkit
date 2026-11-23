@@ -116,6 +116,7 @@ Purchases.sharedInstance.checkpoint(
 Results:
 - `Continued` or `Closed`: the SDK refreshes the customer's info, then the callback runs. Use `Continued` after a purchase and `Closed` when the user dismisses.
 - `NavigatedBack`: the callback does **not** run.
+- If your existing paywall UI cannot tell you that a purchase finished, add a small callback to it so you can report `Continued`. Call it only when the purchase succeeded (no error and not cancelled). Without it the checkpoint only finishes when the user closes the UI.
 - `params` also has `checkpointIdentifier`, `customVariables` and `presentationMode`. Follow `presentationMode` in your UI.
 
 To use one presenter for every checkpoint, set `Purchases.sharedInstance.paywallPresenter = PaywallPresenter { params, completion -> ... }`. A presenter passed on the call wins over it.

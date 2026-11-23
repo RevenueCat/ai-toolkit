@@ -9,7 +9,7 @@ import RevenueCat
 @_spi(InviteOnlyCheckpointsApi) import RevenueCatUI
 ```
 
-Only the `RevenueCatUI` import needs `@_spi(InviteOnlyCheckpointsApi)`. Without it the compiler says "'checkpoint' is inaccessible due to '@_spi' protection level". If the compiler says `checkpoint` does not exist, the SDK is too old or the project is not in the beta. Ask the user.
+Add `import RevenueCat` to any file that uses `Purchases` and does not import it yet. Only the `RevenueCatUI` import needs `@_spi(InviteOnlyCheckpointsApi)`. Without it the compiler says "'checkpoint' is inaccessible due to '@_spi' protection level". If the compiler says `checkpoint` does not exist, the SDK is too old or the project is not in the beta. Ask the user.
 
 ## The call
 
@@ -120,6 +120,8 @@ typealias PaywallPresentationCompletion = @MainActor (PaywallPresentationResult)
 - `.continued` or `.closed`: the SDK refreshes the customer's info, then the continuation runs. Use `.continued` after a purchase and `.closed` when the customer dismisses.
 - `.navigatedBack`: the continuation does **not** run.
 - Only read `params.offering`. Other fields are not documented.
+
+If your existing paywall view cannot tell you that a purchase finished, add a small callback to it (for example `onPurchased`) so you can report ``.continued``. Call it only when the purchase succeeded (no error and not cancelled). Without it the checkpoint only finishes when the user closes the view.
 
 Example with a SwiftUI sheet. It keeps the completion in `@State`, and `finish` makes sure it is called only once:
 

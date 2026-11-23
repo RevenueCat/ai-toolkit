@@ -110,6 +110,7 @@ Results:
 - `CONTINUED` or `CLOSED`: the SDK refreshes the customer's info, then the callback runs. Use `CONTINUED` after a purchase and `CLOSED` when the user dismisses.
 - `NAVIGATED_BACK`: the callback does **not** run.
 - Only read `params.offering`. Other fields are not documented.
+- If your existing paywall UI cannot tell you that a purchase finished, add a small callback to it so you can report `CONTINUED`. Call it only when the purchase succeeded (no error and not cancelled). Without it the checkpoint only finishes when the user closes the UI.
 
 To use one presenter for every checkpoint, call `RevenueCatUI.setPaywallPresenter(myPaywallPresenter)` (pass `null` to clear it). A presenter passed on the call wins over it.
 

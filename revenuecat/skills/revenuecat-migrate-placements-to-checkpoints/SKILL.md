@@ -19,10 +19,25 @@ Prerequisite: `integrate-revenuecat` has already run, so `Purchases.configure(â€
 
 Write for someone who does not know checkpoint internals. Short, friendly, plain words.
 
-- **Show your progress.** Before each step, print one short line saying what you are doing, for example "Looking for Placements in your code...", "Found 4 places to convert. Updating them now...", "Building the app to check it still compiles...". Then say what you found, in one line, for example "This is an iOS app." or "Found 4 Placements in 3 files." Do not wait until the end to say anything.
+- **Follow the progress script below.** Lines marked "Exactly" must be printed word for word. In the other lines, only fill in the {braces}.
 - **Write "Placements" and "Checkpoints" with capital letters** when you mention them to the user.
 - **Do not use internal words** such as "eligibility", "SPI", "slot", "continuation" or "the Verify checklist" in anything the user reads. Say what it means instead.
+- **Do not paste the old or new code** and do not run `git diff`. The summary table is enough.
+- **Checks that pass need no message.** Say nothing about beta access or Observer Mode unless one of them fails. Do show the SDK version, but together with the platform line (see step 1).
 - **Only mention an assumption if it affects the user.** Do not explain why you skipped a step.
+
+### Progress script
+
+Your **first output** is line 1, before any tool call. After that, the only text you write before the summary is the lines below, each as its own separate message, at the moment given. Never write any other text (no "Read the platform file", no "Found X", no notes to yourself).
+
+1. Exactly: `Looking at your project to detect the platform...`
+2. Print this **as soon as you know the platform and SDK version, before you read any source files**: `This is {an iOS | an Android | a React Native} app{ (SwiftUI) | (UIKit) | (Kotlin) | (Java) if known}, SDK {version}. Reading the files.` For example `This is an iOS app (SwiftUI), SDK 5.103.2. Reading the files.` To find these, only list the project files and read the dependency file (`Package.resolved`, `Podfile.lock`, `build.gradle`, `package.json`). If you cannot find the version, leave out `, SDK {version}`.
+3. Now read the platform file and the source files. When you have finished reading, print: `{Count in words} Placements/offering reads need converting, and I'm leaving {what you are not changing} alone; updating them now.` For example: `Four Placements/offering reads need converting, and I'm leaving the embedded paywall alone; updating them now.` If there is nothing to leave alone, use: `{Count in words} Placements/offering reads need converting; updating them now.`
+4. Edit each file with the Write or Edit tool, one file at a time. Claude Code shows `Write(path/to/File.swift)` for each one on its own. Do not add your own line for them.
+5. Exactly: `Building the app to check it still compiles...`
+6. Then the summary (step 6).
+
+Do not print anything else for the steps in between (eligibility checks, dashboard lookups). If a check fails, stop and say why in plain words.
 
 ## 1. Detect the platform
 
@@ -38,7 +53,7 @@ Also treat a web project (`@revenuecat/purchases-js` in `package.json`, no React
 
 If several match (e.g. `ios/` inside a Flutter project), pick the **outermost** project. If still ambiguous, ask the user.
 
-Once you know the platform, tell the user in one line (for example "This is an iOS app (SwiftUI)." or "This is a React Native app.").
+Once you know the platform, print progress line 2 from the script.
 
 **Unsupported platforms (Flutter, KMP, Web, other hybrids).** Checkpoints are currently available on iOS, Android, and React Native only. Tell the user that, say Placements keep working in the meantime, make **no code changes**, and stop. Do not try to emulate checkpoints with Placements APIs.
 
@@ -77,15 +92,7 @@ An invalid id is dropped by the SDK and its callback never runs. So always check
 
 ### Classify each call site
 
-Before editing, show the user a short table of what you are going to change:
-
-| Old name | New name | Location |
-|---|---|---|
-| `onboarding_end` | `onboarding_end` | `OnboardingView.swift:26` |
-| `Settings.Upgrade` | `settings_upgrade` | `SettingsView.swift:20` |
-| (none) | `export` | `ExportButton.swift:10` |
-
-"Old name" is the placement id, or "(none)" if the code had none. "New name" is the checkpoint id. "Location" is the file and line. Leave out call sites you will not change (they go in the final message instead). The table below is for you and is not shown to the user.
+Do not show a table before editing. Print progress line 3 from the script instead. Use the table below for yourself, and the "What changed" table in the summary (step 6) for the user.
 
 | Pattern | Action |
 |---|---|
@@ -105,7 +112,7 @@ For each call site:
 
 1. If the call site has no placement id, its status is **New**. Nothing to look up.
 2. If the RevenueCat MCP is available, use read tools only (`list-targeting-rules`, `get-targeting-rule`, `list-audiences`, `list-offerings`, `list-checkpoints`). Find the legacy rules for the placement: audience, Offering, any "No Offering", the "all other cases" Offering, and order. Then check whether a checkpoint with the new id already exists with matching rules. Status: **Ready** (matches), **Partial** (list the differences) or **Missing**.
-3. If there is no MCP, do not block. Status is **Missing**. The checklist tells the user to recreate the placement's old rules as checkpoint rules. Ask the user to paste rule details only if they want a more exact checklist.
+3. If there is no MCP, do not block. Status is **Missing**. Say nothing yet. In the summary (step 6, part 4), say "I couldn't look at your RevenueCat project from here, so I'm assuming these Checkpoints still need creating." before the paste-in block. The checklist tells the user to recreate the placement's old rules as checkpoint rules. Ask the user to paste rule details only if they want a more exact checklist.
 
 Ignore checkpoints and legacy rules that match no call site.
 
@@ -125,30 +132,38 @@ Rules for every platform:
 - Only one checkpoint can present at a time. If a second one tries to present while the first is presenting, it is dropped: no callback, no error. Checkpoints with no matching rule never block others.
 - If a data-only read (for example a label that loads when the screen appears) can run while the same screen presents another checkpoint (for example a button), still convert it, and flag it in the report. The label would stay on its placeholder if it is dropped.
 - For data-only reads, pass the presenter on the call, not as the global presenter.
-- Remove the old placement or offering fetch from every call site you convert, and delete wrappers and imports that only served it. Do not touch code you flagged, and do not touch `getOfferings` calls in code you did not convert.
-- In Swift files that call `checkpoint`, add `@_spi(InviteOnlyCheckpointsApi) import RevenueCatUI`. Keep `import RevenueCat` as a normal import. Only `RevenueCatUI` needs the SPI.
+- Remove the old placement or offering fetch from every call site you convert, and delete wrappers, imports and unused variables or state that only served it. Do not touch code you flagged, and do not touch `getOfferings` calls in code you did not convert.
+- In Swift files that call `checkpoint`, add `@_spi(InviteOnlyCheckpointsApi) import RevenueCatUI`. The file also needs a normal `import RevenueCat` (add it if the file uses `Purchases` and does not import it yet). Only `RevenueCatUI` needs the SPI.
 - Keep the diff small. Do not reformat other code.
 
 ## 6. Report
 
 Finish with one friendly message in this order. Keep it short.
 
-**1. Opening line.** Say what happened in plain words, for example: "I've converted 3 Placements in your app to Checkpoints, and the app still builds." If something could not be done, say that next in one plain sentence ("I left the banner on the home screen as it is, because Checkpoints can't be embedded yet").
+**1. Opening line.** Say what happened in plain words, for example: "I've converted 4 places in your app to Checkpoints, and the app still builds." Count each call site you changed as one place. Do not split them into kinds. If something could not be done, say that next in one plain sentence ("I left the banner on the home screen as it is, because Checkpoints can't be embedded yet").
 
-**2. What changed.** The same Old name / New name / Location table from step 3, with the places you actually changed.
+**2. What changed.** A table of the places you changed, with these three columns. "Old name" is the Placement id, or "(none)" if the code had none. "New name" is the Checkpoint id. "Location" is the file and line.
+
+| Old name | New name | Location |
+|---|---|---|
+| `onboarding_end` | `onboarding_end` | `OnboardingView.swift:26` |
+| `Settings.Upgrade` | `settings_upgrade` | `SettingsView.swift:20` |
+| (none) | `export` | `ExportButton.swift:10` |
+
+Leave out call sites you did not change. They go in part 3.
 
 **3. Left as it was.** Only if there are any. One line each: where, and what the user needs to decide. Include same-screen overlaps here.
 
 **4. Next step in the dashboard.** Say this is only needed if the Checkpoints and their rules do not already exist in RevenueCat (for example, if they were not already created in the dashboard or by Rico). Do not list manual dashboard steps. Instead give the user one block to paste into **Rico** (the assistant in the RevenueCat dashboard) or an AI tool connected to the RevenueCat MCP:
 
 ```
-Create these checkpoints in my RevenueCat project and add targeting rules for them.
+Create these Checkpoints in my RevenueCat project and add targeting rules for them.
 
-Migrated from placements (copy each placement's existing targeting rules: same audiences, same offerings, same order; add an "All customers" rule last that serves the placement's old "all other cases" offering):
-- onboarding_end (from placement "onboarding_end")
-- settings_upgrade (from placement "Settings.Upgrade"). Serve an Offering, not a Flow, because the app reads the offering itself.
+Migrated from Placements (copy each Placement's existing targeting rules: same audiences, same offerings, same order; add an "All customers" rule last that serves the Placement's old "all other cases" offering):
+- onboarding_end (from Placement "onboarding_end")
+- settings_upgrade (from Placement "Settings.Upgrade"). Serve an Offering, not a Flow, because the app reads the offering itself.
 
-New checkpoints (no old placement):
+New Checkpoints (no old Placement):
 - export: show the paywall to customers whose "pro" entitlement is not active. "All customers" rule last.
 - pricing_label: serve an Offering (not a Flow) to all customers.
 
@@ -163,7 +178,7 @@ Fill it in from what you found. Skip checkpoints that step 4 found already **Rea
 
 ## 7. Check your work
 
-1. Build the app. It must compile before you report. If it fails, fix it first.
+1. Print progress line 5 from the script, then build the app. It must compile before you report. If it fails, fix it first.
 2. You usually cannot run the app (no device, sandbox account or live rules). Do not claim these work. Say in the final message (step 6, part 6) that you only checked the build.
 
 Things for the user to try once the dashboard rules are live (mention one or two, in plain words, not as a checklist):
