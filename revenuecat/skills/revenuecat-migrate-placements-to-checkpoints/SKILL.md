@@ -15,6 +15,15 @@ Docs (re-read them if anything here looks out of date, Checkpoints are in beta):
 
 Prerequisite: `integrate-revenuecat` has already run, so `Purchases.configure(…)` works.
 
+## How to talk to the user
+
+Write for someone who does not know checkpoint internals. Short, friendly, plain words.
+
+- **Show your progress.** Before each step, print one short line saying what you are doing, for example "Looking for Placements in your code...", "Found 4 places to convert. Updating them now...", "Building the app to check it still compiles...". Then say what you found, in one line, for example "This is an iOS app." or "Found 4 Placements in 3 files." Do not wait until the end to say anything.
+- **Write "Placements" and "Checkpoints" with capital letters** when you mention them to the user.
+- **Do not use internal words** such as "eligibility", "SPI", "slot", "continuation" or "the Verify checklist" in anything the user reads. Say what it means instead.
+- **Only mention an assumption if it affects the user.** Do not explain why you skipped a step.
+
 ## 1. Detect the platform
 
 Inspect the working directory and pick the **first** match, from top to bottom:
@@ -28,6 +37,8 @@ Inspect the working directory and pick the **first** match, from top to bottom:
 Also treat a web project (`@revenuecat/purchases-js` in `package.json`, no React Native), Capacitor, and Unity as unsupported.
 
 If several match (e.g. `ios/` inside a Flutter project), pick the **outermost** project. If still ambiguous, ask the user.
+
+Once you know the platform, tell the user in one line (for example "This is an iOS app (SwiftUI)." or "This is a React Native app.").
 
 **Unsupported platforms (Flutter, KMP, Web, other hybrids).** Checkpoints are currently available on iOS, Android, and React Native only. Tell the user that, say Placements keep working in the meantime, make **no code changes**, and stop. Do not try to emulate checkpoints with Placements APIs.
 
@@ -66,7 +77,15 @@ An invalid id is dropped by the SDK and its callback never runs. So always check
 
 ### Classify each call site
 
-Show the user a table (placement id or new name, file:line, pattern, action) before editing.
+Before editing, show the user a short table of what you are going to change:
+
+| Old name | New name | Location |
+|---|---|---|
+| `onboarding_end` | `onboarding_end` | `OnboardingView.swift:26` |
+| `Settings.Upgrade` | `settings_upgrade` | `SettingsView.swift:20` |
+| (none) | `export` | `ExportButton.swift:10` |
+
+"Old name" is the placement id, or "(none)" if the code had none. "New name" is the checkpoint id. "Location" is the file and line. Leave out call sites you will not change (they go in the final message instead). The table below is for you and is not shown to the user.
 
 | Pattern | Action |
 |---|---|
@@ -112,39 +131,44 @@ Rules for every platform:
 
 ## 6. Report
 
-End with three sections.
+Finish with one friendly message in this order. Keep it short.
 
-1. **Converted**: file:line, old call, new call. List every rename (old placement id, new checkpoint id).
-2. **Flagged, not converted**: the reason (embedded paywall, Observer Mode, other use, same-screen overlap) and what the user must decide.
-3. **Dashboard checklist**: one block per checkpoint.
+**1. Opening line.** Say what happened in plain words, for example: "I've converted 3 Placements in your app to Checkpoints, and the app still builds." If something could not be done, say that next in one plain sentence ("I left the banner on the home screen as it is, because Checkpoints can't be embedded yet").
+
+**2. What changed.** The same Old name / New name / Location table from step 3, with the places you actually changed.
+
+**3. Left as it was.** Only if there are any. One line each: where, and what the user needs to decide. Include same-screen overlaps here.
+
+**4. Next step in the dashboard.** Say this is only needed if the Checkpoints and their rules do not already exist in RevenueCat (for example, if they were not already created in the dashboard or by Rico). Do not list manual dashboard steps. Instead give the user one block to paste into **Rico** (the assistant in the RevenueCat dashboard) or an AI tool connected to the RevenueCat MCP:
 
 ```
-Checkpoint: onboarding_end        Status: New | Missing | Partial | Ready
-  Legacy placement: <old id, only if renamed. Keep its rules live for older app versions>
-  1. Create the checkpoint (it is also created the first time the SDK calls it, or in the rule editor: Checkpoints > New checkpoint)
-  2. Rule 1: audience <audience from the old rule> -> serve <Offering or Flow>
-  3. Rule 2: audience <...> -> <...>
-  N. Last rule: audience "All customers" -> <old "all other cases" or Default Offering>
-  Notes: <"No Offering" cases, differences found, order>
+Create these checkpoints in my RevenueCat project and add targeting rules for them.
+
+Migrated from placements (copy each placement's existing targeting rules: same audiences, same offerings, same order; add an "All customers" rule last that serves the placement's old "all other cases" offering):
+- onboarding_end (from placement "onboarding_end")
+- settings_upgrade (from placement "Settings.Upgrade"). Serve an Offering, not a Flow, because the app reads the offering itself.
+
+New checkpoints (no old placement):
+- export: show the paywall to customers whose "pro" entitlement is not active. "All customers" rule last.
+- pricing_label: serve an Offering (not a Flow) to all customers.
+
+Save the rules as drafts and tell me what you created.
 ```
 
-For a **New** checkpoint there are no old rules. Write what the old code did instead (for example "show the paywall to customers without `pro`"), and say it must serve an **Offering** if the code reads `params.offering`.
+Fill it in from what you found. Skip checkpoints that step 4 found already **Ready**. For **Partial** ones, say what is different. For a renamed checkpoint, name both ids, as above.
 
-Remind the user:
-- Rules start as drafts. Use **Make live** when the new app version is ready.
-- Keep the old placement rules live until most customers have updated, because older app versions still use Placements.
-- Without an "All customers" rule last, customers who match nothing see nothing.
-- A legacy "No Offering" choice has no direct equivalent. Check the intended behaviour in the rule editor.
-- Experiments on Placements must be recreated: <https://www.revenuecat.com/docs/tools/targeting/checkpoints/experiments>.
+**5. One reminder line.** Say: keep the old placement rules live until most customers have the new app version, because older versions still use them, and make the new rules live when the new version ships. If the old setup used "No Offering" for any placement, say that needs a quick check.
 
-## 7. Verify
+**6. Not tested yet.** One friendly sentence if you could not run the app: "I've only checked that it builds. Try it on a device or simulator once the dashboard rules are live." Add one sentence that checkpoints are a private beta, so nothing will show until the project has access. Do not repeat details about API keys or SDK versions unless something was wrong.
 
-Do not call it done until:
+## 7. Check your work
 
-1. The project builds.
-2. Each converted call site runs, and the dashboard-configured Flow or Paywall appears for a customer matching the rule (use a sandbox account).
-3. Completing a sandbox purchase dismisses the flow and the continuation runs, with the entitlement present.
-4. A customer matching no rule continues without a paywall.
-5. Backing out (navigate back) does not run the continuation, as documented.
+1. Build the app. It must compile before you report. If it fails, fix it first.
+2. You usually cannot run the app (no device, sandbox account or live rules). Do not claim these work. Say in the final message (step 6, part 6) that you only checked the build.
 
-If nothing shows, the checkpoint has no live rule yet, or the project is not enrolled in the beta.
+Things for the user to try once the dashboard rules are live (mention one or two, in plain words, not as a checklist):
+- Open each converted screen: the paywall or flow should appear for a customer the rule targets.
+- Buy with a sandbox account: the paywall closes and the next screen opens.
+- A customer no rule targets goes straight on without a paywall.
+
+If nothing shows, the checkpoint has no live rule yet, or the project does not have beta access.
