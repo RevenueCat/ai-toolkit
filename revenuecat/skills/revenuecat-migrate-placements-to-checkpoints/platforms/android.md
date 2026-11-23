@@ -1,31 +1,50 @@
 # revenuecat-migrate-placements-to-checkpoints: Android (native)
 
-Requires RevenueCat SDK **11.1.0+** with `purchases-ui` (`revenuecatui`). The API needs a beta opt-in. Add it on the enclosing class, function or file:
+Needs RevenueCat SDK **11.1.0+** with `purchases-ui` (`revenuecatui`).
+
+## Opt-in and imports
+
+The checkpoint API needs an opt-in. Add this on the class, function or file that uses it:
 
 ```kotlin
 @OptIn(InviteOnlyCheckpointsAPI::class)
 ```
 
-Import:
-
 ```kotlin
 import com.revenuecat.purchases.ui.revenuecatui.checkpoints.checkpoint
 ```
 
-## Signatures
+If `checkpoint` is not found, the SDK is too old or the project is not in the beta. Ask the user.
+
+## The call
 
 ```kotlin
-fun Purchases.checkpoint(checkpointIdentifier: String, callback: CheckpointPassedCallback)
-fun Purchases.checkpoint(checkpointIdentifier: String, params: CheckpointParams?, callback: CheckpointPassedCallback)
-var Purchases.paywallPresenter: PaywallPresenter?
-var Purchases.errorPresenter: ErrorPresenter?
+Purchases.sharedInstance.checkpoint("my_checkpoint") { result ->
+    // runs when the customer moves past the checkpoint
+}
 ```
 
-`CheckpointParams { customVariables { … }; presentationMode(…); paywallPresenter { … }; errorPresenter { … } }`. Modes: `DEFAULT`, `MODAL_FULL_SCREEN`, `MODAL_SHEET`.
+With options (all optional):
+
+```kotlin
+Purchases.sharedInstance.checkpoint(
+    "my_checkpoint",
+    CheckpointParams {
+        customVariables { "goal" to "lose_weight" }
+        presentationMode(FlowPresentationMode.MODAL_SHEET)   // DEFAULT, MODAL_FULL_SCREEN, MODAL_SHEET
+        paywallPresenter { params, completion -> /* ... */ }
+        errorPresenter { params, completion -> /* ... */ }
+    }
+) { result -> /* ... */ }
+```
+
+`result.flow` is `null` when nothing was shown. Useful helpers on `result`:
+- `result.hasEntitlement("pro")`: the customer has it now (got it here, or already had it).
+- `result.didObtainEntitlement("pro")`: the customer got it at this checkpoint.
 
 ## Conversions
 
-### Placement offering passed to a paywall
+### Placement offering shown in a paywall
 
 Before:
 
@@ -40,45 +59,104 @@ Purchases.sharedInstance.getOfferingsWith({ goHome() }) { offerings ->
 After:
 
 ```kotlin
-Purchases.sharedInstance.checkpoint("onboarding_end") { result ->
+Purchases.sharedInstance.checkpoint("onboarding_end") { _ ->
     goHome()
 }
 ```
 
-Remove the `PaywallActivityLauncher` / result launcher, `ActivityResultLauncher` wiring and the offering plumbing if they served only this paywall. Move post-paywall code into the callback.
+Delete the paywall launcher, the result launcher and the offering code if they only served this paywall.
 
-### Entitlement-gated presentation
+### `launchIfNeeded` with a required entitlement
 
-Where the code used `PaywallActivityLauncher.launchIfNeeded(requiredEntitlementIdentifier = …)`, use `checkpoint(id)` and put the entitlement condition on the rule's audience (**Has active entitlement is false**).
+Replace it with `checkpoint(id)`. Name the checkpoint using the skill's naming rule. The rule's audience must include "Has active entitlement is false".
 
-### Reacting to what was purchased
+If it guarded an action (a button that unlocks or exports), the callback also runs for customers who already have the entitlement, so check it there:
 
 ```kotlin
-Purchases.sharedInstance.checkpoint("feature_gate") { result ->
-    val gotPro = result.flow?.obtainedEntitlements
-        ?.any { it.entitlementInfo.identifier == "pro" } == true
-    if (gotPro) unlockFeature()
+Purchases.sharedInstance.checkpoint("export") { result ->
+    if (result.hasEntitlement("pro")) doExport()
 }
 ```
 
-### Gating content on an entitlement
+### Do something after a purchase
 
 ```kotlin
-Purchases.sharedInstance.checkpoint("access_locked_content") { _ ->
-    Purchases.sharedInstance.getCustomerInfoWith { customerInfo ->
-        if (customerInfo.entitlements.active.containsKey("pro")) openContent()
+Purchases.sharedInstance.checkpoint("feature_gate") { result ->
+    if (result.didObtainEntitlement("pro")) unlockFeature()
+}
+```
+
+### Your own paywall UI
+
+Keep your UI. Show it from a paywall presenter. The SDK gives the presenter the Offering the rule chose as `params.offering`. The presenter must call `completion.complete(...)` **exactly once**. If it never does, the checkpoint never finishes.
+
+```kotlin
+import com.revenuecat.purchases.ui.revenuecatui.checkpoints.CheckpointParams
+import com.revenuecat.purchases.ui.revenuecatui.checkpoints.PaywallPresenter
+import com.revenuecat.purchases.ui.revenuecatui.checkpoints.paywallPresenter
+
+Purchases.sharedInstance.checkpoint(
+    "settings_upgrade",
+    CheckpointParams {
+        paywallPresenter { params, completion ->
+            // Show your UI for params.offering. Keep `completion` until the user leaves it.
+            showCustomPaywall(params.offering) { purchased ->
+                completion.complete(
+                    if (purchased) PaywallPresenter.Completion.Result.Continued
+                    else PaywallPresenter.Completion.Result.Closed
+                )
+            }
+        }
+    }
+) { _ ->
+    // runs after the paywall closes or continues
+}
+```
+
+Results:
+- `Continued` or `Closed`: the SDK refreshes the customer's info, then the callback runs. Use `Continued` after a purchase and `Closed` when the user dismisses.
+- `NavigatedBack`: the callback does **not** run.
+- `params` also has `checkpointIdentifier`, `customVariables` and `presentationMode`. Follow `presentationMode` in your UI.
+
+To use one presenter for every checkpoint, set `Purchases.sharedInstance.paywallPresenter = PaywallPresenter { params, completion -> ... }`. A presenter passed on the call wins over it.
+
+Remove the old `getOfferings` / `getCurrentOfferingForPlacement` call.
+
+### Reading offering data (price label, package list)
+
+If the rule serves an **Offering** (an "offering step") instead of a Flow, the SDK gives that Offering to the presenter as `params.offering`. It is the same `Offering` type `getOfferings` returns, with packages and prices. `CheckpointResult` does not contain it. A presenter does not have to show anything: read the data, then call `complete`.
+
+```kotlin
+Purchases.sharedInstance.checkpoint(
+    "pricing_label",
+    CheckpointParams {
+        paywallPresenter { params, completion ->
+            price = params.offering.availablePackages.firstOrNull()?.product?.price?.formatted ?: "n/a"
+            completion.complete(PaywallPresenter.Completion.Result.Closed)
+        }
+    }
+) { _ -> }
+```
+
+- Always pass a presenter for this. With no presenter, the SDK shows the offering's own paywall.
+- Each call counts as a checkpoint hit.
+- If the screen can show another checkpoint while this one runs, the second one can be dropped. Flag it in the report (see SKILL.md step 5).
+- Remove the old offering call.
+
+### Custom error screen (optional)
+
+Only add this if the old code had its own error handling. Without it the SDK shows its own error dialog.
+
+```kotlin
+CheckpointParams {
+    errorPresenter { params, completion ->
+        showMyErrorDialog { completion.complete() }
     }
 }
 ```
 
-### Custom paywall UI
+Call `completion.complete()` exactly once. Failure kinds: `FLOW_COULD_NOT_BE_SHOWN`, `FLOW_ACTION_FAILED`, `FLOW_RESULT_SYNC_FAILED`. A global version exists: `Purchases.sharedInstance.errorPresenter = ErrorPresenter { params, completion -> ... }`.
 
-Set `Purchases.sharedInstance.paywallPresenter = PaywallPresenter { params, completion -> … }` globally, or pass `CheckpointParams { paywallPresenter { … } }` per call. Call `completion` exactly once with continued, closed, or navigated back (navigated back does not run the callback). Check the current presenter shape in the implementation docs before writing it.
+### Custom variables (optional)
 
-### Optional
-
-`Purchases.sharedInstance.errorPresenter = ErrorPresenter { params, completion -> … }` or `CheckpointParams { errorPresenter { … } }`. Failure kinds: `FLOW_COULD_NOT_BE_SHOWN`, `FLOW_ACTION_FAILED`, `FLOW_RESULT_SYNC_FAILED`.
-
-### Custom variables
-
-Pass as the second argument: `CheckpointParams { customVariables { "goal" to "lose_weight" } }`.
+If the old call sent context to the paywall: `CheckpointParams { customVariables { "goal" to "lose_weight" } }`. Rules cannot use custom variables yet.

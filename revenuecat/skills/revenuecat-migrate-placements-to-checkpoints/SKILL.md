@@ -39,43 +39,56 @@ Stop and tell the user if any of these fail:
 - **SDK version.** iOS RevenueCat SDK 5.102.0+, Android SDK 11.1.0+, React Native 0.80+ with `react-native-purchases-ui` 11.0.2+ (native dev build, so not Expo Go). If the app is older, tell the user which upgrade is needed (see `revenuecat-migrate`) and stop unless they ask you to do it.
 - **Observer Mode** (`purchasesAreCompletedBy` set to the app) is not supported. Stop.
 
-## 3. Inventory the placement call sites
+## 3. Inventory the call sites
 
-Search the codebase (excluding build output and dependencies) for:
+Search the code (skip build output and dependencies) for:
 
 - `getCurrentOfferingForPlacement`, `currentOffering(forPlacement:)`, `getCurrentOffering(forPlacement:)`
-- `presentPaywall`, `presentPaywallIfNeeded`, `PaywallView`, `PaywallActivity`, `.presentPaywallIfNeeded`, `PaywallViewController`
-- `getOfferings` / `offerings.current` used to decide **what paywall to show**
+- `presentPaywall`, `presentPaywallIfNeeded`, `PaywallView`, `PaywallActivity`, `PaywallViewController`
+- `getOfferings` / `offerings.current` used to pick a paywall, or to read offering data for UI (price labels, package lists)
 
-Build a table and show it to the user before editing:
+### Name each checkpoint
 
-| Placement id | File:line | Pattern | Convertible? |
+Every call site gets a checkpoint id.
 
-Classify each call site:
+**It has a placement id.** Clean it up automatically, without asking:
+
+1. Lowercase it.
+2. Replace every character that is not a letter, digit, `_` or `-` with `_` (one `_` per character). `Settings.Upgrade` becomes `settings_upgrade`.
+3. If it does not start with a letter, add the prefix `cp_`.
+4. Cut it to 255 characters.
+
+A valid lowercase id stays as it is. If two placements end up with the same id, use one checkpoint for both and say so in the report (their dashboard setups may differ).
+
+**It has no placement id** (`presentPaywallIfNeeded`, a paywall shown from a button, a read of offering data). Name it after the component or file, and what happens there, in snake_case: `ExportButton` becomes `export`, `PricingLabel` becomes `pricing_label`. If you cannot find a sensible name, ask the user.
+
+An invalid id is dropped by the SDK and its callback never runs. So always check the final id against these rules: starts with an ASCII letter, only ASCII letters, digits, `_` and `-`, at most 255 characters.
+
+### Classify each call site
+
+Show the user a table (placement id or new name, file:line, pattern, action) before editing.
 
 | Pattern | Action |
 |---|---|
-| Fetch offering for placement, then present a RevenueCatUI paywall with it | **Convert.** Replace with `checkpoint(id)`. |
-| `presentPaywallIfNeeded` with `requiredEntitlementIdentifier` | **Convert.** `checkpoint(id)`; the entitlement condition moves into the rule's audience ("Has active entitlement" is false). Remove the code pre-check. |
-| Fetch offering for placement, render a custom paywall | **Convert** with a custom paywall presenter (platform file). |
-| Embedded `PaywallView` / paywall inside the view tree | **Flag, do not touch.** Flows open modally, embedding is not supported. |
-| `getOfferings()` / `current` used only to show prices or packages in app UI | **Leave alone.** Not a placement, still supported. |
-| Offering fetched for placement but used for non-paywall logic | **Flag, do not touch.** |
-| Observer Mode paths | **Flag, do not touch.** |
-
-The placement identifier is the starting point for the checkpoint identifier ("your Placement identifiers usually work as Checkpoint identifiers"). Checkpoint identifiers must start with an ASCII letter, contain only ASCII letters, digits, `_` and `-`, be at most 255 characters, and are not case-sensitive. If a placement id breaks these rules or two ids differ only by case, propose a new id and ask the user before using it.
+| Fetch the placement's offering, then show it in a RevenueCatUI paywall | **Convert** to `checkpoint(id)`. |
+| `presentPaywallIfNeeded` with `requiredEntitlementIdentifier` | **Convert** to `checkpoint(id)`. Delete the old check that decided whether to show the paywall: the rule's audience does that now ("Has active entitlement" is false). If the old code guarded an action (a button that unlocks or exports), check the entitlement inside the continuation, because the continuation also runs for customers who already have it. |
+| Fetch the placement's offering, then show your own paywall view | **Convert** with a paywall presenter (platform file). |
+| Read an offering to fill UI (price label, package list), with or without a placement | **Convert** with a data-only presenter ("Reading offering data" in the platform file). |
+| Paywall embedded in the view tree | **Flag, do not touch.** Flows open modally. |
+| Offering used for something else (analytics, app logic) | **Flag, do not touch.** |
+| Observer Mode code | **Flag, do not touch.** |
 
 ## 4. Look up each placement in the dashboard (optional, read-only)
 
-The **placements found in the code (step 3) are the source of truth** for what to migrate. The work list never comes from whatever checkpoints already exist. The dashboard is only used to fill in each placement's old setup and to avoid repeating work that is already done.
+The placements found in the code are what you migrate. Never build the work list from existing checkpoints. Use the dashboard only to learn each placement's old setup and to see whether it is already converted.
 
-For each placement identifier from step 3:
+For each call site:
 
-1. If the RevenueCat MCP tools are available, use read tools only (`list-targeting-rules`, `get-targeting-rule`, `list-audiences`, `list-offerings`, `list-checkpoints`) to find the legacy rules that name that placement: audience, Offering served for the placement, any "No Offering" choice, the "for all other cases" Offering, and rule order.
-2. Check whether a checkpoint with the same identifier already exists, and if so, whether its rules already match the legacy setup. Mark the placement **Ready** (already matches), **Partial** (list the differences) or **Missing**.
-3. If the MCP is not connected, do not block. Mark every placement **Missing**, and in the checklist tell the user to recreate that placement's legacy rules (audience, Offering, order, "all other cases") as checkpoint rules. Only ask the user to paste rule details if they want a precise checklist.
+1. If the call site has no placement id, its status is **New**. Nothing to look up.
+2. If the RevenueCat MCP is available, use read tools only (`list-targeting-rules`, `get-targeting-rule`, `list-audiences`, `list-offerings`, `list-checkpoints`). Find the legacy rules for the placement: audience, Offering, any "No Offering", the "all other cases" Offering, and order. Then check whether a checkpoint with the new id already exists with matching rules. Status: **Ready** (matches), **Partial** (list the differences) or **Missing**.
+3. If there is no MCP, do not block. Status is **Missing**. The checklist tells the user to recreate the placement's old rules as checkpoint rules. Ask the user to paste rule details only if they want a more exact checklist.
 
-Ignore checkpoints and legacy rules that match no placement in the code.
+Ignore checkpoints and legacy rules that match no call site.
 
 ## 5. Convert the code
 
@@ -85,37 +98,44 @@ Read the platform file and apply it to each **Convert** row:
 - `platforms/android.md`
 - `platforms/react-native.md`
 
-Rules that apply on every platform:
+Rules for every platform:
 
-- Do not rely on `getOfferings` or the entitlement pre-check to decide whether to show a paywall any more. The rule's audience does that.
-- Move any code that ran **after** the paywall (navigate to the premium screen, unlock a feature) into the checkpoint's continuation. The continuation runs at most once, only when the customer moves past the checkpoint. It does not run if they navigate back or an error occurs, so do not put cleanup that must always run in it.
-- `result.flow == nil` (or null) means nothing was shown (no matching rule). The continuation still runs, so the customer is not blocked.
-- Delete wrappers and helpers that existed only to present a paywall, and imports that become unused.
-- Keep legacy `getOfferings` for older app versions only if code elsewhere still needs it. Do not remove Placement code that you flagged.
-- Keep the diff minimal. Do not reformat unrelated code.
+- Move code that ran after the paywall (open the screen, unlock the feature) into the continuation.
+- The continuation runs when the customer moves past the checkpoint. If no rule matches (or the checkpoint is unknown), it still runs with `result.flow == nil`, and a custom presenter is not called.
+- The continuation does **not** run if: the configuration is unavailable, the customer backs out, another checkpoint is presenting, or the id is invalid. So do not put cleanup in it that must always happen.
+- Only one checkpoint can present at a time. If a second one tries to present while the first is presenting, it is dropped: no callback, no error. Checkpoints with no matching rule never block others.
+- If a data-only read (for example a label that loads when the screen appears) can run while the same screen presents another checkpoint (for example a button), still convert it, and flag it in the report. The label would stay on its placeholder if it is dropped.
+- For data-only reads, pass the presenter on the call, not as the global presenter.
+- Remove the old placement or offering fetch from every call site you convert, and delete wrappers and imports that only served it. Do not touch code you flagged, and do not touch `getOfferings` calls in code you did not convert.
+- In Swift files that call `checkpoint`, add `@_spi(InviteOnlyCheckpointsApi) import RevenueCatUI`. Keep `import RevenueCat` as a normal import. Only `RevenueCatUI` needs the SPI.
+- Keep the diff small. Do not reformat other code.
 
 ## 6. Report
 
-End with three sections:
+End with three sections.
 
-1. **Converted**: file:line, old call, new call.
-2. **Flagged, not converted**: each with the reason (embedded paywall, Observer Mode, non-paywall use) and what the user needs to decide.
-3. **Dashboard checklist**: one block per checkpoint, with its status from step 4.
+1. **Converted**: file:line, old call, new call. List every rename (old placement id, new checkpoint id).
+2. **Flagged, not converted**: the reason (embedded paywall, Observer Mode, other use, same-screen overlap) and what the user must decide.
+3. **Dashboard checklist**: one block per checkpoint.
 
 ```
-Checkpoint: onboarding_end        Status: Missing | Partial | Ready
-  1. Create the checkpoint (auto-created on first SDK hit, or rule editor > Checkpoints > New checkpoint)
-  2. Rule 1: audience <saved audience or filters from the old rule> → serve <Offering / Flow>
-  3. Rule 2: audience <...> → <...>
-  N. Last rule: audience "All customers" → <old "all other cases" / Default Offering>
+Checkpoint: onboarding_end        Status: New | Missing | Partial | Ready
+  Legacy placement: <old id, only if renamed. Keep its rules live for older app versions>
+  1. Create the checkpoint (it is also created the first time the SDK calls it, or in the rule editor: Checkpoints > New checkpoint)
+  2. Rule 1: audience <audience from the old rule> -> serve <Offering or Flow>
+  3. Rule 2: audience <...> -> <...>
+  N. Last rule: audience "All customers" -> <old "all other cases" or Default Offering>
   Notes: <"No Offering" cases, differences found, order>
 ```
 
+For a **New** checkpoint there are no old rules. Write what the old code did instead (for example "show the paywall to customers without `pro`"), and say it must serve an **Offering** if the code reads `params.offering`.
+
 Remind the user:
-- Rules are saved as drafts: use **Make live** once the new app version is ready, and keep the legacy rules live until most customers have updated, since older versions still call the Placements API.
-- Without a catch-all "All customers" rule last, customers matching nothing see nothing.
-- A legacy "No Offering" placement choice has no one-to-one equivalent. Confirm the intended behaviour in the rule editor.
-- Experiments on Placements need to be recreated per <https://www.revenuecat.com/docs/tools/targeting/checkpoints/experiments>.
+- Rules start as drafts. Use **Make live** when the new app version is ready.
+- Keep the old placement rules live until most customers have updated, because older app versions still use Placements.
+- Without an "All customers" rule last, customers who match nothing see nothing.
+- A legacy "No Offering" choice has no direct equivalent. Check the intended behaviour in the rule editor.
+- Experiments on Placements must be recreated: <https://www.revenuecat.com/docs/tools/targeting/checkpoints/experiments>.
 
 ## 7. Verify
 

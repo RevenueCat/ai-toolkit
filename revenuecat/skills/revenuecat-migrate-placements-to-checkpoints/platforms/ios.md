@@ -1,32 +1,44 @@
 # revenuecat-migrate-placements-to-checkpoints: iOS (native)
 
-Requires RevenueCat SDK **5.102.0+** and RevenueCatUI (iOS 15+). The API is behind a beta opt-in, so add the SPI import wherever it is used:
+Needs RevenueCat SDK **5.102.0+** and RevenueCatUI (iOS 15+).
+
+## Imports
 
 ```swift
-@_spi(InviteOnlyCheckpointsApi) import RevenueCat
+import RevenueCat
 @_spi(InviteOnlyCheckpointsApi) import RevenueCatUI
 ```
 
-If the compiler rejects the import or `checkpoint`, confirm SDK version and beta access with the user.
+Only the `RevenueCatUI` import needs `@_spi(InviteOnlyCheckpointsApi)`. Without it the compiler says "'checkpoint' is inaccessible due to '@_spi' protection level". If the compiler says `checkpoint` does not exist, the SDK is too old or the project is not in the beta. Ask the user.
 
-## Signature
+## The call
+
+```swift
+Purchases.shared.checkpoint("my_checkpoint") { result in
+    // runs when the customer moves past the checkpoint
+}
+```
+
+Full signature (all arguments after the id are optional):
 
 ```swift
 func checkpoint(
     _ identifier: String,
     customVariables: [String: CustomVariableValue] = [:],
-    presentationMode: FlowPresentationMode = .default,
+    presentationMode: FlowPresentationMode = .default,   // .default, .modalFullScreen, .modalSheet
     paywallPresenter: PaywallPresentationHandler? = nil,
     errorPresenter: ErrorPresentationHandler? = nil,
     _ onPassed: @escaping (CheckpointResult) -> Void
 )
 ```
 
-`presentationMode`: `.default`, `.modalFullScreen`, `.modalSheet`.
+`result.flow` is `nil` when nothing was shown. Useful helpers on `result`:
+- `result.hasEntitlement("pro")`: the customer has it now (got it here, or already had it).
+- `result.didObtainEntitlement("pro")`: the customer got it at this checkpoint.
 
 ## Conversions
 
-### Placement offering passed to a paywall
+### Placement offering shown in a paywall
 
 Before:
 
@@ -41,21 +53,21 @@ Purchases.shared.getOfferings { offerings, _ in
 // ...
 .sheet(isPresented: $showingPaywall) {
     PaywallView(offering: paywallOffering!, displayCloseButton: true)
-        .onDismiss { goToHome() }
+        .onDisappear { goToHome() }
 }
 ```
 
 After:
 
 ```swift
-Purchases.shared.checkpoint("onboarding_end") { result in
+Purchases.shared.checkpoint("onboarding_end") { _ in
     goToHome()
 }
 ```
 
-Delete the `@State` for the offering and sheet, plus the `PaywallView` sheet. The close button is part of the Flow now.
+Delete the offering `@State`, the sheet state, and the `PaywallView` sheet.
 
-### `presentPaywallIfNeeded`
+### `presentPaywallIfNeeded` on a view
 
 Before:
 
@@ -64,45 +76,120 @@ ContentView()
     .presentPaywallIfNeeded(requiredEntitlementIdentifier: "premium")
 ```
 
-After: call `checkpoint` at the moment that modifier was meant to cover (usually `.task` on the view, or the existing trigger), and remove the modifier:
+After: remove the modifier and call the checkpoint where the paywall should appear (often `.task` on that view). Name it using the skill's naming rule.
 
 ```swift
 ContentView()
-    .task { Purchases.shared.checkpoint("app_launch") { _ in } }
+    .task { Purchases.shared.checkpoint("content") { _ in } }
 ```
 
-Add to the checklist: audience for that rule includes custom filter **Has active entitlement is false** (entitlement `premium`), otherwise entitled users also see the paywall.
+The rule's audience must include "Has active entitlement is false", or customers who already have it will see the paywall too.
 
-### Reacting to what was purchased
+### `presentPaywallIfNeeded` guarding an action (a button)
 
-```swift
-Purchases.shared.checkpoint("feature_gate") { result in
-    let gotPro = result.flow?.obtainedEntitlements
-        .contains { $0.entitlementInfo.identifier == "pro" } == true
-    if gotPro { unlockFeature() }
-}
-```
-
-### Gating content on an entitlement
-
-Hard paywalls are not available yet. Check the entitlement inside the continuation:
+Call the checkpoint from the action. The continuation also runs for customers who already have the entitlement, so check it there:
 
 ```swift
-Purchases.shared.checkpoint("access_locked_content") { _ in
-    Purchases.shared.getCustomerInfo { customerInfo, _ in
-        if customerInfo?.entitlements.active["pro"] != nil { openContent() }
+Button("Export") {
+    Purchases.shared.checkpoint("export") { result in
+        if result.hasEntitlement("pro") { doExport() }
     }
 }
 ```
 
-### Custom paywall UI
+### Do something after a purchase
 
-Where the old code fetched the placement's offering and drew its own paywall, set a presenter globally (`Purchases.shared.paywallPresenter = MyPaywallPresenter()`) or per call (`paywallPresenter:`). The presenter must call its completion exactly once: continued, closed (refresh CustomerInfo, then the continuation runs), or navigated back (continuation does not run). Check the current protocol shape in the implementation docs before writing it.
+```swift
+Purchases.shared.checkpoint("feature_gate") { result in
+    if result.didObtainEntitlement("pro") { unlockFeature() }
+}
+```
 
-### Optional
+### Your own paywall view
 
-`Purchases.shared.errorPresenter = MyErrorPresenter()` (global) or `errorPresenter:` per call, to replace the default error UI. Call `complete()` exactly once.
+Keep your view. Show it from a paywall presenter. The SDK gives the presenter the Offering the rule chose as `params.offering`. The presenter must call `completion` **exactly once**. If it never does, the checkpoint never finishes.
 
-### Custom variables
+Types used by the per-call presenter:
 
-If the old call site passed context to the paywall, use `customVariables: ["goal": .string("lose_weight")]`. Variables are not targetable in rules yet.
+```swift
+typealias PaywallPresentationHandler = @MainActor (PaywallPresentationParams, @escaping PaywallPresentationCompletion) -> Void
+typealias PaywallPresentationCompletion = @MainActor (PaywallPresentationResult) -> Void
+// PaywallPresentationResult values: .continued, .closed, .navigatedBack
+```
+
+- `.continued` or `.closed`: the SDK refreshes the customer's info, then the continuation runs. Use `.continued` after a purchase and `.closed` when the customer dismisses.
+- `.navigatedBack`: the continuation does **not** run.
+- Only read `params.offering`. Other fields are not documented.
+
+Example with a SwiftUI sheet. It keeps the completion in `@State`, and `finish` makes sure it is called only once:
+
+```swift
+struct SettingsView: View {
+    @State private var customOffering: Offering?
+    @State private var done: PaywallPresentationCompletion?
+
+    var body: some View {
+        Button("Upgrade") {
+            Purchases.shared.checkpoint("settings_upgrade", paywallPresenter: { params, completion in
+                done = completion
+                customOffering = params.offering
+            }) { _ in
+                // runs after the paywall closes or continues
+            }
+        }
+        .sheet(item: $customOffering, onDismiss: { finish(.closed) }) { offering in
+            CustomPaywall(offering: offering, onPurchased: {
+                finish(.continued)
+                customOffering = nil
+            })
+        }
+    }
+
+    private func finish(_ result: PaywallPresentationResult) {
+        done?(result)
+        done = nil
+    }
+}
+```
+
+`.sheet(item:)` needs `Offering` to be `Identifiable`. If the compiler says it is not, add:
+
+```swift
+extension Offering: @retroactive Identifiable {
+    public var id: String { identifier }
+}
+```
+
+Remove the old `getOfferings` / `currentOffering(forPlacement:)` call. The presenter closure runs on the main actor, so it can change `@State` directly.
+
+### Reading offering data (price label, package list)
+
+If the rule serves an **Offering** (an "offering step") instead of a Flow, the SDK gives that Offering to the presenter as `params.offering`. It is the same `Offering` type `getOfferings` returns, with packages and prices. `CheckpointResult` does not contain it. A presenter does not have to show anything: read the data, then call `completion`.
+
+```swift
+Purchases.shared.checkpoint("pricing_label", paywallPresenter: { params, completion in
+    price = params.offering.availablePackages.first?.localizedPriceString ?? "n/a"
+    completion(.closed)
+}) { _ in }
+```
+
+- Always pass a presenter for this. With no presenter, the SDK shows the offering's own paywall.
+- Each call counts as a checkpoint hit.
+- If the screen can show another checkpoint while this one runs, the second one can be dropped. Flag it in the report (see SKILL.md step 5).
+- Remove the old `getOfferings` / `currentOffering(forPlacement:)` call.
+
+### Custom error screen (optional)
+
+Only add this if the old code had its own error handling. Without it the SDK shows its own error dialog.
+
+```swift
+Purchases.shared.checkpoint("settings_upgrade", errorPresenter: { params, completion in
+    showMyErrorAlert { completion.complete() }
+}) { _ in }
+```
+
+Call `completion.complete()` exactly once. `params` has the error, the checkpoint id, the custom variables and a failure kind (`.flowCouldNotBeShown`, `.flowActionFailed`, `.flowResultSyncFailed`).
+
+### Custom variables (optional)
+
+If the old call sent context to the paywall: `customVariables: ["goal": .string("lose_weight")]`. Rules cannot use custom variables yet.
