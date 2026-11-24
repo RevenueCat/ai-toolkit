@@ -154,21 +154,20 @@ Leave out call sites you did not change. They go in part 3.
 
 **3. Left as it was.** Only if there are any. One line each: where, and what the user needs to decide. Include same-screen overlaps here.
 
-**4. Next step in the dashboard.** Say this is only needed if the Checkpoints and their rules do not already exist in RevenueCat (for example, if they were not already created in the dashboard or by Rico). Do not list manual dashboard steps. Instead give the user one block to paste into **Rico** (the assistant in the RevenueCat dashboard) or an AI tool connected to the RevenueCat MCP:
+**4. Next step in the dashboard.** Only needed if these Checkpoints do not exist in RevenueCat yet. Do not list manual steps. Say so in one sentence, then give one block the user can paste into Rico (the assistant in the RevenueCat dashboard) or an AI tool connected to the RevenueCat MCP. Fill in the real names:
 
 ```
-Create these Checkpoints in my RevenueCat project and add targeting rules for them.
+I've updated my app to use RevenueCat Checkpoints instead of Placements. If these Checkpoints don't exist yet, please create them as drafts:
 
-Migrated from Placements (copy each Placement's existing targeting rules: same audiences, same offerings, same order; add an "All customers" rule last that serves the Placement's old "all other cases" offering):
-- onboarding_end (from Placement "onboarding_end")
-- settings_upgrade (from Placement "Settings.Upgrade"). Serve an Offering, not a Flow, because the app reads the offering itself.
+- onboarding_end: copy the rules from my Placement "onboarding_end"
+- settings_upgrade: copy the rules from my Placement "Settings.Upgrade". Serve an Offering, not a Flow.
+- export: show the paywall when the "pro" entitlement is not active
+- pricing_label: serve an Offering to all customers. Not a Flow.
 
-New Checkpoints (no old Placement):
-- export: show the paywall to customers whose "pro" entitlement is not active. "All customers" rule last.
-- pricing_label: serve an Offering (not a Flow) to all customers.
-
-Save the rules as drafts and tell me what you created.
+For each one, keep the rules in the same order and put an "All customers" rule last. Then tell me what you created.
 ```
+
+Use "copy the rules from my Placement" for call sites that had a Placement. Use a one-line plain description for new ones.
 
 Fill it in from what you found. Skip checkpoints that step 4 found already **Ready**. For **Partial** ones, say what is different. For a renamed checkpoint, name both ids, as above.
 
