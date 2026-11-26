@@ -17,6 +17,7 @@ The CLI needs a shell. Without one (for example in a chat app with only the MCP 
    - Install with npm: `npm install -g @revenuecat/cli`.
 
    Installing changes the user's machine, so ask before running `brew` or `npm install -g`. `npx` needs no permission beyond running the command.
+
 2. **Check it is logged in:** `rc auth status --json`. The CLI does not share the MCP server's login. If no credential is active, ask the user to run `rc auth login` themselves: it opens a browser for OAuth. In CI, set `RC_API_KEY` or pass `--api-key`.
 3. **Check the project:** pass `--project-id <id>`, or have the user set a default with `rc projects use`.
 

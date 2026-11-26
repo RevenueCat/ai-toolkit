@@ -37,7 +37,7 @@ Two APIs: the imperative `RevenueCatUI.presentPaywall(…)` / `presentPaywallIfN
 ### Imperative: `presentPaywall`
 
 ```tsx
-import RevenueCatUI, { PAYWALL_RESULT } from 'react-native-purchases-ui';
+import RevenueCatUI, { PAYWALL_RESULT } from "react-native-purchases-ui";
 
 async function openPaywall() {
   const result = await RevenueCatUI.presentPaywall({
@@ -63,14 +63,11 @@ async function openPaywall() {
 
 ```tsx
 const result = await RevenueCatUI.presentPaywallIfNeeded({
-  requiredEntitlementIdentifier: 'premium',
+  requiredEntitlementIdentifier: "premium",
   displayCloseButton: true,
 });
 
-if (
-  result === PAYWALL_RESULT.PURCHASED ||
-  result === PAYWALL_RESULT.NOT_PRESENTED
-) {
+if (result === PAYWALL_RESULT.PURCHASED || result === PAYWALL_RESULT.NOT_PRESENTED) {
   // user has access
 }
 ```
@@ -78,8 +75,8 @@ if (
 ### Declarative: `<RevenueCatUI.Paywall />` component
 
 ```tsx
-import { View } from 'react-native';
-import RevenueCatUI from 'react-native-purchases-ui';
+import { View } from "react-native";
+import RevenueCatUI from "react-native-purchases-ui";
 
 export function PremiumScreen({ navigation }: { navigation: { goBack(): void } }) {
   return (

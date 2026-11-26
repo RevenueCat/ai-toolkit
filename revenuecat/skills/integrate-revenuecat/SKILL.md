@@ -38,11 +38,13 @@ Before touching the dashboard, gather the facts:
 Use whichever surface the user has available: the RevenueCat MCP server or the `rc` CLI (see the `revenuecat-cli` skill for CLI discovery and conventions). Both cover the same operations for these steps, and each step below notes the MCP tool and the `rc` command.
 
 ### 2a. Get or create the project
+
 - List accessible projects: `list-projects` (MCP) or `rc projects list`. If multiple, ask the user which one matches this app, or offer to create a new one (`create-project` / `rc projects create`).
 - If there is no project, hand off to the `create-revenuecat-project` skill, then resume here.
 - Store the `project_id` for the rest of the steps.
 
 ### 2b. Get or create the app
+
 - Check which apps are already configured in the project (`list-apps` / `rc apps list`). A `test_store` app is always present; `app_store` and `play_store` apps are present only if the user has finished store-side setup.
 - Ask the user whether their app is already set up in App Store Connect (iOS) or Google Play Console (Android). Reassure them that store-side setup can come later — the `test_store` app is enough to start integrating.
 - If the user confirms store-side setup is done, call `create-app` (or `rc apps create`):
@@ -51,6 +53,7 @@ Use whichever surface the user has available: the RevenueCat MCP server or the `
   - `name` derived from the identifier or asked from the user.
 
 ### 2c. Get the public API key
+
 - List public keys for the relevant app ID: `list-public-api-keys` (MCP) or `rc apps keys <app-id>`:
   - `app_store` / `play_store` if the store-side app exists.
   - Otherwise the `test_store` app.
@@ -105,6 +108,7 @@ If the user only asked to "install" without running the app, tell them what to l
 ## 5. Next steps
 
 ### 5a. Products, entitlements, offerings
+
 Check whether products, entitlements, and offerings are already set up in the project. If not, offer to help via the `create-revenuecat-project` skill.
 
 ### 5b. Store-side setup

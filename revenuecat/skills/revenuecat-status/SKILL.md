@@ -10,6 +10,7 @@ Get a quick overview of your RevenueCat project configuration.
 ## Description
 
 This command provides a summary of your RevenueCat project including:
+
 - Number of apps and their platforms
 - Total products configured
 - Entitlements defined
@@ -23,6 +24,7 @@ This command provides a summary of your RevenueCat project including:
 ```
 
 **Arguments:**
+
 - `project_name` (optional): Name of the project to show status for. If not provided, shows status for all accessible projects.
 
 Can be referenced as `$ARGUMENTS` in the skill.
@@ -44,8 +46,8 @@ When the user invokes this skill, perform the following steps:
    - If no `project_name` provided, show status for all projects
 
 3. **Gather Statistics for Each Project**
-   For each project (filtered or all), use the following tools: 
-   - `list-apps` 
+   For each project (filtered or all), use the following tools:
+   - `list-apps`
    - `list-products`
    - `list-entitlements`
    - `list-offerings`

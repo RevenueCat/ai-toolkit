@@ -96,13 +96,13 @@ The dashboard route only resolves `customer_list_id`; an `aud…` id in that slo
 **Correct:**
 
 ```
-https://app.revenuecat.com/projects/56965ae1/customer-lists/list7c1f0a2b93
+https://app.revenuecat.com/projects/1ab2c3d4/customer-lists/list1a2b3c4d5e
 ```
 
 **Wrong** (the audience `id` instead of the `customer_list_id`):
 
 ```
-https://app.revenuecat.com/projects/56965ae1/customer-lists/audf0269cdf3df84dd2
+https://app.revenuecat.com/projects/1ab2c3d4/customer-lists/aud1a2b3c4d5e6f7a8b
 ```
 
 Do not add a `filters` param to a saved-audience link — the audience carries its own rules. If
@@ -302,7 +302,7 @@ matches zero customers.
 
 ## Example: building a link
 
-User wants: "Android customers acquired through Instagram" in project `proj56965ae1`.
+User wants: "Android customers acquired through Instagram" in project `proj1ab2c3d4`.
 
 Rule (both conditions in one group — AND):
 
@@ -322,7 +322,7 @@ Rule (both conditions in one group — AND):
 Link:
 
 ```
-https://app.revenuecat.com/projects/56965ae1/customer-lists/all-customers?filters=%7B%22groups%22%3A%5B%7B%22conditions%22%3A%5B%7B%22field%22%3A%22platform%22%2C%22operator%22%3A%22is%22%2C%22value%22%3A%22android%22%7D%2C%7B%22field%22%3A%22mediaSource%22%2C%22operator%22%3A%22is%22%2C%22value%22%3A%22Instagram%22%7D%5D%7D%5D%7D
+https://app.revenuecat.com/projects/1ab2c3d4/customer-lists/all-customers?filters=%7B%22groups%22%3A%5B%7B%22conditions%22%3A%5B%7B%22field%22%3A%22platform%22%2C%22operator%22%3A%22is%22%2C%22value%22%3A%22android%22%7D%2C%7B%22field%22%3A%22mediaSource%22%2C%22operator%22%3A%22is%22%2C%22value%22%3A%22Instagram%22%7D%5D%7D%5D%7D
 ```
 
 User wants: "customers on iOS or Android who are currently trialing and were first seen in the

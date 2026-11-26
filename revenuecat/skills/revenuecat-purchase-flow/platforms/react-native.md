@@ -3,7 +3,7 @@
 ## Fetch offerings
 
 ```ts
-import Purchases, { PurchasesPackage } from 'react-native-purchases';
+import Purchases, { PurchasesPackage } from "react-native-purchases";
 
 export async function currentPackages(): Promise<PurchasesPackage[]> {
   const offerings = await Purchases.getOfferings();
@@ -16,22 +16,22 @@ export async function currentPackages(): Promise<PurchasesPackage[]> {
 `Purchases.purchasePackage` rejects on failure. When the user dismisses the store sheet, the error's `code` is `PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR`. Check that before treating anything as an error.
 
 ```ts
-import Purchases, { PURCHASES_ERROR_CODE, PurchasesPackage } from 'react-native-purchases';
+import Purchases, { PURCHASES_ERROR_CODE, PurchasesPackage } from "react-native-purchases";
 
 export type PurchaseOutcome =
-  | { kind: 'purchased' }
-  | { kind: 'cancelled' }
-  | { kind: 'failed'; error: unknown };
+  | { kind: "purchased" }
+  | { kind: "cancelled" }
+  | { kind: "failed"; error: unknown };
 
 export async function buy(pkg: PurchasesPackage): Promise<PurchaseOutcome> {
   try {
     await Purchases.purchasePackage(pkg);
     // Do not unlock content here. A CustomerInfoUpdateListener flips the
     // gated UI (see revenuecat-entitlements-gate).
-    return { kind: 'purchased' };
+    return { kind: "purchased" };
   } catch (e: any) {
-    if (e?.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) return { kind: 'cancelled' };
-    return { kind: 'failed', error: e };
+    if (e?.code === PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) return { kind: "cancelled" };
+    return { kind: "failed", error: e };
   }
 }
 ```
@@ -41,10 +41,11 @@ export async function buy(pkg: PurchasesPackage): Promise<PurchaseOutcome> {
 ## Wire it to a component
 
 ```tsx
-import React, { useState } from 'react';
-import { Alert, Button } from 'react-native';
-import type { PurchasesPackage } from 'react-native-purchases';
-import { buy } from './buy';
+import React, { useState } from "react";
+import { Alert, Button } from "react-native";
+import type { PurchasesPackage } from "react-native-purchases";
+
+import { buy } from "./buy";
 
 export function BuyButton({ package: pkg }: { package: PurchasesPackage }) {
   const [isBuying, setIsBuying] = useState(false);
@@ -53,18 +54,12 @@ export function BuyButton({ package: pkg }: { package: PurchasesPackage }) {
     setIsBuying(true);
     const outcome = await buy(pkg);
     setIsBuying(false);
-    if (outcome.kind === 'failed') {
-      Alert.alert('Purchase failed', String((outcome.error as any)?.message ?? outcome.error));
+    if (outcome.kind === "failed") {
+      Alert.alert("Purchase failed", String((outcome.error as any)?.message ?? outcome.error));
     }
   };
 
-  return (
-    <Button
-      disabled={isBuying}
-      title={pkg.product.priceString}
-      onPress={onPress}
-    />
-  );
+  return <Button disabled={isBuying} title={pkg.product.priceString} onPress={onPress} />;
 }
 ```
 

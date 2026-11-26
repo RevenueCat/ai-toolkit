@@ -2,14 +2,14 @@
 
 Wire every row. The names follow each mediator's listener API; look up the exact signature in the mediator's SDK the app already uses.
 
-| Event | `AdTracker` call | AdMob | AppLovin MAX (Android / iOS) | Unity LevelPlay (ironSource) | Unity Ads under LevelPlay |
-| --- | --- | --- | --- | --- | --- |
-| Loaded | `trackAdLoaded` | `onAdLoaded` | `onAdLoaded` / `didLoad` | `onAdLoaded` | `onUnityAdsAdLoaded` |
-| Displayed (impression) | `trackAdDisplayed` | `onAdImpression` | `onAdDisplayed` / `didDisplay` | `onAdDisplayed` | `onUnityAdsShowStart` |
-| Revenue | `trackAdRevenue` | `onPaidEvent` | `onAdRevenuePaid` / `didPayRevenueForAd` | `onImpressionSuccess` | `onImpressionSuccess` from LevelPlay; standalone Unity Ads has no revenue callback |
-| Opened (click) | `trackAdOpened` | `onAdClicked` | `onAdClicked` / `didClick` | `onAdClicked` | `onUnityAdsShowClick` |
-| Failed to load | `trackAdFailedToLoad` | `onAdFailedToLoad` | `onAdLoadFailed` / `didFailToLoadAd` | `onAdLoadFailed` | `onUnityAdsFailedToLoad` |
-| Reward earned (rewarded formats only) | `trackAdRewardEarnedUnverified` | `onUserEarnedReward` | `onUserRewarded` / `didRewardUser` | `onAdRewarded` | `onUnityAdsShowComplete` with state `COMPLETED` |
+| Event                                 | `AdTracker` call                | AdMob                | AppLovin MAX (Android / iOS)             | Unity LevelPlay (ironSource) | Unity Ads under LevelPlay                                                          |
+| ------------------------------------- | ------------------------------- | -------------------- | ---------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| Loaded                                | `trackAdLoaded`                 | `onAdLoaded`         | `onAdLoaded` / `didLoad`                 | `onAdLoaded`                 | `onUnityAdsAdLoaded`                                                               |
+| Displayed (impression)                | `trackAdDisplayed`              | `onAdImpression`     | `onAdDisplayed` / `didDisplay`           | `onAdDisplayed`              | `onUnityAdsShowStart`                                                              |
+| Revenue                               | `trackAdRevenue`                | `onPaidEvent`        | `onAdRevenuePaid` / `didPayRevenueForAd` | `onImpressionSuccess`        | `onImpressionSuccess` from LevelPlay; standalone Unity Ads has no revenue callback |
+| Opened (click)                        | `trackAdOpened`                 | `onAdClicked`        | `onAdClicked` / `didClick`               | `onAdClicked`                | `onUnityAdsShowClick`                                                              |
+| Failed to load                        | `trackAdFailedToLoad`           | `onAdFailedToLoad`   | `onAdLoadFailed` / `didFailToLoadAd`     | `onAdLoadFailed`             | `onUnityAdsFailedToLoad`                                                           |
+| Reward earned (rewarded formats only) | `trackAdRewardEarnedUnverified` | `onUserEarnedReward` | `onUserRewarded` / `didRewardUser`       | `onAdRewarded`               | `onUnityAdsShowComplete` with state `COMPLETED`                                    |
 
 `trackRewardedAdPromptShown` and `trackRewardedAdPromptAccepted` have no row: no mediator emits them. Call them from the app's own "Watch an ad" prompt, before the load; see the platform file.
 
@@ -19,25 +19,25 @@ AppLovin MAX callbacks that have no RevenueCat event: `onAdHidden`, `onAdDisplay
 
 ## Field sources per mediator
 
-| Field | AdMob (manual) | AppLovin MAX |
-| --- | --- | --- |
-| `impressionId` | `responseInfo.responseId`; a banner refresh gets a new one | none on `MaxAd`; generate a UUID per load |
-| `networkName` | `responseInfo.loadedAdapterResponseInfo.adSourceName` | `ad.networkName` |
-| revenue | Differs per platform, see the table below | `ad.revenue` is a currency amount in USD, multiply by 1,000,000 |
-| precision | Unknown, estimated, publisher provided, precise; field names in the table below | `ad.revenuePrecision`: `exact`, `estimated`, `publisher_defined`, `undefined` |
-| error code | `loadAdError.code` | `error.code` |
+| Field          | AdMob (manual)                                                                  | AppLovin MAX                                                                  |
+| -------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `impressionId` | `responseInfo.responseId`; a banner refresh gets a new one                      | none on `MaxAd`; generate a UUID per load                                     |
+| `networkName`  | `responseInfo.loadedAdapterResponseInfo.adSourceName`                           | `ad.networkName`                                                              |
+| revenue        | Differs per platform, see the table below                                       | `ad.revenue` is a currency amount in USD, multiply by 1,000,000               |
+| precision      | Unknown, estimated, publisher provided, precise; field names in the table below | `ad.revenuePrecision`: `exact`, `estimated`, `publisher_defined`, `undefined` |
+| error code     | `loadAdError.code`                                                              | `error.code`                                                                  |
 
 ### AdMob paid event per platform
 
 The unit is not the same everywhere. Convert once, on the side that receives the paid event.
 
-| Platform | Revenue field | Convert to `revenueMicros` | Precision field | Currency |
-| --- | --- | --- | --- | --- |
-| Android (and KMP `androidMain`) | `adValue.valueMicros` (`Long`) | Already micros: pass it through | `adValue.precisionType`: `0` unknown, `1` estimated, `2` publisher provided, `3` precise | `adValue.currencyCode` |
-| iOS (and the Swift side of KMP) | `adValue.value` (`NSDecimalNumber`, a currency amount) | Multiply by 1,000,000 once | `adValue.precision`: `.unknown`, `.estimated`, `.publisherProvided`, `.precise` | `adValue.currencyCode` |
-| Flutter | `valueMicros` (`double`) in `onPaidEvent(ad, valueMicros, precision, currencyCode)` | Already micros: `valueMicros.round()` | `PrecisionType.unknown`, `.estimated`, `.publisherProvided`, `.precise` | `currencyCode` |
-| React Native | `AdEventType.PAID` payload: `valueMicros` (decimal string or `null`) and `value` (currency amount) | `Number(valueMicros)`; if it is `null`, `Math.round(value * 1_000_000)` | `precision`: `RevenuePrecisions.UNKNOWN`, `ESTIMATED`, `PUBLISHER_PROVIDED`, `PRECISE` | `currency` |
-| Unity | `AdValue.Value` (`long`) | Already micros: pass it through | `AdValue.Precision`: `PrecisionType.Unknown`, `Estimated`, `PublisherProvided`, `Precise` | `AdValue.CurrencyCode` |
+| Platform                        | Revenue field                                                                                      | Convert to `revenueMicros`                                              | Precision field                                                                           | Currency               |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------- |
+| Android (and KMP `androidMain`) | `adValue.valueMicros` (`Long`)                                                                     | Already micros: pass it through                                         | `adValue.precisionType`: `0` unknown, `1` estimated, `2` publisher provided, `3` precise  | `adValue.currencyCode` |
+| iOS (and the Swift side of KMP) | `adValue.value` (`NSDecimalNumber`, a currency amount)                                             | Multiply by 1,000,000 once                                              | `adValue.precision`: `.unknown`, `.estimated`, `.publisherProvided`, `.precise`           | `adValue.currencyCode` |
+| Flutter                         | `valueMicros` (`double`) in `onPaidEvent(ad, valueMicros, precision, currencyCode)`                | Already micros: `valueMicros.round()`                                   | `PrecisionType.unknown`, `.estimated`, `.publisherProvided`, `.precise`                   | `currencyCode`         |
+| React Native                    | `AdEventType.PAID` payload: `valueMicros` (decimal string or `null`) and `value` (currency amount) | `Number(valueMicros)`; if it is `null`, `Math.round(value * 1_000_000)` | `precision`: `RevenuePrecisions.UNKNOWN`, `ESTIMATED`, `PUBLISHER_PROVIDED`, `PRECISE`    | `currency`             |
+| Unity                           | `AdValue.Value` (`long`)                                                                           | Already micros: pass it through                                         | `AdValue.Precision`: `PrecisionType.Unknown`, `Estimated`, `PublisherProvided`, `Precise` | `AdValue.CurrencyCode` |
 
 Map precise to exact, estimated to estimated, publisher provided to publisher defined, and unknown to unknown.
 
