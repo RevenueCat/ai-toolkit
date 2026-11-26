@@ -11,18 +11,14 @@ Test Store works on both RN targets. Pass a `test_…` API key in debug builds a
 Branch on `__DEV__`:
 
 ```tsx
-import Purchases from 'react-native-purchases';
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
+import Purchases from "react-native-purchases";
 
-const TEST_KEY = 'test_YOUR_TEST_STORE_KEY';
-const PROD_KEY_IOS = 'appl_YOUR_IOS_PRODUCTION_KEY';
-const PROD_KEY_ANDROID = 'goog_YOUR_ANDROID_PRODUCTION_KEY';
+const TEST_KEY = "test_YOUR_TEST_STORE_KEY";
+const PROD_KEY_IOS = "appl_YOUR_IOS_PRODUCTION_KEY";
+const PROD_KEY_ANDROID = "goog_YOUR_ANDROID_PRODUCTION_KEY";
 
-const apiKey = __DEV__
-  ? TEST_KEY
-  : Platform.OS === 'ios'
-    ? PROD_KEY_IOS
-    : PROD_KEY_ANDROID;
+const apiKey = __DEV__ ? TEST_KEY : Platform.OS === "ios" ? PROD_KEY_IOS : PROD_KEY_ANDROID;
 
 Purchases.configure({ apiKey });
 ```

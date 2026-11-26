@@ -5,7 +5,7 @@ Work the universal checklist in `../SKILL.md` first. React Native bugs usually s
 ## Turn on debug logging
 
 ```ts
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 Purchases.setLogLevel(LOG_LEVEL.DEBUG);
 ```
@@ -53,11 +53,10 @@ Stale Metro caches can bundle the old JS against a new native module, producing 
 ## Platform branching errors
 
 ```ts
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 
-const apiKey = Platform.OS === 'ios'
-  ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
-  : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
+const apiKey =
+  Platform.OS === "ios" ? "appl_YOUR_IOS_PUBLIC_SDK_KEY" : "goog_YOUR_ANDROID_PUBLIC_SDK_KEY";
 ```
 
 A common report: one platform works, the other returns `INVALID_CREDENTIALS`. Cause: the `Platform.OS` check fell through to the wrong branch, or both platforms share a single key constant.

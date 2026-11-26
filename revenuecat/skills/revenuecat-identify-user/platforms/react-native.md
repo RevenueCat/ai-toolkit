@@ -5,7 +5,7 @@
 `Purchases.logIn(appUserID)` resolves to `{ customerInfo, created }`.
 
 ```ts
-import Purchases from 'react-native-purchases';
+import Purchases from "react-native-purchases";
 
 export async function syncRevenueCat(appUserID: string): Promise<void> {
   try {
@@ -13,7 +13,7 @@ export async function syncRevenueCat(appUserID: string): Promise<void> {
     // customerInfo is the current entitlement state for this user.
     // created is true the first time this appUserID reaches RevenueCat.
   } catch (e) {
-    console.warn('RevenueCat logIn failed', e);
+    console.warn("RevenueCat logIn failed", e);
   }
 }
 ```
@@ -29,7 +29,7 @@ export async function signOutRevenueCat(): Promise<void> {
   try {
     await Purchases.logOut();
   } catch (e) {
-    console.warn('RevenueCat logOut failed', e);
+    console.warn("RevenueCat logOut failed", e);
   }
 }
 ```
@@ -39,8 +39,9 @@ export async function signOutRevenueCat(): Promise<void> {
 A `useEffect` watching the current user id is the natural place:
 
 ```tsx
-import { useEffect, useRef } from 'react';
-import { syncRevenueCat, signOutRevenueCat } from './revenuecatIdentity';
+import { useEffect, useRef } from "react";
+
+import { syncRevenueCat, signOutRevenueCat } from "./revenuecatIdentity";
 
 export function useRevenueCatIdentity(currentUserID: string | null) {
   const previous = useRef<string | null>(null);

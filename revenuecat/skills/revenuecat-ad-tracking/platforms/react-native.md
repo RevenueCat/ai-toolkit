@@ -31,15 +31,22 @@ interstitial.load();
 await interstitial.show();
 
 // After
-const interstitial = RevenueCatAdMob.createInterstitialAd(adUnitId, { placement: "level_complete" });
+const interstitial = RevenueCatAdMob.createInterstitialAd(adUnitId, {
+  placement: "level_complete",
+});
 interstitial.load();
-await RevenueCatAdMob.showAndTrack(interstitial);           // or showAndTrack(ad, { placement: "level_complete" })
+await RevenueCatAdMob.showAndTrack(interstitial); // or showAndTrack(ad, { placement: "level_complete" })
 ```
 
 `createRewardedAd` and `createRewardedInterstitialAd` (both async, `await` them before `load()`) and `createAppOpenAd` follow the same shape. The second argument is `{ placement?, requestOptions? }` (rewarded formats add `enableRewardVerification?`); `showAndTrack(ad, { placement?, showOptions? })` returns `Promise<void>`. Banners are a component, so use the hook. It takes every `BannerAd` prop plus `placement`, and forwards the callbacks you pass in (`onAdLoaded`, `onAdFailedToLoad`, `onPaid`, …), so move the app's existing callbacks into the hook call. Never pass them after the spread; that replaces the adapter's own listener. Class components call `RevenueCatAdMob.trackingBannerAdProps` once per banner instead:
 
 ```tsx
-const bannerProps = useTrackingBannerAdProps({ unitId, size: BannerAdSize.BANNER, placement: "home_banner", onAdLoaded: () => setLoaded(true) });
+const bannerProps = useTrackingBannerAdProps({
+  unitId,
+  size: BannerAdSize.BANNER,
+  placement: "home_banner",
+  onAdLoaded: () => setLoaded(true),
+});
 return <BannerAd {...bannerProps} />;
 ```
 
@@ -58,9 +65,9 @@ import Purchases, { AdFormat, AdMediatorName, AdRevenuePrecision } from "react-n
 
 async function onAdLoaded(ad: YourAdType) {
   await Purchases.adTracker.trackAdLoaded({
-    networkName: ad.networkName,            // e.g. "Google Ads", optional
-    mediatorName: AdMediatorName.appLovin,  // .adMob, .appLovin, or any string such as "LevelPlay"
-    adFormat: AdFormat.rewarded,            // .banner, .interstitial, .rewardedInterstitial, .nativeAd, .appOpen, .other
+    networkName: ad.networkName, // e.g. "Google Ads", optional
+    mediatorName: AdMediatorName.appLovin, // .adMob, .appLovin, or any string such as "LevelPlay"
+    adFormat: AdFormat.rewarded, // .banner, .interstitial, .rewardedInterstitial, .nativeAd, .appOpen, .other
     placement: "home_screen",
     adUnitId: ad.adUnitId,
     impressionId: ad.impressionId,
@@ -77,7 +84,7 @@ async function onAdRevenue(ad: YourAdType, revenue: number, currency: string) {
     impressionId: ad.impressionId,
     revenueMicros: Math.round(revenue * 1_000_000),
     currency,
-    precision: AdRevenuePrecision.exact,    // .estimated, .publisherDefined, .unknown
+    precision: AdRevenuePrecision.exact, // .estimated, .publisherDefined, .unknown
   });
 }
 ```

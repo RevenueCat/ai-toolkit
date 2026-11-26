@@ -3,15 +3,15 @@
 ## One shot check
 
 ```ts
-import Purchases from 'react-native-purchases';
+import Purchases from "react-native-purchases";
 
 export async function hasPremium(): Promise<boolean> {
   try {
     const info = await Purchases.getCustomerInfo();
-    return info.entitlements.active['premium'] !== undefined;
+    return info.entitlements.active["premium"] !== undefined;
   } catch (e) {
     // Network or auth error. Treat as "no access" and log for diagnostics.
-    console.warn('RevenueCat getCustomerInfo failed', e);
+    console.warn("RevenueCat getCustomerInfo failed", e);
     return false;
   }
 }
@@ -22,10 +22,10 @@ export async function hasPremium(): Promise<boolean> {
 `Purchases.addCustomerInfoUpdateListener` registers a callback that fires on every entitlement change. Wrap it in a hook so components can subscribe and clean up automatically.
 
 ```tsx
-import { useEffect, useState } from 'react';
-import Purchases, { CustomerInfo } from 'react-native-purchases';
+import { useEffect, useState } from "react";
+import Purchases, { CustomerInfo } from "react-native-purchases";
 
-export function useHasPremium(entitlementId = 'premium'): boolean {
+export function useHasPremium(entitlementId = "premium"): boolean {
   const [hasPremium, setHasPremium] = useState(false);
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function useHasPremium(entitlementId = 'premium'): boolean {
     // Seed initial value.
     Purchases.getCustomerInfo()
       .then(apply)
-      .catch((e) => console.warn('RevenueCat getCustomerInfo failed', e));
+      .catch((e) => console.warn("RevenueCat getCustomerInfo failed", e));
 
     return () => {
       cancelled = true;
