@@ -1,0 +1,25 @@
+name: Synced skills
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - if: github.event.pull_request.user.login != 'revenuecat-ci-cd-bot-pr-writer[bot]'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          if gh api --paginate "repos/$REPO/pulls/$PR/files" \
+              --jq '.[] | .filename, (.previous_filename // empty)' \
+              | grep -q '^revenuecat/skills/'; then
+            echo "::error::revenuecat/skills/ is read-only."
+            exit 1
+          fi

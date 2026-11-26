@@ -332,7 +332,7 @@ from a verified previous successful `get-chart-data` call.
 https://app.revenuecat.com/projects/{project_id}/charts/{chart_name}?range={range_value}
 ```
 
-- `{project_id}` — The short hex ID (e.g., `56965ae1`), not the full `proj56965ae1`
+- `{project_id}` — The short hex ID (e.g., `1ab2c3d4`), not the full `proj1ab2c3d4`
 - `{chart_name}` — The same chart name used with `get-chart-data` (`revenue`, `churn`, `mrr`,
   `conversion_to_paying`, etc.)
 - Project ID goes in the **path**, not as a query parameter
@@ -340,13 +340,13 @@ https://app.revenuecat.com/projects/{project_id}/charts/{chart_name}?range={rang
 **Correct example:**
 
 ```
-https://app.revenuecat.com/projects/56965ae1/charts/revenue?range=Custom%3A2025-11-16%3A2026-02-13
+https://app.revenuecat.com/projects/1ab2c3d4/charts/revenue?range=Custom%3A2025-11-16%3A2026-02-13
 ```
 
 **WRONG — do not use:**
 
 ```
-https://app.revenuecat.com/charts/revenue?project=proj56965ae1&chart_start=...&chart_end=...
+https://app.revenuecat.com/charts/revenue?project=proj1ab2c3d4&chart_start=...&chart_end=...
 ```
 
 ## Query Parameters
@@ -431,18 +431,18 @@ User wants: "Revenue chart for last 90 days, segmented by country, filtered to U
 Calculate dates: if today is 2026-02-13, then 90 days ago is 2025-11-16.
 
 ```
-https://app.revenuecat.com/projects/56965ae1/charts/revenue?range=Custom%3A2025-11-16%3A2026-02-13&segment=country&filter=country%3A%3D%3AUS&filter=country%3A%3D%3ADE
+https://app.revenuecat.com/projects/1ab2c3d4/charts/revenue?range=Custom%3A2025-11-16%3A2026-02-13&segment=country&filter=country%3A%3D%3AUS&filter=country%3A%3D%3ADE
 ```
 
 User wants: "Churn chart from August 2025 to now"
 
 ```
-https://app.revenuecat.com/projects/56965ae1/charts/churn?range=Custom%3A2025-08-01%3A2026-02-13
+https://app.revenuecat.com/projects/1ab2c3d4/charts/churn?range=Custom%3A2025-08-01%3A2026-02-13
 ```
 
 ## Getting Project ID
 
 The project ID can be found via the `list-projects` tool, which lists all projects with their ID.
 
-- The tool returns IDs starting with `proj`, for example `proj56965ae1`
-- **For dashboard URLs, strip the `proj` prefix** — use just `56965ae1` in the path
+- The tool returns IDs starting with `proj`, for example `proj1ab2c3d4`
+- **For dashboard URLs, strip the `proj` prefix** — use just `1ab2c3d4` in the path

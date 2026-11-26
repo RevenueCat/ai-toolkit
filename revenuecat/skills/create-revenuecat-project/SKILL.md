@@ -25,14 +25,14 @@ Ask targeted questions to understand the developer's needs:
 Execute in this order — dependencies matter. Each step names the MCP tool; the equivalent `rc` commands are `rc projects create`, `rc apps create`, `rc products create`, `rc entitlements create`, `rc entitlements attach`, `rc offerings create`, `rc packages create`, `rc packages attach`, and `rc apps keys`.
 
 1. Verify/Create Project
-`list-projects` - list accessible projects
-If multiple: ask user which to use, or offer to create a new one
-To create a new project, use the `create-project` MCP tool
-Store project_id for all subsequent calls
+   `list-projects` - list accessible projects
+   If multiple: ask user which to use, or offer to create a new one
+   To create a new project, use the `create-project` MCP tool
+   Store project_id for all subsequent calls
 
-2. Create Apps (for each platform): 
-    - For mobile apps, ask if the user already has set up their app in App Store Connect / Google Play Console. If so, create an app using the `create-app` tool (type: app_store | play_store). If not, use the automatically generated `test_store` app and tell the user that they can set up the integration with App Store Connect / Google Play Console later.
-    - For web apps, `create-app` with type rc_billing
+2. Create Apps (for each platform):
+   - For mobile apps, ask if the user already has set up their app in App Store Connect / Google Play Console. If so, create an app using the `create-app` tool (type: app_store | play_store). If not, use the automatically generated `test_store` app and tell the user that they can set up the integration with App Store Connect / Google Play Console later.
+   - For web apps, `create-app` with type rc_billing
 
 3. Create Products (for each subscription/purchase): `create-product` tool
 
@@ -83,6 +83,7 @@ Next Steps:
 ## Error Handling
 
 If any step fails:
+
 1. Report the specific error clearly
 2. Suggest fixes (e.g., "Bundle ID may already be in use")
 3. Offer to retry or skip that step

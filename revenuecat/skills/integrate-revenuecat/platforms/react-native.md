@@ -33,22 +33,21 @@ Expo Go has no native module for `react-native-purchases`, so the SDK switches t
 Call `Purchases.configure` once when the app mounts. In `App.tsx` (or `index.js`):
 
 ```tsx
-import { useEffect } from 'react';
-import { Platform } from 'react-native';
-import Purchases, { LOG_LEVEL } from 'react-native-purchases';
+import { useEffect } from "react";
+import { Platform } from "react-native";
+import Purchases, { LOG_LEVEL } from "react-native-purchases";
 
 export default function App() {
   useEffect(() => {
     Purchases.setLogLevel(LOG_LEVEL.DEBUG); // remove for release
 
-    const apiKey = Platform.OS === 'ios'
-      ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
-      : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
+    const apiKey =
+      Platform.OS === "ios" ? "appl_YOUR_IOS_PUBLIC_SDK_KEY" : "goog_YOUR_ANDROID_PUBLIC_SDK_KEY";
 
     Purchases.configure({ apiKey });
   }, []);
 
-  return /* … your UI … */;
+  return; /* … your UI … */
 }
 ```
 

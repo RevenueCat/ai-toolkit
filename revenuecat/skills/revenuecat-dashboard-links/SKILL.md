@@ -28,7 +28,7 @@ customer lists and audiences**, use `revenuecat-audiences`.
 ## URL rules
 
 - Base: `https://app.revenuecat.com`
-- `{projectId}` in these paths is the **short hex ID** (e.g. `56965ae1`), not `proj56965ae1`.
+- `{projectId}` in these paths is the **short hex ID** (e.g. `1ab2c3d4`), not `proj1ab2c3d4`.
   `list-projects` returns IDs starting with `proj` — strip that prefix for dashboard URLs.
 - Fill every `{param}` with a real ID from an API/MCP response.
 - Do not add query parameters unless `revenuecat-charts` or `revenuecat-audiences` says so.
@@ -37,65 +37,65 @@ customer lists and audiences**, use `revenuecat-audiences`.
 
 ## Account (no project)
 
-| Path | Page |
-| --- | --- |
-| `/overview` | Home / account overview |
-| `/settings/account` | Account settings |
-| `/settings/billing` | RevenueCat plan and billing |
-| `/settings/billing/invoices` | Billing invoices |
-| `/settings/security` | Security, 2FA |
-| `/projects/add` | Create a project |
+| Path                         | Page                        |
+| ---------------------------- | --------------------------- |
+| `/overview`                  | Home / account overview     |
+| `/settings/account`          | Account settings            |
+| `/settings/billing`          | RevenueCat plan and billing |
+| `/settings/billing/invoices` | Billing invoices            |
+| `/settings/security`         | Security, 2FA               |
+| `/projects/add`              | Create a project            |
 
 ## Project pages
 
 Prefix every path with `/projects/{projectId}`.
 
-| Path | Page |
-| --- | --- |
-| `/` or `/overview` | Project overview |
-| `/apps` | Apps list |
-| `/apps/{appId}` | App details, store credentials |
-| `/new-app` | Add an app |
-| `/api-keys` | API keys |
-| `/sdk-compatibility` | SDK versions and feature compatibility |
-| `/settings` | Project settings |
-| `/collaborators` | Team members and roles |
-| `/audit-logs` | Audit logs |
-| `/product-catalog/entitlements` | Entitlements list |
-| `/product-catalog/entitlements/{entitlementId}` | Entitlement detail |
-| `/product-catalog/products` | Products list |
-| `/product-catalog/products/{productId}` | Product detail |
-| `/product-catalog/product-editor` | Bulk product editor |
-| `/product-catalog/offerings` | Offerings list |
-| `/product-catalog/offerings/{offeringId}` | Offering detail |
-| `/product-catalog/virtual-currencies` | In-app currencies |
-| `/paywalls` | Paywalls list |
-| `/paywalls/{paywallId}/builder` | Paywall builder |
-| `/targeting` | Targeting rules |
-| `/experiments` | Experiments list |
-| `/experiments/{experimentId}` | Experiment detail / results |
-| `/lifecycle/customer-center` | Customer Center config |
-| `/lifecycle/winback` | Win-back campaigns |
-| `/lifecycle/retention` | Retention offers |
-| `/funnels` | Web funnels |
-| `/charts` | Charts home (see `revenuecat-charts` for filtered chart URLs) |
-| `/benchmarks` | Benchmarks |
-| `/customer-lists` | Audiences / customer lists |
-| `/customer-lists/{listId}` | Saved audience (`customer_list_id`) |
-| `/customers/{appUserId}` | Customer profile |
-| `/integrations` | Integrations home |
-| `/integrations/webhooks` | Webhooks |
+| Path                                            | Page                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------- |
+| `/` or `/overview`                              | Project overview                                              |
+| `/apps`                                         | Apps list                                                     |
+| `/apps/{appId}`                                 | App details, store credentials                                |
+| `/new-app`                                      | Add an app                                                    |
+| `/api-keys`                                     | API keys                                                      |
+| `/sdk-compatibility`                            | SDK versions and feature compatibility                        |
+| `/settings`                                     | Project settings                                              |
+| `/collaborators`                                | Team members and roles                                        |
+| `/audit-logs`                                   | Audit logs                                                    |
+| `/product-catalog/entitlements`                 | Entitlements list                                             |
+| `/product-catalog/entitlements/{entitlementId}` | Entitlement detail                                            |
+| `/product-catalog/products`                     | Products list                                                 |
+| `/product-catalog/products/{productId}`         | Product detail                                                |
+| `/product-catalog/product-editor`               | Bulk product editor                                           |
+| `/product-catalog/offerings`                    | Offerings list                                                |
+| `/product-catalog/offerings/{offeringId}`       | Offering detail                                               |
+| `/product-catalog/virtual-currencies`           | In-app currencies                                             |
+| `/paywalls`                                     | Paywalls list                                                 |
+| `/paywalls/{paywallId}/builder`                 | Paywall builder                                               |
+| `/targeting`                                    | Targeting rules                                               |
+| `/experiments`                                  | Experiments list                                              |
+| `/experiments/{experimentId}`                   | Experiment detail / results                                   |
+| `/lifecycle/customer-center`                    | Customer Center config                                        |
+| `/lifecycle/winback`                            | Win-back campaigns                                            |
+| `/lifecycle/retention`                          | Retention offers                                              |
+| `/funnels`                                      | Web funnels                                                   |
+| `/charts`                                       | Charts home (see `revenuecat-charts` for filtered chart URLs) |
+| `/benchmarks`                                   | Benchmarks                                                    |
+| `/customer-lists`                               | Audiences / customer lists                                    |
+| `/customer-lists/{listId}`                      | Saved audience (`customer_list_id`)                           |
+| `/customers/{appUserId}`                        | Customer profile                                              |
+| `/integrations`                                 | Integrations home                                             |
+| `/integrations/webhooks`                        | Webhooks                                                      |
 
 ## Examples
 
 Offering detail:
 
 ```
-https://app.revenuecat.com/projects/56965ae1/product-catalog/offerings/ofrng_default
+https://app.revenuecat.com/projects/1ab2c3d4/product-catalog/offerings/ofrng_default
 ```
 
 Paywall builder:
 
 ```
-https://app.revenuecat.com/projects/56965ae1/paywalls/pw_abc123/builder
+https://app.revenuecat.com/projects/1ab2c3d4/paywalls/pw_abc123/builder
 ```

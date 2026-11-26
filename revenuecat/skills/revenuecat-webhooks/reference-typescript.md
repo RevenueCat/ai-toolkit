@@ -60,7 +60,12 @@ export interface WebhookStore {
    * null for no expiry). Skip the write when this user and project already hold a read with a later readAtMs.
    * Leave other projects and access from other sources alone.
    */
-  saveEntitlements(userId: string, projectId: string, active: Record<string, number | null>, readAtMs: number): Promise<void>;
+  saveEntitlements(
+    userId: string,
+    projectId: string,
+    active: Record<string, number | null>,
+    readAtMs: number,
+  ): Promise<void>;
   /*
    * Consumable ledger, one row per transactionId: purchaseSeen, reversed, owner (user or none), units, the
    * purchase's app user IDs, and refundEventMs (the event_timestamp_ms of the last refund or reversal applied, null
@@ -70,7 +75,14 @@ export interface WebhookStore {
    * it is missing.
    */
   /** Purchase: the first time, set purchaseSeen, units, IDs, and owner (when known). Later calls change nothing. */
-  recordPurchase(transactionId: string, productId: string, units: number, owner: string | undefined, appUserIds: string[], eventMs: number): Promise<void>;
+  recordPurchase(
+    transactionId: string,
+    productId: string,
+    units: number,
+    owner: string | undefined,
+    appUserIds: string[],
+    eventMs: number,
+  ): Promise<void>;
   /** Refund: set reversed when refundEventMs is null or eventMs is later than it (then store eventMs). */
   reverseCredit(transactionId: string, eventMs: number): Promise<void>;
   /** Refund reversed: clear reversed when refundEventMs is null or eventMs is later than it (then store eventMs). */
@@ -108,8 +120,10 @@ class RetryLater extends Error {
 
 export function createRevenueCatWebhook(config: WebhookConfig) {
   // Fail at startup, not on every request. A blank value would also match an empty header.
-  if (!config.authorization?.trim()) throw new Error("Set the webhook Authorization value from the RevenueCat dashboard");
-  if (!config.secretApiKey?.trim()) throw new Error("Set a RevenueCat secret API key for REST API v2");
+  if (!config.authorization?.trim())
+    throw new Error("Set the webhook Authorization value from the RevenueCat dashboard");
+  if (!config.secretApiKey?.trim())
+    throw new Error("Set a RevenueCat secret API key for REST API v2");
   if (!config.projectId?.trim()) throw new Error("Set the RevenueCat project ID");
   const { store } = config;
   const project = `/v2/projects/${encodeURIComponent(config.projectId)}`;
@@ -119,10 +133,20 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
   let keysLoadedAt = 0;
 
   /** Authenticate, record the event once, and return the status to answer. */
-  async function handle(rawBody: Buffer, headers: Record<string, string | string[] | undefined>): Promise<number> {
+  async function handle(
+    rawBody: Buffer,
+    headers: Record<string, string | string[] | undefined>,
+  ): Promise<number> {
     if (!safeEqual(header(headers, "authorization"), config.authorization)) return 401;
     if (!Buffer.isBuffer(rawBody)) return 400;
-    if (config.signingSecret && !verifySignature(rawBody, header(headers, "x-revenuecat-webhook-signature"), config.signingSecret)) {
+    if (
+      config.signingSecret &&
+      !verifySignature(
+        rawBody,
+        header(headers, "x-revenuecat-webhook-signature"),
+        config.signingSecret,
+      )
+    ) {
       return 401;
     }
     let id: unknown;
@@ -182,7 +206,9 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
     const productId = event.product_id ?? "";
     const units = Object.hasOwn(config.consumables, productId) ? config.consumables[productId] : 0;
     if (units > 0 && !event.transaction_id) {
-      console.warn(`RevenueCat ${event.type} ${event.id} for ${productId} has no transaction_id; not credited or reversed`);
+      console.warn(
+        `RevenueCat ${event.type} ${event.id} for ${productId} has no transaction_id; not credited or reversed`,
+      );
     } else if (units > 0 && event.environment === "SANDBOX" && !config.creditSandbox) {
       console.info(`RevenueCat sandbox ${event.type} ${event.transaction_id}: no credit change`);
     } else if (units > 0 && event.transaction_id) {
@@ -194,12 +220,21 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
           aliasIds = await aliases(event.app_user_id);
           owner = await store.findUser(aliasIds);
         }
-        await store.recordPurchase(event.transaction_id, productId, units * (event.quantity ?? 1), owner, ids, eventMs);
+        await store.recordPurchase(
+          event.transaction_id,
+          productId,
+          units * (event.quantity ?? 1),
+          owner,
+          ids,
+          eventMs,
+        );
       } else if (event.type === "CANCELLATION") {
-        if (event.event_timestamp_ms == null) console.warn(`RevenueCat ${event.type} ${event.id} has no event_timestamp_ms`);
+        if (event.event_timestamp_ms == null)
+          console.warn(`RevenueCat ${event.type} ${event.id} has no event_timestamp_ms`);
         await store.reverseCredit(event.transaction_id, eventMs);
       } else if (event.type === "REFUND_REVERSED") {
-        if (event.event_timestamp_ms == null) console.warn(`RevenueCat ${event.type} ${event.id} has no event_timestamp_ms`);
+        if (event.event_timestamp_ms == null)
+          console.warn(`RevenueCat ${event.type} ${event.id} has no event_timestamp_ms`);
         await store.restoreCredit(event.transaction_id, eventMs);
       }
     }
@@ -207,21 +242,31 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
     // Access: re-read every customer the event touches and store what RevenueCat reports now.
     if (NO_ACCESS_CHANGE.has(event.type)) return;
     let targets: string[][];
-    if (event.type === "TRANSFER") targets = [...(event.transferred_from ?? []), ...(event.transferred_to ?? [])].map((id) => [id]);
-    else if (event.type === "PURCHASE_REDEEMED") targets = (event.redeemed_by ?? []).map((id) => [id]);
+    if (event.type === "TRANSFER")
+      targets = [...(event.transferred_from ?? []), ...(event.transferred_to ?? [])].map((id) => [
+        id,
+      ]);
+    else if (event.type === "PURCHASE_REDEEMED")
+      targets = (event.redeemed_by ?? []).map((id) => [id]);
     else targets = ids.length > 0 ? [aliasIds ? [...ids, ...aliasIds] : ids] : [];
-    if (targets.length === 0) console.warn(`RevenueCat event ${event.id} (${event.type}) has no app user ID`);
+    if (targets.length === 0)
+      console.warn(`RevenueCat event ${event.id} (${event.type}) has no app user ID`);
     for (const target of targets) {
       // Not in this project: the project ID or key belongs to another project, or the customer was deleted.
       // Never revoke on that; fail and keep the event queued, where the error stays visible.
       if ((await syncCustomer(target, aliasIds !== undefined)) === "not_found") {
-        throw new Error(`RevenueCat customer ${target[0]} not found in project ${config.projectId}; check the project ID and the key`);
+        throw new Error(
+          `RevenueCat customer ${target[0]} not found in project ${config.projectId}; check the project ID and the key`,
+        );
       }
     }
   }
 
   /** Re-read one customer and save its active entitlements. Also use it before denying access at serve time. */
-  async function syncCustomer(ids: string[], aliasesIncluded = false): Promise<"saved" | "no_user" | "not_found"> {
+  async function syncCustomer(
+    ids: string[],
+    aliasesIncluded = false,
+  ): Promise<"saved" | "no_user" | "not_found"> {
     let known = ids;
     let userId = await store.findUser(known);
     if (!userId && !aliasesIncluded) {
@@ -237,13 +282,17 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
     const customer = await get(`${project}/customers/${encodeURIComponent(ids[0])}`);
     if (customer === null) return "not_found";
     // Never read a missing list as "no access".
-    if (!customer.active_entitlements) throw new Error(`RevenueCat customer ${ids[0]} came back without active_entitlements`);
+    if (!customer.active_entitlements)
+      throw new Error(`RevenueCat customer ${ids[0]} came back without active_entitlements`);
     const active: Record<string, number | null> = {};
     let page = customer.active_entitlements;
     while (page) {
       for (const item of page.items ?? []) {
         const key = await lookupKey(item.entitlement_id);
-        if (key === undefined) console.error(`RevenueCat entitlement ${item.entitlement_id} is not in the entitlements list of ${config.projectId}; skipped`);
+        if (key === undefined)
+          console.error(
+            `RevenueCat entitlement ${item.entitlement_id} is not in the entitlements list of ${config.projectId}; skipped`,
+          );
         else active[key] = item.expires_at ?? null;
       }
       page = page.next_page ? await get(page.next_page) : null;
@@ -276,10 +325,17 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
   async function lookupKey(entitlementId: string): Promise<string | undefined> {
     if (entitlementKeys.has(entitlementId)) return entitlementKeys.get(entitlementId);
     // Reload at most once a minute (the entitlements endpoint has a lower rate limit); retry until then.
-    if (Date.now() - keysLoadedAt < 60_000) throw new RetryLater(`RevenueCat entitlement ${entitlementId} is not in the cached entitlements list`, 60_000);
+    if (Date.now() - keysLoadedAt < 60_000)
+      throw new RetryLater(
+        `RevenueCat entitlement ${entitlementId} is not in the cached entitlements list`,
+        60_000,
+      );
     const keys = new Map<string, string>();
     let page = await get(`${project}/entitlements?limit=100`);
-    if (page === null) throw new Error(`RevenueCat project ${config.projectId} not found; check the project ID and the key`);
+    if (page === null)
+      throw new Error(
+        `RevenueCat project ${config.projectId} not found; check the project ID and the key`,
+      );
     while (page) {
       for (const entitlement of page.items ?? []) keys.set(entitlement.id, entitlement.lookup_key);
       page = page.next_page ? await get(page.next_page) : null;
@@ -292,21 +348,34 @@ export function createRevenueCatWebhook(config: WebhookConfig) {
 
   /** GET a REST API v2 path. null on 404; throws on anything else that is not 2xx. */
   async function get(path: string): Promise<any> {
-    const response = await fetch(`${REVENUECAT}${path}`, { headers: { Authorization: `Bearer ${config.secretApiKey}` } });
+    const response = await fetch(`${REVENUECAT}${path}`, {
+      headers: { Authorization: `Bearer ${config.secretApiKey}` },
+    });
     if (response.status === 404) return null;
     // 423: RevenueCat is still processing this customer (wait backoff_ms). 429 and 5xx: try again later.
     if (response.status === 429 || response.status === 423 || response.status >= 500) {
       const backoffMs = Number((await response.json().catch(() => ({})))?.backoff_ms);
-      throw new RetryLater(`GET ${path} answered ${response.status}`, Math.max(retryAfterMs(response), Number.isFinite(backoffMs) ? backoffMs : 0));
+      throw new RetryLater(
+        `GET ${path} answered ${response.status}`,
+        Math.max(retryAfterMs(response), Number.isFinite(backoffMs) ? backoffMs : 0),
+      );
     }
-    if (!response.ok) throw new Error(`GET ${path} answered ${response.status}; check the key (a v1 key does not work with REST API v2) and its permissions`);
+    if (!response.ok)
+      throw new Error(
+        `GET ${path} answered ${response.status}; check the key (a v1 key does not work with REST API v2) and its permissions`,
+      );
     return response.json();
   }
 
   return { handle, processEvents, syncCustomer, refreshUser };
 }
 
-export function verifySignature(rawBody: Buffer, signature: string | undefined, secret: string, toleranceSeconds = 300): boolean {
+export function verifySignature(
+  rawBody: Buffer,
+  signature: string | undefined,
+  secret: string,
+  toleranceSeconds = 300,
+): boolean {
   if (!signature) return false;
   const parts = new Map<string, string>();
   for (const part of signature.split(",")) {
@@ -329,7 +398,10 @@ function safeEqual(actual: string | undefined, expected: string): boolean {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
-function header(headers: Record<string, string | string[] | undefined>, name: string): string | undefined {
+function header(
+  headers: Record<string, string | string[] | undefined>,
+  name: string,
+): string | undefined {
   const value = headers[name];
   return Array.isArray(value) ? value[0] : value;
 }
@@ -351,9 +423,10 @@ function retryAfterMs(response: Response): number {
 ```ts
 // server.ts
 import express from "express";
-import { createRevenueCatWebhook } from "./revenuecat-webhooks.ts";
-import { store } from "./revenuecat-store.ts"; // your WebhookStore on your database
+
 import { requireUser } from "./auth.ts"; // your auth middleware; it sets res.locals.userId
+import { store } from "./revenuecat-store.ts"; // your WebhookStore on your database
+import { createRevenueCatWebhook } from "./revenuecat-webhooks.ts";
 
 const webhook = createRevenueCatWebhook({
   authorization: process.env.REVENUECAT_WEBHOOK_AUTHORIZATION ?? "",
@@ -365,7 +438,9 @@ const webhook = createRevenueCatWebhook({
 });
 
 function processSoon(): void {
-  webhook.processEvents().catch((error) => console.error("RevenueCat event processing failed", error));
+  webhook
+    .processEvents()
+    .catch((error) => console.error("RevenueCat event processing failed", error));
 }
 
 const app = express();
@@ -414,10 +489,23 @@ The in-memory store below shows the same semantics, and is what the tests for th
 // memory-store.ts
 import type { InboxEvent, WebhookStore } from "./revenuecat-webhooks.ts";
 
-type LedgerRow = { purchaseSeen: boolean; reversed: boolean; owner?: string; units: number; ids: string[]; refundEventMs: number | null };
+type LedgerRow = {
+  purchaseSeen: boolean;
+  reversed: boolean;
+  owner?: string;
+  units: number;
+  ids: string[];
+  refundEventMs: number | null;
+};
 
 export class MemoryStore implements WebhookStore {
-  users = new Map<string, { access: Map<string, { active: Record<string, number | null>; readAtMs: number }>; coins: number }>();
+  users = new Map<
+    string,
+    {
+      access: Map<string, { active: Record<string, number | null>; readAtMs: number }>;
+      coins: number;
+    }
+  >();
   private inbox = new Map<string, InboxEvent & { nextAttemptAt: number; done: boolean }>();
   private ledger = new Map<string, LedgerRow>();
 
@@ -432,7 +520,9 @@ export class MemoryStore implements WebhookStore {
   }
 
   async dueEvents(now: number, limit: number): Promise<InboxEvent[]> {
-    return [...this.inbox.values()].filter((e) => !e.done && e.nextAttemptAt <= now).slice(0, limit);
+    return [...this.inbox.values()]
+      .filter((e) => !e.done && e.nextAttemptAt <= now)
+      .slice(0, limit);
   }
 
   async markDone(id: string): Promise<void> {
@@ -452,14 +542,25 @@ export class MemoryStore implements WebhookStore {
     return appUserIds.find((id) => this.users.has(id));
   }
 
-  async saveEntitlements(userId: string, projectId: string, active: Record<string, number | null>, readAtMs: number): Promise<void> {
+  async saveEntitlements(
+    userId: string,
+    projectId: string,
+    active: Record<string, number | null>,
+    readAtMs: number,
+  ): Promise<void> {
     const user = this.users.get(userId);
     const stored = user?.access.get(projectId);
     if (!user || (stored && stored.readAtMs > readAtMs)) return;
     user.access.set(projectId, { active: { ...active }, readAtMs });
   }
 
-  async recordPurchase(transactionId: string, _productId: string, units: number, owner: string | undefined, appUserIds: string[]): Promise<void> {
+  async recordPurchase(
+    transactionId: string,
+    _productId: string,
+    units: number,
+    owner: string | undefined,
+    appUserIds: string[],
+  ): Promise<void> {
     const row = this.row(transactionId);
     if (row.purchaseSeen) return;
     this.change(row, () => {
@@ -499,7 +600,11 @@ export class MemoryStore implements WebhookStore {
 
   private row(transactionId: string): LedgerRow {
     let row = this.ledger.get(transactionId);
-    if (!row) this.ledger.set(transactionId, (row = { purchaseSeen: false, reversed: false, units: 0, ids: [], refundEventMs: null }));
+    if (!row)
+      this.ledger.set(
+        transactionId,
+        (row = { purchaseSeen: false, reversed: false, units: 0, ids: [], refundEventMs: null }),
+      );
     return row;
   }
 

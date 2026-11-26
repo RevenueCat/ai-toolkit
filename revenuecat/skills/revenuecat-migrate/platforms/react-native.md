@@ -32,18 +32,17 @@ npx expo prebuild --clean # dev client required, Expo Go does not work
 ### Configure in observer mode
 
 ```ts
-import { Platform } from 'react-native';
+import { Platform } from "react-native";
 import Purchases, {
   LOG_LEVEL,
   PURCHASES_ARE_COMPLETED_BY_TYPE,
   STOREKIT_VERSION,
-} from 'react-native-purchases';
+} from "react-native-purchases";
 
 Purchases.setLogLevel(LOG_LEVEL.DEBUG);
 
-const apiKey = Platform.OS === 'ios'
-  ? 'appl_YOUR_IOS_PUBLIC_SDK_KEY'
-  : 'goog_YOUR_ANDROID_PUBLIC_SDK_KEY';
+const apiKey =
+  Platform.OS === "ios" ? "appl_YOUR_IOS_PUBLIC_SDK_KEY" : "goog_YOUR_ANDROID_PUBLIC_SDK_KEY";
 
 Purchases.configure({
   apiKey,

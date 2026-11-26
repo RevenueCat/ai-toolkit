@@ -32,8 +32,8 @@ Walk these nine items in order. Most reports are resolved by steps 1 through 5.
 
 1. **Turn on debug logging and reproduce.** The SDK narrates what it is doing. Roughly 80% of reports are diagnosable from the log output alone. Each platform file shows how to set `logLevel` to debug.
 2. **Verify the API key platform matches the app.** iOS apps must use an `appl_…` public SDK key. Android apps must use `goog_…` (or `amzn_…` for Amazon). A mismatched key produces an authentication error on the first network call. On iOS this surfaces as an `INVALID_CREDENTIALS` error code. On Android it surfaces as `PurchasesErrorCode.InvalidCredentialsError`. Use the `list-app-public-api-keys` RevenueCat MCP tool to list the API keys for the project.
-3. **Verify the bundle ID / package name matches the one set up in the RevenueCat project.** 
-List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / App Store) or `package_name` (Android / Play Store / Amazon Appstore) registered there must match the built app exactly, including capitalization. A mismatch causes offerings to come back empty because the app is not recognized.
+3. **Verify the bundle ID / package name matches the one set up in the RevenueCat project.**
+   List the apps using the `list-apps` RevenueCat MCP tool. The `bundle_id` (iOS / App Store) or `package_name` (Android / Play Store / Amazon Appstore) registered there must match the built app exactly, including capitalization. A mismatch causes offerings to come back empty because the app is not recognized.
 4. **Verify offerings in the RevenueCat project.** List the project's offerings using the `list-offerings` RevenueCat MCP tool, passing `limit: 100` and `expand=items.package.product`. The default page of 20 can omit the current offering, and a partial page looks the same as a project with no current offering. The offering marked with `is_current: true` must have at least one package attached, and each package must reference a store product. The SDK drops an offering whose packages resolve to no store products, or that has no packages: it is missing from `offerings.all` and `current` is null if it was the current one (purchases-ios also logs a warning). If no offering has any products, `getOfferings` fails with a configuration error.
 5. **Verify store products are live.** On App Store Connect, products need complete metadata (at minimum reference name, product ID, localized name, and price, plus the subscription group localization for subscriptions); new products show "Prepare for Submission" whether or not metadata is missing, so check the fields rather than the status. On Google Play Console, products must be "Active". A product the store considers incomplete or inactive will not be returned, even in sandbox. If the SDK logs show offerings arriving from RevenueCat but products failing to resolve, this is almost always the cause. Use the `get-product-store-state` RevenueCat MCP tool to understand the state of product in App Store Connect or Google Play Console (field `store_status`). To fix or change the store state (not just read it), follow the `revenuecat-store-state` skill.
 6. **Verify the testing account.** iOS: the device must be signed into a Sandbox Apple ID under Settings → Developer → Sandbox Apple Account on iOS 18 and later, or Settings → App Store → Sandbox Account on iOS 17 and earlier (it appears after the first sandbox purchase prompt). Android: the tester's Gmail must be added to Google Play Console → Settings → License testing, and the tester must have opted in to a testing track (Internal Testing works) through its opt-in link. The app can then come from Play or be a sideloaded build with the same package name.
@@ -57,17 +57,21 @@ Use this when steps 3, 4, or 5 above point at dashboard configuration, when the 
 Work through this checklist via MCP tools or their `rc` CLI equivalents (see the `revenuecat-cli` skill). Each `list-*` tool maps to `rc <noun> list` (e.g. `list-offerings` → `rc offerings list`, `list-apps` → `rc apps list`), `list-app-public-api-keys` → `rc apps keys <app-id>`, and `get-product-store-state` → `rc products show <product-id> --store-state`.
 
 #### Check 1: Project overview
+
 ```
 list-projects → ask user to select project if multiple
 list-apps (with selected project_id)
 ```
+
 - Verify project exists and apps are present.
 
 #### Check 2: Products
+
 ```
 list-products
 get-product-store-state
 ```
+
 - [ ] Products exist for each store item.
 - [ ] Store identifiers match App Store Connect / Play Console exactly.
 - [ ] Product types are correct (subscription vs one-time).
@@ -77,32 +81,40 @@ get-product-store-state
 A `null` duration from `list-products` does not mean the product is misconfigured (it can simply not have been purchased yet). Judge store setup from `get-product-store-state`.
 
 #### Check 3: Entitlements
+
 ```
 list-entitlements
 get-products-from-entitlement (for each entitlement)
 ```
+
 - [ ] Entitlements exist for each access level.
 - [ ] Products are attached to entitlements.
 - [ ] No orphaned products (products not granting any entitlement).
 
 #### Check 4: Offerings
+
 ```
 list-offerings (limit: 100)
 list-packages (for the offering with is_current: true)
 ```
+
 - [ ] At least one offering exists with `is_current: true`.
 - [ ] Packages contain products.
 - [ ] Package identifiers use standard conventions (`$rc_monthly`, etc.).
 
 #### Check 5: Webhooks (if server-side issues suspected)
+
 ```
 list-webhook-integrations
 ```
+
 - [ ] Webhook URL is correct and accessible.
 - [ ] Environment matches (production vs sandbox).
 
 #### Check 6: SDK compatibility (if an SDK-gated feature misbehaves)
+
 Paywall components, experiment enrollment, exposure tracking, Customer Center behavior, In-App Currencies, and offering features depend on minimum SDK versions. Load the `revenuecat-sdk-compatibility` skill before making any SDK-version claim.
+
 - [ ] The feature's gate was checked with `list-sdk-feature-gates`.
 - [ ] Any claim about the project's SDK adoption was checked with `list-sdk-versions`.
 - [ ] The report separates required SDK versions from versions observed in the project.
@@ -140,6 +152,7 @@ Would you like me to fix issues #1 and #2 now?
 ```
 
 For each fixable issue, confirm with the user, then execute via MCP:
+
 - `attach-products-to-entitlement`
 - `attach-products-to-package`
 
@@ -169,26 +182,27 @@ If the user cannot reproduce locally, have them send the full debug log from app
 
 ### Common errors
 
-| Error code                       | Likely cause                                | Solution                                                                |
-| -------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------- |
-| `INVALID_APP_USER_ID`            | Reserved characters or empty string         | Use alphanumeric IDs, underscores, hyphens only                         |
-| `INVALID_CREDENTIALS`            | Wrong API key or bundle ID mismatch         | Verify API key matches app                                              |
-| `NETWORK_ERROR`                  | No connectivity or firewall                 | Check network, verify RevenueCat domains allowed                        |
-| `STORE_PROBLEM`                  | Store downtime, config issue, iOS 18.x bug  | Check store status, verify config, see Known iOS Issues below           |
-| `SIGNATURE_VERIFICATION_FAILED`  | Tampered receipt or config error            | Verify In-App Purchase Key (iOS) or service credentials                 |
+| Error code                      | Likely cause                               | Solution                                                      |
+| ------------------------------- | ------------------------------------------ | ------------------------------------------------------------- |
+| `INVALID_APP_USER_ID`           | Reserved characters or empty string        | Use alphanumeric IDs, underscores, hyphens only               |
+| `INVALID_CREDENTIALS`           | Wrong API key or bundle ID mismatch        | Verify API key matches app                                    |
+| `NETWORK_ERROR`                 | No connectivity or firewall                | Check network, verify RevenueCat domains allowed              |
+| `STORE_PROBLEM`                 | Store downtime, config issue, iOS 18.x bug | Check store status, verify config, see Known iOS Issues below |
+| `SIGNATURE_VERIFICATION_FAILED` | Tampered receipt or config error           | Verify In-App Purchase Key (iOS) or service credentials       |
 
 ### Purchase errors
 
-| Error code                            | Solution                                                          |
-| ------------------------------------- | ----------------------------------------------------------------- |
-| `RECEIPT_ALREADY_IN_USE`              | Call `restorePurchases()` or sync customer                        |
-| `PRODUCT_NOT_AVAILABLE_FOR_PURCHASE`  | Verify product status in App Store Connect / Play Console         |
-| `PURCHASE_NOT_ALLOWED`                | Check parental controls, payment method                           |
-| `PRODUCT_ALREADY_PURCHASED`           | Call `restorePurchases()` to sync                                 |
+| Error code                           | Solution                                                  |
+| ------------------------------------ | --------------------------------------------------------- |
+| `RECEIPT_ALREADY_IN_USE`             | Call `restorePurchases()` or sync customer                |
+| `PRODUCT_NOT_AVAILABLE_FOR_PURCHASE` | Verify product status in App Store Connect / Play Console |
+| `PURCHASE_NOT_ALLOWED`               | Check parental controls, payment method                   |
+| `PRODUCT_ALREADY_PURCHASED`          | Call `restorePurchases()` to sync                         |
 
 ## Reference: debug log interpretation
 
 Ask the developer to enable debug logging:
+
 - iOS: `Purchases.logLevel = .debug`
 - Android: `Purchases.logLevel = LogLevel.DEBUG`
 
@@ -199,10 +213,12 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 ### iOS
 
 **iOS 18.0–18.3.2: StoreKit Daemon Connection Failure**
+
 - Symptom: `STORE_PROBLEM` (NSCocoaErrorDomain Code 4097) on ~25% of purchases on physical devices.
 - Fix: Upgrade to iOS 18.4+.
 
 **iOS 18.4–18.5 Simulator: Products Don't Load**
+
 - Symptom: Products return empty in simulator with sandbox.
 - Affected: Simulator only — physical devices and production unaffected.
 - Fix: Test on physical device, or use Xcode 26+ with iOS 26+ simulators.
@@ -210,10 +226,12 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 ### Android
 
 **ProxyBillingActivity NullPointerException**
+
 - Typically from automated testing or Play Store pre-launch reports on LG Nexus 5X / rooted devices.
 - Safe to ignore/silence in crash reporting tools.
 
 **NoCoreLibraryDesugaringException / NoClassDefFoundError when starting a purchase**
+
 - Only SDK versions on Play Billing Library 7.1 can hit this: purchases-android 8.10.8 to 8.25.0 (a raw `NoClassDefFoundError` before 8.16.0, `NoCoreLibraryDesugaringException` from 8.16.0), and the `purchases-bc7` artifacts (9.14.1 to 10.12.0) that 10.13.0 removed. Versions on Billing Library 8 or later are not affected, and 11.1.0 deprecates the exception and never throws it.
 - Fix: upgrade the SDK, or enable core library desugaring in `build.gradle`.
 
@@ -254,10 +272,12 @@ Log emoji indicators: 🍎 Apple/StoreKit · 🤖 Google Play · 📦 Amazon · 
 **Webhook not receiving events** — Verify URL is internet-accessible and returns 200 OK. Test with webhook.site.
 
 **Subscription status out of sync** — SDK caches `CustomerInfo` for 5 min (foreground). Force refresh:
+
 ```swift
 // iOS
 Purchases.shared.getCustomerInfo(fetchPolicy: .fetchCurrent) { ... }
 ```
+
 ```kotlin
 // Android
 Purchases.sharedInstance.getCustomerInfoWith(CacheFetchPolicy.FETCH_CURRENT) { ... }

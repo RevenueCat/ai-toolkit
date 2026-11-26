@@ -37,7 +37,7 @@ Two APIs: the imperative `RevenueCatUI.presentCustomerCenter(…)` method and th
 ### Imperative: `presentCustomerCenter`
 
 ```tsx
-import RevenueCatUI from 'react-native-purchases-ui';
+import RevenueCatUI from "react-native-purchases-ui";
 
 async function openCustomerCenter() {
   await RevenueCatUI.presentCustomerCenter({
@@ -65,8 +65,8 @@ All callbacks are optional. The promise resolves when the Customer Center is dis
 ### Declarative: `<RevenueCatUI.CustomerCenterView />` component
 
 ```tsx
-import { View } from 'react-native';
-import RevenueCatUI from 'react-native-purchases-ui';
+import { View } from "react-native";
+import RevenueCatUI from "react-native-purchases-ui";
 
 export function SubscriptionSettingsScreen({ navigation }: { navigation: { goBack(): void } }) {
   return (
